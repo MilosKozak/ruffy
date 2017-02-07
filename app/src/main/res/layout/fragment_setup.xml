@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_start"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="org.monkey.d.ruffy.ruffy.SetupFragment"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Welcome to Ruffy!"
+        style="@style/Base.TextAppearance.AppCompat.Headline"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lets start by pairing the pump to this App:\n
+        1. Grab your pump\n
+        2. Navigate to Bluetooth Settings\n
+        3. Check if the pump is already paired\n
+        3b. Delete pairing\n
+        4. Start adding new Device on Pump\n
+        5. Click on Connect! Button"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connect!"
+        android:id="@+id/setup_connect"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Log"
+        style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
+        android:background="@color/colorPrimaryDark"
+        android:id="@+id/setup_log"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true"/>
+
+
+
+
+</LinearLayout>
