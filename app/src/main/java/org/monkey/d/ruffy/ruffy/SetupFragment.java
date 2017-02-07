@@ -28,9 +28,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static android.content.ContentValues.TAG;
@@ -43,6 +46,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     private TextView connectLog;
     private runthread runthread;
     private boolean paired = false;
+    private byte addresses;
 
     public SetupFragment() {
 
@@ -108,8 +112,8 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     if (socket != null) {
                         if (deviceMac != null && paired) {
                             //FIXME maybe this make doubles bonding dialog?
-                            SetupFragment.this.run(socket,null,2);
-                        } else {
+                       //     SetupFragment.this.run(socket,null,2);
+                        //} else {
                             socket.close();
                             socket=null;
                         }
@@ -301,6 +305,306 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private int step = 0;
 
+    public byte[] generateKey(String strKey)
+    {
+        final String FUNC_TAG = "generateKey";
+
+        byte[] pin = new byte[10];
+
+        for(int i=0;i<strKey.length();i++)
+            pin[i] = ((byte)(strKey.charAt(i)));		//Don't convert to decimal here
+
+        String d = "";
+        for(byte b:pin)
+            d += String.format("%02X ", b);
+
+        byte[] key = new byte[16];
+
+        for(int i = 0; i<16; i++)
+        {
+            if(i < 10)
+            {
+                key[i] = pin[i];
+            }
+            else
+            {
+                key[i] = (byte) (0xFF ^ pin[i - 10]);
+            }
+        }
+
+        d = "";
+        for(byte b:key)
+            d += String.format("%02X ", b);
+
+        return key;
+    }
+
+    private byte[] pin;
+    private Object pump_tf;
+    private Object driver_tf;
+    public List<List<Byte>> frameDeEscaping(List<Byte> buffer)//FIXME add buffering of long packets!
+    {
+        final String FUNC_TAG = "frameDeEscaping";
+
+        List<List<Byte>> complete = new ArrayList<List<Byte>>();
+
+       /*FIXME handle big packages!  if(start)
+        {
+            //This is a scenario where a packet is so big it isn't complete in a buffer
+            //So we don't want to erase the data or reset the flags
+            Debug.i(TAG, FUNC_TAG, "Start is true, so we have an incomplete packet waiting...");
+        }
+        else
+        {
+            //Reset flags and clear data for starting a new packet
+            start = stop = escaped = false;
+            packet.clear();
+        }*/
+        List<Byte> packet = new ArrayList<Byte>();
+        boolean escaped = false ,start = false, stop=false;
+        for(int i=0;i<buffer.size();i++)
+        {
+            if(escaped == true)
+            {
+                escaped = false;
+                if(buffer.get(i) == -35)
+                {
+                    packet.add((byte)-52);
+                }
+                else if(buffer.get(i) == -18)
+                {
+                    packet.add((byte)119);
+                }
+            }
+            else if(buffer.get(i) == 119)
+            {
+                if(i+1 >= buffer.size())
+                {
+                    escaped = true;				//If we are at the end of the buffer and find an escape character
+                }
+                else
+                {
+                    Byte next = buffer.get(i+1);
+                    if(next == -35)
+                    {
+                        packet.add((byte)-52);
+                        i++;								//Skip the next byte
+                    }
+                    else if(next == -18)
+                    {
+                        packet.add((byte)119);			//Skip the next byte
+                        i++;
+                    }
+                }
+            }
+            else if(buffer.get(i) == -52)	//We need to cover the chance that there are multiple packets in the buffer
+            {
+                if(!start)
+                {
+                    start = true;
+                }
+                else
+                {
+                    stop = true;
+                }
+
+                if(start && stop)
+                {
+                    start = false;
+                    stop = false;
+
+                    if(packet.size() == 0)
+                    {
+                        start = true;
+                        stop = false;
+                    }
+                    else if(i == 0)
+                    {
+                        start = true;
+                        stop = false;
+                    }
+                    else
+                    {
+                        complete.add(packet);
+                        packet = new ArrayList<Byte>();
+                    }
+                }
+            }
+            else
+            {
+                //Debug.i(TAG, FUNC_TAG, "Adding byte to packet...");
+                if(start)
+                    packet.add(buffer.get(i));
+            }
+        }
+
+        return complete;
+    }
+    public void handleRX(byte[] inBuf, int length)
+    {
+        //Byte command = (byte) (inBuf[1] & 0x1F);
+        boolean expected = false;
+        String descrip = "";
+
+        ByteBuffer buffer = ByteBuffer.wrap(inBuf,0,length);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        ByteBuffer nBuf, pBuf, uBuf;
+
+        byte[] nonce, payload, umac, paddedPacket, packetNoUmac;
+
+        Byte version, command, addresses;
+        version = buffer.get();					//Get version and other data
+        command = buffer.get();
+
+        short payloadlength = buffer.getShort();
+
+        addresses = buffer.get();
+
+        nonce = new byte[13];							//Copy buffers for nonce
+        buffer.get(nonce, 0, nonce.length);
+        nBuf = ByteBuffer.wrap(nonce);					//Copy to ByteBuffers too for extracting data
+
+        payload = new byte[payloadlength];						//Payload
+        buffer.get(payload, 0, payload.length);
+        pBuf = ByteBuffer.wrap(payload);
+
+        umac = new byte[8];								//U-MAC
+        buffer.get(umac, 0, umac.length);
+        uBuf = ByteBuffer.wrap(umac);
+
+        packetNoUmac = new byte[buffer.capacity()-umac.length];
+        buffer.rewind();
+        for(int i = 0; i<packetNoUmac.length;i++)
+            packetNoUmac[i] = buffer.get();
+
+        buffer.rewind();
+//logging:
+        appendLog(String.format("Version: %02X", version));
+        appendLog(String.format("Command: %02X", command));
+        appendLog(String.format("Length: %04X", payloadlength));
+        appendLog(String.format("Address: %02X", addresses));
+
+        String dat = "";
+        for(byte b: nonce)
+            dat += String.format("%02X ", b);
+        appendLog("Nonce: "+dat);
+
+        dat = "";
+        for(byte b:payload)
+            dat += String.format("%02X ", b);
+        appendLog("Payload: "+dat);
+
+        dat = "";
+        for(byte b:umac)
+            dat += String.format("%02X ", b);
+        appendLog("UMAC: "+dat);
+
+        dat = "";
+        for(byte b:packetNoUmac)
+            dat += String.format("%02X ", b);
+        appendLog("Packet No UMAC: "+dat);
+
+
+        byte seq = 0x00;
+        if((inBuf[1] & 0x80)==0x80)
+            seq = (byte) 0x80;
+        else
+            seq = (byte) 0x00;
+
+        switch(command)
+        {
+            case 0x11://key response?
+                try {
+                    Object tf = Twofish_Algorithm.makeKey(pin);
+                    this.addresses = (byte)((addresses << 4) & 0xF0);		//Get the address and reverse it since source and destination are reversed from the RX packet
+
+                    byte[] key_pd = new byte[16];							//Get the bytes for the keys
+                    byte[] key_dp = new byte[16];
+
+                    pBuf.rewind();
+                    pBuf.get(key_pd, 0, key_pd.length);
+                    pBuf.get(key_dp, 0, key_dp.length);
+
+                    String d = "";
+                    for(byte b:key_pd)
+                        d += String.format("%02X ", b);
+                    appendLog("parseRx >>> Key_PD: "+d);
+
+                    d = "";
+                    for(byte b:key_dp)
+                        d += String.format("%02X ", b);
+                    appendLog( "parseRx >>> Key_DP: "+d);
+
+                    byte[] key_pd_de = Twofish_Algorithm.blockDecrypt(key_pd, 0, tf);
+                    byte[] key_dp_de = Twofish_Algorithm.blockDecrypt(key_dp, 0, tf);
+
+                    //FIXME save saveKeysToPrefs(key_pd_de, key_dp_de);
+
+                    d = "";
+                    for(byte b:key_pd_de)
+                        d += String.format("%02X ", b);
+                    appendLog("parseRx >>> Decrytped PD: "+d);
+
+                    d = "";
+                    for(byte b:key_dp_de)
+                        d += String.format("%02X ", b);
+                    appendLog("parseRx >>> Decrytped DP: "+d);
+
+                    //CREATE THE KEY OBJECTS (WHITENING SUBKEYS, ROUND KEYS, S-BOXES)
+                    pump_tf = Twofish_Algorithm.makeKey(key_pd_de);
+                    driver_tf = Twofish_Algorithm.makeKey(key_dp_de);
+
+                    runthread.sendIDReq();
+                }catch(Exception e)
+                {
+                    e.printStackTrace();
+                    appendLog("failed inRX: "+e.getMessage());
+                }
+                break;
+            default:
+                appendLog("not yet implemented rx command: "+command);
+
+        }
+    }
+
+    public void resetTxNonce()
+    {
+        for(int i=0;i<nonceTx.length;i++)
+            nonceTx[i] = 0;
+    }
+
+    public void resetRxNonce()
+    {
+        for(int i=0;i<nonceRx.length;i++)
+            nonceRx[i] = 0;
+    }
+
+    public int incrementArray(byte[] array)
+    {
+        int i=0, carry=0;
+
+        array[i]++;
+        if(array[i] == 0)
+            carry =1;
+
+        for(i=1;i<array.length;i++)
+        {
+            if(carry==1)
+            {
+                array[i] += carry;
+                if(array[i] > 0)
+                {
+                    carry = 0;
+                    return carry;
+                }
+                else
+                    carry = 1;
+            }
+        }
+
+        return carry;
+    }
     class runthread extends Thread{
         private final BluetoothDevice device;
         private BluetoothSocket socket;
@@ -352,6 +656,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                                                 public void onClick(DialogInterface dialog, int whichButton) {
                                                     String pin = pinIn.getText().toString();
                                                     appendLog(runthread.this.getId()+": got the pin: "+pin);
+                                                    SetupFragment.this.pin = generateKey(pin);
                                                     step=2;
                                                     //sending key available:
                                                     appendLog(runthread.this.getId()+" doing A_KEY_AVA");
@@ -365,86 +670,17 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
                         }
                         break;
-                        case 2: //we indicated that we have a key
+                        case 2: //we indicated that we have a key, now lets handle the handle to the handle with an handler
                         {
-                            /*
-                            do the analysis of the 60 bytes (needed?)
-
-                            02-06 09:48:22.840 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Version: 10
-02-06 09:48:22.850 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Command: 11
-02-06 09:48:22.850 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Length: 0020
-02-06 09:48:22.850 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Address: 01
-02-06 09:48:22.850 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Nonce: 01 00 00 00 00 00 00 00 00 00 00 00 00
-02-06 09:48:22.860 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Payload: 53 BF BE A3 DD CF 89 A7 B0 AA 6B A8 F4 04 72 86 A7 25 37 0D AB DD 4A 01 E1 BC 05 0C 94 23 2A 11
-02-06 09:48:22.860 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> UMAC: FF C4 7E 0E CB D7 7D 51
-02-06 09:48:22.880 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: RochePacket >>> Packet No UMAC: 10 11 20 00 01 01 00 00 00 00 00 00 00 00 00 00 00 00 53 BF BE A3 DD CF 89 A7 B0 AA 6B A8 F4 04 72 86 A7 25 37 0D AB DD 4A 01 E1 BC 05 0C 94 23 2A 11
-02-06 09:48:22.950 5275-5289/edu.virginia.dtc.RocheDriver I/Security: ccmVerify >>> ccmVerify >>> U: FF C4 7E 0E CB D7 7D 51
-02-06 09:48:22.950 5275-5289/edu.virginia.dtc.RocheDriver I/Security: ccmVerify >>> ccmVerify >>> U_Prime: FF C4 7E 0E CB D7 7D 51
-02-06 09:48:22.950 5275-5289/edu.virginia.dtc.RocheDriver I/Security: ccmVerify >>> ccmVerify >>> verify = true
-02-06 09:48:22.960 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: parseRx >>> parseRx >>> Key_PD: 53 BF BE A3 DD CF 89 A7 B0 AA 6B A8 F4 04 72 86
-02-06 09:48:22.980 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: parseRx >>> parseRx >>> Key_DP: A7 25 37 0D AB DD 4A 01 E1 BC 05 0C 94 23 2A 11
-02-06 09:48:23.010 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: parseRx >>> parseRx >>> Decrytped PD: AC 92 C5 9E EB FD DA 94 00 2D 75 D1 CA D8 3D 0E
-02-06 09:48:23.010 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: parseRx >>> parseRx >>> Decrytped DP: 3D 3B 3A 79 13 0D FC B3 F3 F5 6D 43 88 46 EE FF
-
-02-06 09:48:23.020 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: parseRx >>> Receiving: KEY_RESPONSE | Seq No: 0 | Length: 58
-02-06 09:48:23.020 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: sendTransportLayerCommand >>> BT Friendly Name: NEO S8 plus
-02-06 09:48:23.020 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: sendTransportLayerCommand >>> Device ID: 4E 45 4F 20 53 38 20 70 6C 75 73 00 00
-02-06 09:48:23.020 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: sendTransportLayerCommand >>> Client ID: 2908
-02-06 09:48:23.020 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: sendTransportLayerCommand >>> Payload: 08 29 00 00 4E 45 4F 20 53 38 20 70 6C 75 73 00 00
-02-06 09:48:23.050 5275-5289/edu.virginia.dtc.RocheDriver I/RochePacket: setData >>> SetData(): 10 12 11 00 10 01 00 00 00 00 00 00 00 00 00 00 00 00 08 29 00 00 4E 45 4F 20 53 38 20 70 6C 75 73 00 00 6B 18 4E 18 5F E3 14 11
-02-06 09:48:23.050 5275-5289/edu.virginia.dtc.RocheDriver I/Transport: setState >>> setState >>> State: 6 Prev: 5
-
-                            afterwards send id request:
-
-                            case SEND_ID_REQUEST:
-                            descrip = "ID_REQ";
-                            p.resetTxNonce();														//Reset TX Nonce (previous to this the nonce is not used and is zero)
-                            incrementTxNonce();														//Increment it to 1
-
-                            ByteBuffer ids = ByteBuffer.allocate(17);								//Allocate payload
-
-                            String btName = InterfaceData.getInstance().bt.getName();				//Get the Device ID
-
-                            Debug.i(TAG, FUNC_TAG, "BT Friendly Name: "+btName);
-
-                            byte[] deviceId = new byte[13];
-                            for(int i=0;i<deviceId.length;i++)
-                            {
-                                if(i < btName.length())
-                                    deviceId[i] = (byte)btName.charAt(i);
-                                else
-                                    deviceId[i] = (byte)0x00;
+                            List<Byte> t = new ArrayList<>();
+                            for(int i = 0; i < bytes;i++)
+                                t.add(buffer[i]);
+                            for(List<Byte> x : frameDeEscaping(t)) {
+                                byte[] xx = new byte[x.size()];
+                                for (int i = 0; i < x.size(); i++)
+                                    xx[i] = x.get(i);
+                                handleRX(xx, x.size());
                             }
-
-                            String dat = "";
-                            for(byte b:deviceId)
-                                dat += String.format("%02X ", b);
-                            Debug.i(TAG, FUNC_TAG, "Device ID: "+dat);
-
-                            String swver = "5.04";													//Get the SW Version
-                            int clientId = 0;
-
-                            clientId += (((byte)swver.charAt(3)) - 0x30);
-                            clientId += (((byte)swver.charAt(2)) - 0x30)*10;
-                            clientId += (((byte)swver.charAt(0)) - 0x30)*100;
-                            clientId += (10000);
-
-                            Debug.i(TAG, FUNC_TAG, "Client ID: "+String.format("%X", clientId));
-
-                            ids.order(ByteOrder.LITTLE_ENDIAN);
-                            ids.putInt(clientId);
-                            ids.put(deviceId);
-
-                            dat = "";																//Print payload
-                            for(byte b:ids.array())
-                                dat += String.format("%02X ", b);
-                            Debug.i(TAG, FUNC_TAG, "Payload: "+dat);
-
-                            packet = p.buildPacket(device_id, ids, true);							//Use real address (gathered in Key Response)
-                            packet = s.ccmAuthenticate(packet, drv.dp_key, Packet.nonceTx);			//Add U-MAC (Use D->P key)
-
-                            p.frameEscaping(packet);
-                            */
                         }
                         break;
                         /* case 3: //we expect an id response
@@ -593,6 +829,35 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 }
             }
         }
+        public void addNonce(List<Byte> packet, byte[] nonce)
+        {
+            for(int i=0;i<nonce.length;i++)
+                packet.add(nonce[i]);
+        }
+        public List<Byte> buildPacket(byte[] command, ByteBuffer payload, boolean address)
+        {
+            List<Byte> output = new ArrayList<Byte>();
+
+            for(int i=0; i < command.length; i++)
+                output.add(command[i]);
+
+            if(address)											//Replace the default address with the real one
+            {
+                output.remove(command.length-1);				//Remove the last byte (address)
+                output.add(addresses);		//Add the real address byte
+            }
+
+            addNonce(output, nonceTx);
+
+            if(payload!=null)
+            {
+                payload.rewind();
+                for(int i=0;i<payload.capacity();i++)
+                    output.add(payload.get());
+            }
+
+            return output;
+        }
         public void addCRC(List<Byte> out)
         {
             short crc = -1;
@@ -628,6 +893,268 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
             return temp;
         }
 
+        public void sendIDReq() {
+            resetTxNonce();														//Reset TX Nonce (previous to this the nonce is not used and is zero)
+            incrementArray(nonceTx);														//Increment it to 1
+
+            ByteBuffer ids = ByteBuffer.allocate(17);								//Allocate payload
+
+            String btName = bt.getName();				//Get the Device ID
+
+            appendLog("BT Friendly Name: "+btName);
+
+            byte[] deviceId = new byte[13];
+            for(int i=0;i<deviceId.length;i++)
+            {
+                if(i < btName.length())
+                    deviceId[i] = (byte)btName.charAt(i);
+                else
+                    deviceId[i] = (byte)0x00;
+            }
+
+            String dat = "";
+            for(byte b:deviceId)
+                dat += String.format("%02X ", b);
+            appendLog("Device ID: "+dat);
+
+            String swver = "5.04";													//Get the SW Version
+            int clientId = 0;
+
+            clientId += (((byte)swver.charAt(3)) - 0x30);
+            clientId += (((byte)swver.charAt(2)) - 0x30)*10;
+            clientId += (((byte)swver.charAt(0)) - 0x30)*100;
+            clientId += (10000);
+
+            appendLog("Client ID: "+String.format("%X", clientId));
+
+            ids.order(ByteOrder.LITTLE_ENDIAN);
+            ids.putInt(clientId);
+            ids.put(deviceId);
+
+            dat = "";																//Print payload
+            for(byte b:ids.array())
+                dat += String.format("%02X ", b);
+            appendLog("Payload: "+dat);
+
+            byte[] p_r = {16,0x12,17,0,0};
+
+            List<Byte> packet = buildPacket(p_r, ids, true);							//Use real address (gathered in Key Response)
+            packet = ccmAuthenticate(packet, driver_tf, nonceTx);			//Add U-MAC (Use D->P key)
+
+            List<Byte> temp = frameEscape(packet);
+            byte[] ro = new byte[temp.size()];
+            int i = 0;
+            for(byte b : temp)
+                ro[i++]=b;
+            try
+            {
+                output.write(ro);
+                appendLog(this.getId()+": succesful wrote "+temp.size()+" bytes!");
+            }catch(Exception e) {
+                e.printStackTrace();
+                appendLog(this.getId() + ": error in tx: " + e.getMessage());
+            }
+        }
+        public List<Byte> ccmAuthenticate(List<Byte> buffer, Object key, byte[] nonceIn)
+        {
+            List<Byte> output = new ArrayList<Byte>();
+            int origLength = buffer.size();					//Hang on to the original length
+
+            byte[] packet = new byte[buffer.size()];		//Create primitive array
+            for(int i=0;i<packet.length;i++)				//Copy to byte array
+                packet[i] = buffer.get(i);
+
+            byte[] paddedPacket = padPacket(packet);
+            byte[] nonce = nonceIn;
+
+            byte[] umac = ccmEncrypt(paddedPacket,key,nonce);							//Generate U-MAC value
+
+            ByteBuffer packetBuffer = ByteBuffer.allocate(origLength + umac.length);
+            packetBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+            packetBuffer.put(paddedPacket, 0, origLength);
+            packetBuffer.put(umac);
+
+            String dat = "";
+            for(byte b:packetBuffer.array())
+                dat += String.format("%02X ", b);
+            appendLog("SetData(): "+dat);
+
+            for(int i=0;i<packetBuffer.array().length;i++)	//Convert to List<Byte>
+                output.add(packetBuffer.array()[i]);
+
+            return output;
+        }
+        public byte[] ccmEncrypt(byte[] padded, Object key,byte[] nonce)
+        {
+            byte[] xi = new byte[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};		//Initialization vector
+            byte[] u = new byte[8];											//Output array U-MAC
+
+            //SETUP INITIALIZATION VECTOR
+
+            xi[0] = 0x79;													//Set flags for IV
+
+            for(int i=0;i<nonce.length;i++)								//Copy nonce
+                xi[i+1] = nonce[i];										//TODO: check endianness
+
+            xi[14] = 0;														//Length is zero
+            xi[15] = 0;
+
+            String dat = "";
+            for(byte b:xi)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Initial XI: "+dat);
+
+            xi = Twofish_Algorithm.blockEncrypt(xi, 0, key);				//Encrypt to generate XI from IV
+
+            dat = "";
+            for(byte b:xi)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Encrypt 1 XI: "+dat);
+
+            //RUN CBC AND ENCRYPT PACKET
+
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Length = "+p.paddedPacket.length);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Running loop "+p.paddedPacket.length/ENCRYPT_BLOCKSIZE+" iterations!");
+
+            for(int i=0;i<(padded.length / 16);i++)
+            {
+                //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> ==========================================================================================================");
+
+                for(int n=0;n<16;n++)
+                {
+                    //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> POSITION: "+ ((i * ENCRYPT_BLOCKSIZE)+n) +" xi[n]: "+String.format("%02X", xi[n])+" XOR'd with Data[n]: "+String.format("%02X",p.paddedPacket[(i * ENCRYPT_BLOCKSIZE)+n]));
+                    xi[n] ^= padded[(i * 16)+n];		//Do the XOR chaining
+                    //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> POSITION: "+ ((i * ENCRYPT_BLOCKSIZE)+n) +" xi[n] RESULT: "+String.format("%02X", xi[n]));
+                }
+
+                xi = Twofish_Algorithm.blockEncrypt(xi, 0, key);			//Encrypt with TwoFish
+
+                //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> ITERATION: "+i);
+
+                dat = "";
+                for(byte b:xi)
+                    dat += String.format("%02X ", b);
+                //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> XI: "+dat);
+
+                //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> ==========================================================================================================");
+            }
+
+            //PAD DATA IF IT ISN'T A MULTIPLE OF THE BLOCKSIZE
+
+            if ((padded.length % 16) != 0)
+            {
+                //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Packet needs padding! Condition="+p.paddedPacket.length % ENCRYPT_BLOCKSIZE);
+
+                for (int i=0; i < 16; i++)
+                {
+                    //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> ==========================================================================================================");
+
+                    if ( i < (padded.length % 16) )
+                    {
+                        // Fill with trailing data
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> I ="+i+" trailing data...");
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> POSITION: "+(((p.paddedPacket.length / ENCRYPT_BLOCKSIZE) * ENCRYPT_BLOCKSIZE) + i)+" xi[n]: "+String.format("%02X", xi[i])+" XOR'd with Data[n]: "+String.format("%02X",p.paddedPacket[((p.paddedPacket.length / ENCRYPT_BLOCKSIZE) * ENCRYPT_BLOCKSIZE) + i]));
+                        xi[i] ^= padded[((padded.length / 16) * 16) + i];
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> POSITION: "+(((p.paddedPacket.length / ENCRYPT_BLOCKSIZE) * ENCRYPT_BLOCKSIZE) + i) +" xi[n] RESULT: "+String.format("%02X", xi[i]));
+                    }
+                    else
+                    {
+                        // Fill with bytes with value of bytes required to padding blocksize
+                        // Difference to RFC 3610 section 2.2 (padding with zeroes)
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> I ="+i+" padding size...");
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> xi[n]: "+String.format("%02X", xi[i])+" XOR'd with size: "+String.format("%02X",ENCRYPT_BLOCKSIZE - (p.paddedPacket.length % ENCRYPT_BLOCKSIZE)));
+                        xi[i] ^= 16 - (padded.length % 16);
+                        //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> xi[n] RESULT: "+String.format("%02X", xi[i]));
+                    }
+
+                    //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> ==========================================================================================================");
+                }
+
+                xi = Twofish_Algorithm.blockEncrypt(xi, 0, key);
+            }
+
+            //COMPUTE U-MAC
+
+            for(int i=0;i<u.length;i++)										//Copy XI to U
+                u[i] = xi[i];
+
+            dat = "";
+            for(byte b:u)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Copy 8 Bytes to UMAC: "+dat);
+
+            xi[0] = 65;														//Set flags
+
+            dat = "";
+            for(byte b:nonce)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Nonce: "+dat);
+
+            for(int n=0;n<nonce.length;n++)
+                xi[n+1] = nonce[n];
+
+            xi[14] = 0;
+            xi[15] = 0;
+
+            dat = "";
+            for(byte b:xi)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Encrypt A0: "+dat);
+
+            xi = Twofish_Algorithm.blockEncrypt(xi, 0, key);				//Encrypt XI
+
+            dat = "";
+            for(byte b:xi)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> Encrypt A0 after Encryption: "+dat);
+
+            for(int i=0;i<u.length;i++)										//XOR to create U-MAC
+                u[i] ^= xi[i];
+
+            dat = "";
+            for(byte b:u)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "ccmEncrypt >>> U: "+dat);
+
+            return u;
+        }
+        public byte[] padPacket(byte[] packet)
+        {
+            byte pad;
+            byte[] output;
+
+            //Debug.i(TAG, FUNC_TAG, "padPacket >>> Packet Length: "+packet.length);
+
+            String dat = "";
+            for(byte b:packet)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "padPacket >>> Input Packet: "+dat);
+
+            pad = (byte) (16 - (packet.length % 16));	//(ENCRYPT_BLOCKSIZE - (packet.length % ENCRYPT_BLOCKSIZE));
+            if(pad > 0)
+            {
+                output = new byte[pad+packet.length];
+                //Debug.i(TAG, FUNC_TAG, "padPacket >>> Output Length: "+output.length+" Padding needed: "+pad);
+
+                for(int n=0;n<packet.length;n++)		//Copy packet into output
+                    output[n] = packet[n];
+
+                for(int i=0;i < pad;i++)
+                {
+                    output[packet.length+i] = pad;
+                }
+            }
+            else
+                output =  packet;
+
+            dat = "";
+            for(byte b:output)
+                dat += String.format("%02X ", b);
+            //Debug.i(TAG, FUNC_TAG, "padPacket >>> Output Packet: "+dat);
+
+            return output;
+        }
     }
     void run(final BluetoothSocket socket,BluetoothDevice device, int retry)
     {
