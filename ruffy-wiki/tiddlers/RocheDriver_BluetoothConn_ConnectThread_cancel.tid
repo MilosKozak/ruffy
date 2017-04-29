@@ -1,0 +1,16 @@
+created: 20170429162009565
+modified: 20170429162032399
+tags: 
+title: RocheDriver/BluetoothConn/ConnectThread:cancel
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+try
+			{
+				socket.close();
+			}
+			catch(IOException e)
+			{
+				Debug.e(TAG, FUNC_TAG, NAME + ": ConnectThread: unable to close() during cancel call");
+			}

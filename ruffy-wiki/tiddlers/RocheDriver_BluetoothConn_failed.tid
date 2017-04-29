@@ -1,0 +1,28 @@
+created: 20170429160815161
+modified: 20170429160958606
+tags: 
+title: RocheDriver/BluetoothConn:failed
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+if(!stopping)
+{
+	[[RocheDriver/BluetoothConn:listen]]	
+	Runnable retry = new Runnable()
+	{
+		public void run() 
+		{
+			if(prevDev != null && state != CONNECTED)
+				[[RocheDriver/BluetoothConn:connect]](prevDev, false, true);
+		}	
+	};
+			
+	if(retrySchedule != null)
+		retrySchedule.cancel(true);
+			
+	if(connectRetry)
+	{
+		retrySchedule = scheduler.schedule(retry, RETRY_S, TimeUnit.SECONDS);
+	}
+}

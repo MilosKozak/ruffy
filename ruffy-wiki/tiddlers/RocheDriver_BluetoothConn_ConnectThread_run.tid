@@ -1,0 +1,41 @@
+created: 20170429161804331
+modified: 20170429161950856
+tags: 
+title: RocheDriver/BluetoothConn/ConnectThread:run
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+if(adapter.isDiscovering())
+				adapter.cancelDiscovery();
+			
+			try{
+//				if(count % 2 == 0)
+//					socket.close();
+				
+				socket.connect();
+			}
+			catch(IOException e)
+			{
+				if(socket.isConnected())
+				{
+					try
+					{
+						socket.close();
+					}
+					catch(IOException e2)
+					{
+						Debug.e(TAG, FUNC_TAG, NAME + ": ConnectThread: unable to close() socket");
+					}
+				}
+				
+				[[RocheDriver/BluetoothConn:failed]]
+				return;
+			}
+			
+			synchronized(this)
+			{
+				connect = null;
+			}
+			
+			[[RocheDriver/BluetoothConn:running]](socket);

@@ -1,0 +1,47 @@
+created: 20170429161431515
+modified: 20170429161625568
+tags: 
+title: RocheDriver/BluetoothConn/ListenThread:run
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+BluetoothSocket socket = null;
+			while(state != CONNECTED)
+			{
+				try
+				{
+					if(servSock != null)
+						socket = servSock.accept();
+				}
+				catch(IOException e)
+				{
+					break;
+				}
+				
+				if(socket != null)
+				{
+					synchronized(this)
+					{
+						switch(state)
+						{
+							case LISTENING:
+							case CONNECTING:
+								//Start connected thread
+								[[RocheDriver/BluetoothConn:running]](socket);
+								break;
+							case NONE:
+							case CONNECTED:
+								try
+								{
+									socket.close();
+								}
+								catch(IOException e)
+								{
+									Debug.e(TAG, FUNC_TAG, NAME + ": ListenThread: couldn't close unwanted socket");
+								}
+								break;
+						}
+					}
+				}
+			}

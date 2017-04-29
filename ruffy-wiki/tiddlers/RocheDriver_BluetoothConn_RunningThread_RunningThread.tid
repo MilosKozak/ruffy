@@ -1,0 +1,24 @@
+created: 20170429162158759
+modified: 20170429162237944
+tags: 
+title: RocheDriver/BluetoothConn/RunningThread:RunningThread
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+socket = sock;
+			InputStream tmpInput = null;
+			OutputStream tmpOutput = null;
+			
+			try
+			{
+				tmpInput = socket.getInputStream();
+				tmpOutput = socket.getOutputStream();
+			}
+			catch(IOException e)
+			{
+				Debug.e(TAG, FUNC_TAG, NAME + ": RunningThread: IO sockets not created");
+			}
+			
+			input = tmpInput;
+			output = tmpOutput;

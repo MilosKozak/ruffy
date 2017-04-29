@@ -1,0 +1,29 @@
+created: 20170429161003950
+modified: 20170429161259023
+tags: 
+title: RocheDriver/BluetoothConn:lost
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+if(!stopping)
+{
+	[[RocheDriver/BluetoothConn:listen]]
+			
+	Runnable retry = new Runnable()
+	{
+		public void run() 
+		{
+			if(prevDev != null && state != CONNECTED)
+			{
+				[[RocheDriver/BluetoothConn:connect]](prevDev, false, true);
+			}
+		}	
+	};
+			
+	if(retrySchedule != null)
+		retrySchedule.cancel(true);
+			
+	if(autoRetry)
+		retrySchedule = scheduler.schedule(retry, RETRY_S, TimeUnit.SECONDS);
+}

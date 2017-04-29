@@ -1,0 +1,23 @@
+created: 20170429161700861
+modified: 20170429161804239
+tags: 
+title: RocheDriver/BluetoothConn/ConnectThread:ConnectThread
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+BluetoothDevice dev
+
+Code:
+device = dev;
+			BluetoothSocket tmp = null;
+			try
+			{
+				tmp = device.createInsecureRfcommSocketToServiceRecord(UUID_SECURE);
+			}
+			catch(IOException e)
+			{
+				Debug.e(TAG, FUNC_TAG,NAME + ": ConnectThread: socket create() failed");
+			}
+			
+			socket = tmp;

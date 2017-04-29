@@ -1,0 +1,27 @@
+created: 20170429154411371
+modified: 20170429162859263
+tags: 
+title: RocheDriver/BluetoothConn:listen
+type: text/vnd.tiddlywiki
+
+"""
+if(connect!=null)
+{
+	[[RocheDriver/BluetoothConn/ConnectThread:cancel]]
+	connect = null;
+}
+		
+if(running != null)
+{
+	[[RocheDriver/BluetoothConn/RunningThread:cancel]]
+	running = null;
+}
+		
+setState(LISTENING);
+		
+if(listen == null)
+{
+	listen = [[RocheDriver/BluetoothConn/ListenThread:ListenThread]]
+	[[RocheDriver/BluetoothConn/ListenThread:run]]
+}
+""

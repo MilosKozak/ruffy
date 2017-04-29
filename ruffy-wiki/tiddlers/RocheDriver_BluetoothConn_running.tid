@@ -1,0 +1,34 @@
+created: 20170429155213797
+modified: 20170429155714684
+tags: 
+title: RocheDriver/BluetoothConn:running
+type: text/vnd.tiddlywiki
+
+"""
+params:
+BluetoothSocket sock
+
+Code:
+if(connect != null)
+{
+	[[RocheDriver/BluetoothConn/ConnectThread:cancel]]
+	connect = null;
+}
+		
+if(running != null)
+{
+	[[RocheDriver/BluetoothConn/RunningThread:cancel]]
+	running = null;
+}
+		
+if(listen != null)
+{
+	[[RocheDriver/BluetoothConn/ListenThread:cancel]]
+	listen = null;
+}
+		
+[[RocheDriver/BluetoothConn/RunningThread:RunningThread]]
+[[RocheDriver/BluetoothConn/RunningThread:start]]
+		
+setState(CONNECTED);
+"""

@@ -1,0 +1,25 @@
+created: 20170429160620525
+modified: 20170429160803518
+tags: 
+title: RocheDriver/BluetoothConn:write
+type: text/vnd.tiddlywiki
+
+"""
+params:
+byte[] out
+
+Code:
+RunningThread r;
+synchronized(this)
+{
+	if(state != CONNECTED)
+	{
+		return false;
+	}
+	r = running;
+}
+r.write(out);
+return true;
+
+Comments:
+Actual writing something to the running Thread, threadsafe behaviour
