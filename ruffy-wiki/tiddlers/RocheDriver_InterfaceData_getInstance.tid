@@ -1,0 +1,17 @@
+created: 20170429174802416
+modified: 20170429175114252
+tags: 
+title: RocheDriver/InterfaceData:getInstance
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+if(instance == null)
+		{
+			synchronized(InterfaceData.class)
+			{
+				if(instance == null)
+					instance = new [[RocheDriver/InterfaceData:InterfaceData]]();
+			}
+		}
+		return instance;

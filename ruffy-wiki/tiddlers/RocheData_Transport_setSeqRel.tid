@@ -1,0 +1,22 @@
+created: 20170429184936092
+modified: 20170429185048276
+tags: 
+title: RocheData/Transport:setSeqRel
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+Byte b, 
+boolean rel
+
+Code:
+b = (byte) (b | drv.seqNo); [[RocheDriver/Driver]]			//Set the sequence bit
+		
+		if(rel)
+			b = (byte) (b |0x20);			//Set the reliable bit
+				
+		//Debug.i(TAG, FUNC_TAG, "Byte for Seq and Rel: "+String.format("%02X", b));
+		
+		drv.seqNo ^= 0x80; [[RocheDriver/Driver]]
+		
+		return b;

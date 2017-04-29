@@ -1,0 +1,14 @@
+created: 20170429184822139
+modified: 20170429184934185
+tags: 
+title: RocheData/Transport:adjustLength
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+List<Byte> packet, 
+int length
+
+Code:
+packet.set(2, (byte) (length & 0xFF));
+packet.set(3, (byte) (length >> 8));

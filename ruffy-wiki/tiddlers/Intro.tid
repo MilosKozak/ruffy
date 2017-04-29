@@ -1,0 +1,40 @@
+created: 20170429193927156
+modified: 20170429200512888
+tags: 
+title: Intro
+type: text/vnd.tiddlywiki
+
+Pairing is finishes in:
+[[RocheData/Transport:runPairingAuthFSM]]
+there the biometrics driver of DiAs gets updated
+
+Missing parts: 
+most urgent: 
+
+# [[RocheData/Application]] there all the fun is on the app layer (2870 lines of fun)
+# [[RocheDriver/Driver]] contains packet declarations and utility funcs?
+
+maybe need to know:
+
+# [[RocheDriver/RocheDB]] gets all history/event data from driver
+# [[RocheDriver/RocheDriver]] seems like DiAs main interface, has checkLimits function, does custom intend listening
+
+other stuff (not expected to be of interest):
+
+# [[RocheData/Key]] not needed, just calculation for temp pin code
+# [[RocheData/Packet]] not needed, straight forward frmae encoding
+# [[RocheData/RochePacket]] just packet wrapper
+# [[RocheData/RTConstants]] not much, only some parsing for pump display
+# [[RocheData/Security]] CRC calculations, not very interesting
+# [[RocheDriver/DiscoveryFragment]] UI for connecting to pump
+# [[RocheDriver/LogFragement]] history view for [[RocheDriver/RocheDB]]
+# [[RocheDriver/RocheUI]] looks like main interface of roche app
+# [[RocheDriver/RTFragment]] display for the rt command interface, gets updated from somewhere (all is public), but its more or less empty, maybe implemented in other src package
+# [[RocheDriver/SetupFragment]] same as [[RocheDriver/RTFragement]]
+
+Done stuff:
+
+# [[RocheData/Transport]] transport layer and base pairing
+# [[RocheDriver/BluetoothConn]] serial connection to pump, handling of pairing /search/conection
+# [[RocheDriver/InterfaceData]] not much, queue for message and holder of bt Conn to pump
+

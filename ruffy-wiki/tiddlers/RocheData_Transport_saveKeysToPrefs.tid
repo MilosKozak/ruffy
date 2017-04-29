@@ -1,0 +1,25 @@
+created: 20170429192148002
+modified: 20170429192226437
+tags: 
+title: RocheData/Transport:saveKeysToPrefs
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+byte[] pd, 
+byte[] dp
+
+Code:
+Editor edit = drv.settings.edit();
+		
+		for(int i=0;i<pd.length;i++)
+		{
+			edit.putInt("pd"+i, pd[i]);
+		}
+		
+		for(int i=0;i<dp.length;i++)
+		{
+			edit.putInt("dp"+i, dp[i]);
+		}
+		
+		edit.commit();

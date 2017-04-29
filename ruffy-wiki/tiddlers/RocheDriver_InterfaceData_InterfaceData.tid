@@ -1,0 +1,8 @@
+created: 20170429174714954
+modified: 20170429174728179
+title: RocheDriver/InterfaceData:InterfaceData
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+pumpMessages = new ConcurrentLinkedQueue<byte[]>();

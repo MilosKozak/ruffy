@@ -1,0 +1,71 @@
+created: 20170429193417619
+modified: 20170429193915407
+tags: 
+title: RocheData/Transport:runPairingAuthFSM
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+switch([[RocheData/Transport:getState]]())
+		{
+			case P1_CONNECT:
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_CONNECT_PAIR_AUTHENTICATE, null, "");
+				[[RocheData/Transport:setState]](Transport.P1_AWAIT_CONNECT_RESP);
+				break;
+			case P1_KEY_AVA:
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_KEY_AVAILABLE, null, "");
+				[[RocheData/Transport:setState]](Transport.P1_AWAIT_KEY_RESP);
+				break;
+			case P2_ID_REQ:
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_ID_REQUEST, null, "");
+				[[RocheData/Transport:setState]](Transport.P2_AWAIT_ID_RESP);
+				break;
+			case P3_SYN:
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_SYN, null, "");
+				[[RocheData/Transport:setState]](Transport.P3_SYN_ACK);
+				break;
+			case P3_APP_CONNECT:
+				drv.a.[[RocheData/Application:startP3]]();				
+				[[RocheData/Transport:setState]](Transport.P3_BINDING);
+				break;
+			case P3_SYN_DIS:
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_SYN, null, "");
+				[[RocheData/Transport:setState]](Transport.P3_SYN_DIS_RESP);
+				break;
+			case P3_APP_DISCONNECT:
+				Debug.i(TAG, FUNC_TAG, "Telling Application layer to disconnect...");
+				drv.a.[[RocheData/Application:disconnectAppLayer]]();
+				if(Driver.[[RocheDriver/Driver:getMode]]() == Driver.PAIRING_AUTH)
+				{	
+					Debug.i(TAG, FUNC_TAG, "Pairing and authentication complete!  Overall state set to IDLE!");
+					[[RocheData/Transport:setState]](Transport.P_A_COMPLETE);
+					
+					//Delay this execution so the UI doesn't prematurely send the start for Command mode
+					handler.postDelayed(new Runnable(){
+						public void run() {
+							Debug.e(TAG, FUNC_TAG, "Setting mode to idle...");
+							Driver.[[RocheDriver/Driver:setMode]](Driver.IDLE);
+							drv.a.[[RocheData/Application:startMode]](Driver.COMMAND, false);
+						}
+					}, 5000);
+					
+					ContentValues dv = new ContentValues();
+
+					Debug.e("Application", FUNC_TAG, "Adding to running pump DB value!");
+					dv.put("running_pump", "edu.virginia.dtc.RocheDriver.RocheDriver");					
+					
+					Debug.w("Application", FUNC_TAG, "Running pump updated in Hardware Configuration table!");
+					drv.serv.getContentResolver().update(Biometrics.HARDWARE_CONFIGURATION_URI, dv, null, null);
+					
+					Debug.i(TAG, FUNC_TAG, "Writing keys and MAC address to shared storage!");
+					
+					Editor edit = drv.settings.edit();
+					
+					edit.putInt("address", drv.addresses);
+					edit.putString("mac", drv.deviceMac);
+					edit.putBoolean("paired", true);
+					
+					edit.commit();
+				}
+				break;
+		}

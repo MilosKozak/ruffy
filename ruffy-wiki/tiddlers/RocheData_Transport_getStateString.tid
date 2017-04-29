@@ -1,0 +1,38 @@
+created: 20170429192332900
+modified: 20170429192414046
+tags: 
+title: RocheData/Transport:getStateString
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+int st
+
+Code:
+switch(st)
+		{
+			case P1_CONNECT: return "P1_CONNECT";
+			case P1_AWAIT_CONNECT_RESP: return "P1_AWAIT_CONNECT_RESP";
+			case P1_KEY_AVA: return "P1_KEY_AVA";
+			case P1_AWAIT_KEY_RESP: return "P1_AWAIT_KEY_RESP";
+			case P2_ID_REQ: return "P2_ID_REQ";
+			case P2_AWAIT_ID_RESP: return "P2_AWAIT_ID_RESP";
+			case P3_SYN: return "P3_SYN";
+			case P3_SYN_ACK: return "P3_SYN_ACK";
+			case P3_APP_CONNECT: return "P3_APP_CONNECT";
+			case P3_BINDING: return "P3_BINDING";
+			case P3_SYN_DIS: return "P3_SYN_DIS";
+			case P3_SYN_DIS_RESP: return "P3_SYN_DIS_RESP";
+			case P3_APP_DISCONNECT: return "P3_APP_DISCONNECT";
+	
+			case P_A_COMPLETE: return "P_A_COMPLETE";
+			case CONNECTED: return "CONNECTED";
+			case DISCONNECTED: return "DISCONNECTED";
+			
+			case SERVICE_CON: return "SERVICE_CON";
+			case CM_SYN: return "CM_SYN";
+			case CM_SYN_RESP: return "CM_SYN_RESP";
+			case CM_SYN_ACKD: return "CM_SYN_ACKD";
+			
+			default: return "UNKNOWN";
+		}

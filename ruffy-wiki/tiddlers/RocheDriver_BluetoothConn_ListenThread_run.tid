@@ -1,5 +1,5 @@
 created: 20170429161431515
-modified: 20170429161625568
+modified: 20170429164914629
 tags: 
 title: RocheDriver/BluetoothConn/ListenThread:run
 type: text/vnd.tiddlywiki
@@ -27,7 +27,6 @@ BluetoothSocket socket = null;
 						{
 							case LISTENING:
 							case CONNECTING:
-								//Start connected thread
 								[[RocheDriver/BluetoothConn:running]](socket);
 								break;
 							case NONE:

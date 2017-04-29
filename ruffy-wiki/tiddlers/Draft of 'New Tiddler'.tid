@@ -1,0 +1,14 @@
+created: 20170429185049729
+draft.of: New Tiddler
+draft.title: RocheData/Transport:sendConnect
+modified: 20170429185306037
+tags: 
+title: Draft of 'New Tiddler'
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+//Basically the entry point to system start up, pairing and authentication begins here!
+		Driver.[[RocheDriver/Driver:setMode]](Driver.PAIRING_AUTH);
+		[[RocheData/Transport:setState]](Transport.P1_CONNECT);
+		[[RocheData/Transport:runFSM]]();

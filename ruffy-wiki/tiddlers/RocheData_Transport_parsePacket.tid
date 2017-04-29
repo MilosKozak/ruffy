@@ -1,0 +1,22 @@
+created: 20170429192017397
+modified: 20170429192135199
+tags: 
+title: RocheData/Transport:parsePacket
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+List&lt;Byte&gt; packet
+
+Code:
+byte[] buf = new byte[packet.size()];
+		
+		for(int i=0;i<buf.length;i++)
+			buf[i] = packet.get(i);
+			
+		ByteBuffer buffer = ByteBuffer.wrap(buf);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		RochePacket p = new [[RocheData/Transport/RochePacket:RochePacket]](buffer);
+		
+		return p;

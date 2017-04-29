@@ -1,0 +1,9 @@
+created: 20170429192843704
+modified: 20170429192910505
+tags: 
+title: RocheData/Transport:getState
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+return state;

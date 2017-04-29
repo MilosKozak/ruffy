@@ -1,0 +1,13 @@
+created: 20170429185322370
+modified: 20170429185439248
+tags: 
+title: RocheData/Transport:sendReliableData
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+ByteBuffer payload, 
+String commDescrip
+
+Code:
+[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_RELIABLE_DATA, payload, commDescrip);

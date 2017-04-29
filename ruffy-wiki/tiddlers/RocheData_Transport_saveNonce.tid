@@ -1,0 +1,16 @@
+created: 20170429192228704
+modified: 20170429192302886
+tags: 
+title: RocheData/Transport:saveNonce
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+Editor edit = drv.settings.edit();
+		
+		for(int i=0;i<Packet.nonceTx.length;i++)
+		{
+			edit.putInt("nonce"+i, Packet.nonceTx[i]);
+		}
+		
+		edit.commit();

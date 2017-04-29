@@ -1,0 +1,44 @@
+created: 20170429175600549
+modified: 20170429181113358
+title: RocheData/Transport:processRx
+type: text/vnd.tiddlywiki
+
+"""
+Param:
+byte[] buffer
+
+Code:
+boolean rel = false;
+		
+		List&lt;Byte&gt; bufList = new ArrayList&lt;Byte&gt;();
+		for(int i=0;i&lt;buffer.length;i++)
+ bufList.add(buffer[i]);
+		
+		List&lt;List&lt;Byte&gt;&gt; complete = p.[[RocheData/Packet:frameDeEscaping]](bufList);
+		
+		for(List&lt;Byte&gt; p:complete)
+		{
+			if(p != null && p.size() &gt;= (MIN_PACKET_SIZE-NUM_DELIMITERS))
+			{								
+				if((p.get(1) & 0x20) == 0x20)
+				{
+					rel = true;
+					
+					byte seq = 0x00;
+					if((p.get(1) & 0x80)==0x80)
+						seq = (byte) 0x80;
+					
+					drv.recvSeqNo = seq; [[RocheDriver/Driver]]
+					[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_ACK, null, "");				Send ACK right away
+				}
+				else
+				{
+					rel = false;
+				}
+				
+				Driver.stats.rxPackets++; [[RocheDriver/Driver]]
+				[[RocheData/Transport:parseRx]](p, rel);
+			}
+			else
+				Driver.stats.skippedPackets++; [[RocheDriver/Driver]]
+		}

@@ -1,0 +1,22 @@
+created: 20170429185532940
+modified: 20170429190255699
+tags: 
+title: RocheData/Transport:addTxPacket
+type: text/vnd.tiddlywiki
+
+"""
+Params:
+List<Byte> in, 
+boolean reliable, 
+byte seq, 
+String s
+
+Code:
+byte[] out = new byte[in.size()];
+		
+		for(int i=0;i<out.length;i++)		//Stupid conversion to byte[]
+			out[i] = in.get(i);
+		
+		OutPacket op = drv.new [[RocheData/Transport/OutPacket:OutPacket]](out, reliable, s, seq);
+		
+		txMessages.offer(op);

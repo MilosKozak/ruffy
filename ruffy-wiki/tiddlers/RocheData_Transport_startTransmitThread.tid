@@ -1,0 +1,46 @@
+created: 20170429182255387
+modified: 20170429183308717
+tags: 
+title: RocheData/Transport:startTransmitThread
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+txMessages = new ConcurrentLinkedQueue&lt;OutPacket&gt;();				//Initialize the TX queue
+		
+		if(!txRunning)
+		{
+			txRunning = true;
+			
+			transmit = new Thread ()
+			{
+				public void run ()
+				{
+					Debug.i("Thread", FUNC_TAG, "TX Thread starting!");
+					txStop = false;
+				
+					while(!txStop)
+					{
+						[[RocheDriver/Driver/OutPacket]] op = txMessages.poll();
+						if(op != null)
+						{
+							Debug.i("Thread", FUNC_TAG, "Size of TxBuffer: "+txMessages.size());
+							
+							drv.command = op.descrip; [[RocheDriver/Driver]]
+							Debug.i(TAG, FUNC_TAG, "Transmitting: " + op.descrip + " | Seq No: "+String.format("%X",op.sequence) + " | Size of buffer: "+op.packet.length);
+							[[RocheDriver/InterfaceData]].remotePumpBt.write(op.packet);		//Write it out
+							
+							Driver.stats.txPackets++; [[RocheDriver/Driver]]
+						}
+						
+						try {
+							Thread.sleep(TX_THREAD_SLEEP);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+			
+			transmit.start();
+		}

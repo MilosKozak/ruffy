@@ -1,0 +1,163 @@
+created: 20170429183320522
+modified: 20170429184627782
+tags: 
+title: RocheData/Transport:sendTransportLayerCommand
+type: text/vnd.tiddlywiki
+
+"""
+Param:
+int command
+ByteBuffer payload
+String commDescrip
+
+Code:
+List&lt;Byte&gt; packet = null;
+		boolean reliable = true;
+		String descrip = "Unknown";
+		byte seq = (byte) 0xFF;
+		
+		switch(command)
+		{
+			case SEND_CONNECT_PAIR_AUTHENTICATE:			/************************************************************************/
+				descrip = "CONNECT_PAIR_AUTH";
+				packet = p.[[RocheData/Packet:[[RocheData/Packet:buildPacket]]]](connect_pair_authenticate, null, false);
+				s.[[RocheData/Security:[[RocheData/Security:addCrc]]]](packet);
+				p.[[RocheData/Packet:[[RocheData/Packet:frameEscaping]]]](packet);
+				break;
+				
+			case SEND_KEY_REQUEST:							/************************************************************************/
+				descrip = "KEY_REQUEST";
+				packet = p.[[RocheData/Packet:[[RocheData/Packet:buildPacket]]]](key_request, null, false);
+				s.[[RocheData/Security:addCrc]](packet);
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				break;
+				
+			case SEND_KEY_AVAILABLE:						/************************************************************************/
+				descrip = "KEY_AVAIL";
+				packet = p.[[RocheData/Packet:[[RocheData/Packet:buildPacket]]]](key_available, null, false);
+				s.[[RocheData/Security:addCrc]](packet);
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				break;
+				
+			case SEND_ID_REQUEST:							/************************************************************************/
+				descrip = "ID_REQ";
+				p.[[RocheData/Packet:resetTxNonce]]();														//Reset TX Nonce (previous to this the nonce is not used and is zero)
+				[[RocheData/Transport:incrementTxNonce]]();														//Increment it to 1
+				
+				ByteBuffer ids = ByteBuffer.allocate(17);								//Allocate payload
+				
+				String btName = InterfaceData.[[RocheDriver/InterfaceData:getInstance]]().bt.getName();				//Get the Device ID
+				
+				Debug.i(TAG, FUNC_TAG, "BT Friendly Name: "+btName);
+				
+				byte[] deviceId = new byte[13];
+				for(int i=0;i&lt;deviceId.length;i++)
+				{
+					if(i &lt; btName.length())
+						deviceId[i] = (byte)btName.charAt(i);
+					else
+						deviceId[i] = (byte)0x00;
+				}
+				
+				String dat = "";
+				for(byte b:deviceId)
+					dat += String.format("%02X ", b);
+				Debug.i(TAG, FUNC_TAG, "Device ID: "+dat);
+				
+				String swver = "5.04";													//Get the SW Version
+				int clientId = 0;
+				
+				clientId += (((byte)swver.charAt(3)) - 0x30);			
+				clientId += (((byte)swver.charAt(2)) - 0x30)*10;
+				clientId += (((byte)swver.charAt(0)) - 0x30)*100;
+				clientId += (10000);
+				
+				Debug.i(TAG, FUNC_TAG, "Client ID: "+String.format("%X", clientId));
+				
+				ids.order(ByteOrder.LITTLE_ENDIAN);
+				ids.putInt(clientId);
+				ids.put(deviceId);
+				
+				dat = "";																//Print payload
+				for(byte b:ids.array())
+					dat += String.format("%02X ", b);
+				Debug.i(TAG, FUNC_TAG, "Payload: "+dat);
+				
+				packet = p.[[RocheData/Packet:buildPacket]](device_id, ids, true);							//Use real address (gathered in Key Response)
+				packet = s.[[RocheData/Security:ccmAuthenticate]](packet, drv.dp_key, Packet.nonceTx);			//Add U-MAC (Use D-&gt;P key)//FIXME last loc
+				
+				p.[[RocheData/Packet:frameEscaping]](packet);												//Escape packet
+				break;
+			case SEND_SYN:									/************************************************************************/
+				descrip = "SYN";
+				[[RocheData/Transport:incrementTxNonce]]();
+				
+				packet = p.[[RocheData/Packet:buildPacket]](connect_normal, null, true);
+				packet = s.[[RocheData/Security:ccmAuthenticate]](packet, drv.dp_key, Packet.nonceTx);
+				
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				break;
+			case SEND_RELIABLE_DATA:						/************************************************************************/
+				descrip = "RELIABLE_DATA";
+				[[RocheData/Transport:incrementTxNonce]]();
+				
+				packet = p.[[RocheData/Packet:buildPacket]](data_packet, payload, true);					//Add the payload, set the address if valid
+				
+				seq = drv.seqNo; [[RocheDriver/Driver]]
+				packet.set(1, [[RocheData/Transport:setSeqRel]](packet.get(1), true));						//Set the sequence and reliable bits
+				
+				[[RocheData/Transport:adjustLength]](packet, payload.capacity());							//Set the payload length
+				
+				packet = s.[[RocheData/Security:ccmAuthenticate]](packet, drv.dp_key, Packet.nonceTx);		//Authenticate packet
+				
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				break;
+			case SEND_UNRELIABLE_DATA:
+				descrip = "UNRELIABLE_DATA";
+				[[RocheData/Transport:incrementTxNonce]]();
+				
+				packet = p.[[RocheData/Packet:buildPacket]](data_packet, payload, true);					//Add the payload, set the address if valid
+				
+				seq = drv.seqNo;[[RocheDriver/Driver]]
+				
+				[[RocheData/Transport:adjustLength]](packet, payload.capacity());							//Set the payload length
+				
+				packet = s.[[RocheData/Security:ccmAuthenticate]](packet, drv.dp_key, Packet.nonceTx);		//Authenticate packet
+				
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				break;
+			case SEND_ACK:									/************************************************************************/
+				descrip = "ACK";
+				[[RocheData/Transport:incrementTxNonce]]();
+				
+				packet = p.[[RocheData/Packet:buildPacket]](ack, null, true);
+				
+				//drv.recvSeqNo ^= 0x80;[[RocheDriver/Driver]]
+				
+				seq = drv.recvSeqNo;[[RocheDriver/Driver]]
+				packet.set(1, (byte) (packet.get(1) | drv.recvSeqNo));	[[RocheDriver/Driver]]			//OR the received sequence number
+				
+				packet = s.[[RocheData/Security:ccmAuthenticate]](packet, drv.dp_key, Packet.nonceTx); [[RocheDriver/Driver]] [[RocheData/Packet]]
+				
+				p.[[RocheData/Packet:frameEscaping]](packet);
+				//reliable = false;													//Use this to make transmission asynchronous (not threaded)
+				break;
+		}
+		
+		if(packet != null)
+		{
+//			Debug.i(TAG, FUNC_TAG, "TX Packet Start ------------------------------------");
+//			String dat = "";
+//			for(byte b:packet)
+//			{
+//				dat += String.format("%02X ", b);
+//			}
+//			Debug.i(TAG, FUNC_TAG, dat);
+//			Debug.i(TAG, FUNC_TAG, "TX Packet End --------------------------------------");
+		}
+		else
+			Debug.i(TAG, FUNC_TAG, "Packet is null!");
+		
+		[[RocheData/Transport:saveNonce]]();
+		
+		[[RocheData/Transport:addTxPacket]](packet, reliable, seq, descrip + " " + commDescrip);

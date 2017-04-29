@@ -1,0 +1,21 @@
+created: 20170429193243275
+modified: 20170429193410542
+tags: 
+title: RocheData/Transport:runModeFSM
+type: text/vnd.tiddlywiki
+
+"""
+Code:
+switch([[RocheData/Transport:getState]]())
+		{
+			case CM_SYN:
+				Debug.i(TAG, FUNC_TAG, "Sending SYN command!");
+				[[RocheData/Transport:sendTransportLayerCommand]](Transport.SEND_SYN, null, "");
+				[[RocheData/Transport:setState]](CM_SYN_RESP);
+				break;
+			case CM_SYN_ACKD:
+				Debug.i(TAG, FUNC_TAG, "Sending SYN ACK signal!");
+				[[RocheData/Transport:setState]](SERVICE_CON);
+				drv.a.[[RocheData/Application:synAckd]]();
+				break;
+		}
