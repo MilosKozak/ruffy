@@ -1,9 +1,0 @@
-created: 20170429182015722
-modified: 20170429182123862
-tags: 
-title: RocheData/Transport:incrementTxNonce
-type: text/vnd.tiddlywiki
-
-"""
-Code:
-p.[[RocheData/Packet:incrementArray]](Packet.nonceTx);
