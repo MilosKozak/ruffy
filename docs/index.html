@@ -134,6 +134,8 @@ Error message and password prompt
 
 <li>$:/state/tab-2065006209</li>
 
+<li>$:/state/tab/sidebar--1835078512</li>
+
 <li>$:/status/IsLoggedIn</li>
 
 <li>$:/status/UserName</li>
@@ -147,6 +149,10 @@ Error message and password prompt
 <li>$:/themes/tiddlywiki/vanilla</li>
 
 <li>$:/UploadName</li>
+
+<li>addSubCommand</li>
+
+<li>app layer commands</li>
 
 <li>appendCRC</li>
 
@@ -278,7 +284,11 @@ Error message and password prompt
 
 <li>RocheDriver/InterfaceData:InterfaceData</li>
 
+<li>send app layer command</li>
+
 <li>send data</li>
+
+<li>send Syn</li>
 
 </ul>
 </p>
@@ -8568,13 +8578,16 @@ Error message and password prompt
 <div bag="default" created="20170503123042137" modified="20170503123043420" revision="2" title="$:/state/tab-2065006209">
 <pre>$:/core/ui/ControlPanel/Saving/TiddlySpot</pre>
 </div>
+<div created="20170515072240950" modified="20170515081423427" title="$:/state/tab/sidebar--1835078512">
+<pre>$:/core/ui/SideBar/Open</pre>
+</div>
 <div bag="default" revision="2" title="$:/status/IsLoggedIn">
 <pre>yes</pre>
 </div>
 <div bag="default" revision="1" title="$:/status/UserName">
 <pre></pre>
 </div>
-<div list="[[Pairing combo]] Intro" title="$:/StoryList">
+<div list="Intro [[Pairing combo]] [[recieve data]] [[send app layer command]] addSubCommand [[app layer commands]] responses [[send Syn]] Command" title="$:/StoryList">
 <pre></pre>
 </div>
 <div plugin-type="info" title="$:/temp/info-plugin" type="application/json">
@@ -8735,6 +8748,58 @@ Error message and password prompt
 <div bag="default" created="20170503120832942" modified="20170503123046263" revision="1" title="$:/UploadName" type="text/vnd.tiddlywiki">
 <pre></pre>
 </div>
+<div created="20170515072148727" modified="20170515073627051" title="addSubCommand">
+<pre>add sub command to app layer command
+
+# command activate
+#* payload.put([[app layer commands]] service activate);
+#* payload.put(0xB7); command service mode
+#* payload.put(0x01);
+#* payload.put(0x00);
+# command deactivate
+#* payload.put([[app layer commands]] service deactivate);
+#* payload.put(0xB7); command service mode
+# rt activate
+#* payload.put([[app layer commands]] service activate);
+#* payload.put(0x48); rt service mode
+#* payload.put(0x01);
+#* payload.put(0x00);
+# rt deactivate
+#* payload.put([[app layer commands]] service deactivate);
+#* payload.put(0x48); rt service mode
+# command version
+#* payload.put(0x10); Version
+#* payload.put(0);
+#* payload.put((byte) (0x9065 &amp; 0xFF));
+#* payload.put((byte) ((0x9065&gt;&gt;8) &amp; 0xFF));
+#* payload.put(0xB7); command mode
+# rt version
+#* payload.put(0x10); Version
+#* payload.put(0);
+#* payload.put((byte) (0x9065 &amp; 0xFF));
+#* payload.put((byte) ((0x9065&gt;&gt;8) &amp; 0xFF));
+#* payload.put(0x48); rt mode
+# binding request
+#* payload.put(0x10); Version
+#* payload.put(0);
+#* payload.put((byte) (0x9095 &amp; 0xFF)); binding request
+#* payload.put((byte) ((0x9095&gt;&gt;8) &amp; 0xFF)); 
+#* payload.put(0x48);
+</pre>
+</div>
+<div created="20170515070423727" modified="20170515071010858" title="app layer commands">
+<pre>All app layer commands have same structure (4 bytes):
+
+# Version 0x10
+# Service ID 0x00
+# Command (2 byte)
+#* app connect 0x55 0x90
+#* app disconnect 0x5A 0x00
+#* service activate 0x66 0x90
+#* service deactivate 0x69 0x90
+#* service deactivate all 0x6A 0x90
+#* error 0xAA 0x00</pre>
+</div>
 <div created="20170514155800520" modified="20170514155804329" title="appendCRC">
 <pre>```
 public void addCRC(List&lt;Byte&gt; out)
@@ -8858,10 +8923,11 @@ public boolean ccmVerify(RochePacket p, Object key, byte[] u)
 ```
 </pre>
 </div>
-<div created="20170514155929800" modified="20170514160202263" title="Command">
+<div created="20170514155929800" modified="20170515065531683" title="Command">
 <pre># Connection Request 0x09
 # Key Request 0x0C
 # ID Request 0x12
+# Syn 0x17 (connect)
 # Unreliable Data 0x03 (app layer)
 # Reliable Data 0x23 (app layer)
 </pre>
@@ -9083,16 +9149,14 @@ drv.deviceId = new String(device);
 ```
 </pre>
 </div>
-<div bag="default" created="20170429193927156" modified="20170514190546545" revision="0" tags="" title="Intro" type="text/vnd.tiddlywiki">
+<div bag="default" created="20170429193927156" modified="20170515081624147" revision="0" tags="" title="Intro" type="text/vnd.tiddlywiki">
 <pre>Mostly interesting:
 
-''[[Pairing combo]]''
+''[[Pairing combo]]'' now complete 
 
 
 
-Pairing is finishes in:
-[[RocheData/Transport:runPairingAuthFSM]]
-there the biometrics driver of DiAs gets updated
+//old stuff (sequentially reading and commenting source files) is not longer needed!//
 
 Missing parts: 
 most urgent: 
@@ -9177,10 +9241,10 @@ public byte[] padPacket(byte[] packet)
 }
 ```</pre>
 </div>
-<div created="20170514140216292" modified="20170514190550509" tags="" title="Pairing combo">
+<div created="20170514140216292" modified="20170515081427183" tags="" title="Pairing combo">
 <pre>Pairing is done in three steps.
 
-''P1:''
+''P1: (Basic Communications)''
 
 # Make your Device discoverable
 # Setup a Insecure RFComm Server with SDP:
@@ -9214,7 +9278,7 @@ public byte[] padPacket(byte[] packet)
 
 now we have secure comm and starting P2 phase.
 
-''P2:''
+''P2: (Device Info)''
 
 # [[send data]] ID Request [[Command]]
 #* [[prepare ID Request]]
@@ -9224,12 +9288,37 @@ now we have secure comm and starting P2 phase.
 
 and now we have finished P2.
 
-''P3:''
+''P3: (Application Layer)''
 
-# &gt; SYN
-# &lt; SYN_ACK
-#* startP3
-</pre>
+# [[send Syn]]
+#* ''CC10170000100200000000000000000000000092CE...CC''
+# [[recieve data]] Syn Ack [[responses]]
+#* ''CC101800000103000000000000000000000000865E...CC''
+# now start App Connect
+#* [[send app layer command]] App Connect [[app layer commands]]
+#* wait for ack ''CC100500000104000000000000000000000000D9E3...CC''
+#** ignore it
+#* wait for connect response ''CC102306000105000000000000000000000000100055A00000F320...CC''
+#* results in ACK send in [[recieve data]]
+#* [[ccmVerify]] reliable data [[Command]]
+# [[send app layer command]] App Command  [[app layer commands]] command version [[addSubCommand]]
+#* results in ack response ''CC108500000106000000000000000000000000BF57...CC''
+#* results in ''CC10A308000107000000000000000000000000100065A000000100427C...CC'' command mode version response
+#** reply with ack ''CC108500001006000000000000000000000000E6D0...CC''
+#* ignore contents
+# [[send app layer command]] App Command  [[app layer commands]] rt version [[addSubCommand]] 
+#* same as command mode version
+# [[send app layer command]] App Command  [[app layer commands]] binding request [[addSubCommand]] 
+#* results in  ''CC10A30500100900000000000000000000000010009590...CC''
+#* get ack response
+#* get binding response ''CC10A30700010B000000000000000000000000100095A000004863...CC''
+#** send ack
+# [[send data]] Syn [[Command]]
+#* on syn response [[send app layer command]] send diconnect Command  [[app layer commands]] ''CC10230600100C00000000000000000000000010005A0003608...CC''
+#** get ack response
+# reset com mlayer (nonces)
+
+''pairing complete'' </pre>
 </div>
 <div created="20170514175429361" modified="20170514184502279" title="prepare ID Request">
 <pre>* reset tx nonce
@@ -11030,6 +11119,28 @@ if(instance == null)
 Code:
 pumpMessages = new ConcurrentLinkedQueue&lt;byte[]&gt;();</pre>
 </div>
+<div created="20170515071056654" modified="20170515073634865" title="send app layer command">
+<pre>build payload:
+
+# send connect
+#* payload.put([[app layer commands]] app connect);
+#* payload.order(ByteOrder.LITTLE_ENDIAN);
+#* payload.putInt(Integer.parseInt(&quot;12345&quot;)); ''magic number?!?''
+# send disconnect 
+#* payload.put([[app layer commands]] app disconnect);
+#* payload.order(ByteOrder.LITTLE_ENDIAN);
+#* payload.putShort((short) 0x6003); ''next magic number''
+# service activate
+#* payload = [[addSubCommand]](subCommand);
+# service deactivateactivate
+#* payload = [[addSubCommand]](subCommand);
+# service deatcivate all
+#* payload.put([[app layer commands]] service deactivate all);
+# App command
+#* payload = [[addSubCommand]] (subCommand);
+
+send payload via [[send data]] reliable Data [[Command]]</pre>
+</div>
 <div created="20170514160108597" modified="20170514160303822" title="send data">
 <pre>sending is done via:
 
@@ -11042,6 +11153,12 @@ pumpMessages = new ConcurrentLinkedQueue&lt;byte[]&gt;();</pre>
 # add payload if any
 # [[appendCRC]] 
 # [[frame escape]]</pre>
+</div>
+<div created="20170515065227512" modified="20170515081436094" title="send Syn">
+<pre>* increment TX nonce
+* build packet ([[send data]] Syn [[Command]])
+* [[authenticate]]
+* [[frame escape]]</pre>
 </div>
 
 </div>
