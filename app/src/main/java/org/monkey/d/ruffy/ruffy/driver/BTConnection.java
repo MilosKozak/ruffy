@@ -77,6 +77,9 @@ public class BTConnection {
     }
 
     public void makeDiscoverable() {
+        resetRxNonce();
+        resetTxNonce();
+
         IntentFilter filter = new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST");
         pairingReciever = new PairingRequest(activity, handler);
         activity.registerReceiver(pairingReciever, filter);
