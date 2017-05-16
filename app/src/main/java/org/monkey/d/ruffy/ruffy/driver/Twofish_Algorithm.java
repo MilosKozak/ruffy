@@ -9,7 +9,7 @@
  * Copyright (c) 1997, 1998 Systemics Ltd on behalf of
  * the Cryptix Development Team. All rights reserved.
  */
-package org.monkey.d.ruffy.ruffy;
+package org.monkey.d.ruffy.ruffy.driver;
 
 import java.io.PrintWriter;
 import java.security.InvalidKeyException;

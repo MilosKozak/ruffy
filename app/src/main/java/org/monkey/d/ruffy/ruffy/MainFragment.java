@@ -1,9 +1,7 @@
 package org.monkey.d.ruffy.ruffy;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -29,18 +27,15 @@ import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class SetupFragment extends Fragment implements View.OnClickListener {
+public class MainFragment extends Fragment implements View.OnClickListener {
 
     private TextView connectLog;
 
@@ -48,89 +43,112 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private BTConnection btConn;
 
-    public SetupFragment() {
+    public MainFragment() {
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_setup, container, false);
-        Button connect = (Button) v.findViewById(R.id.setup_connect);
+        View v = inflater.inflate(R.layout.fragment_main, container, false);
+        Button connect = (Button) v.findViewById(R.id.main_connect);
         connect.setOnClickListener(this);
 
-        connectLog = (TextView) v.findViewById(R.id.setup_log);
+        Button reset = (Button) v.findViewById(R.id.main_reset);
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
+                prefs.edit().putBoolean("paired",false).commit();
+
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
+            }
+        });
+
+        connectLog = (TextView) v.findViewById(R.id.main_log);
         connectLog.setMovementMethod(new ScrollingMovementMethod());
 
         return v;
     }
-
+    boolean r = true;
+    Thread t = new Thread(){
+        @Override
+        public void run() {
+            while(r)
+            {
+                Protokoll.sendSyn(btConn);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
     BluetoothDevice pairingDevice;
     @Override
     public void onClick(final View view) {
         view.setEnabled(false);
-        connectLog.setText("Starting rfcomm to wait for Pump connection…");
+
+        SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
+        String dp = prefs.getString("dp",null);
+        String pd = prefs.getString("pd",null);
+        final String device = prefs.getString("device",null);
+
+        connectLog.setText("Starting connection to Pump "+device);
 
 
-        int sdk = android.os.Build.VERSION.SDK_INT;
-        if (sdk < android.os.Build.VERSION_CODES.HONEYCOMB) {
-            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            clipboard.setText("}gZ='GD?gj2r|B}>");
-        } else {
-            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            android.content.ClipData clip = android.content.ClipData.newPlainText("text label", "}gZ='GD?gj2r|B}>");
-            clipboard.setPrimaryClip(clip);
+
+        if(device != null)
+        {
+            btConn = new BTConnection(getActivity(), new BTHandler() {
+                @Override
+                public void deviceConnected() {
+                    appendLog("connected to pump");
+                    r=true;
+                    t.start();
+
+
+                }
+
+                @Override
+                public void log(String s) {
+                    appendLog(s);
+                }
+
+                @Override
+                public void fail(String s) {
+                    appendLog("failed: "+s);
+                    r=false;
+                    btConn.connect(device,4);
+                }
+
+                @Override
+                public void deviceFound(BluetoothDevice bd) {
+                    appendLog("not be here!?!");
+                }
+
+                @Override
+                public void handleRawData(byte[] buffer, int bytes) {
+                    appendLog("got data from pump");
+                    r=false;
+                    step=0;
+                    handleData(buffer,bytes);
+                }
+            });
+
+            try {
+                btConn.pump_tf = Twofish_Algorithm.makeKey(Utils.hexStringToByteArray(pd));
+                btConn.driver_tf = Twofish_Algorithm.makeKey(Utils.hexStringToByteArray(dp));
+            } catch(Exception e)
+            {
+                e.printStackTrace();
+                appendLog("unable to load keys!");
+                return;
+            }
+
+            btConn.connect(device,10);
         }
-
-        btConn = new BTConnection(getActivity(), new BTHandler() {
-            BluetoothDevice device;
-
-            @Override
-            public void deviceConnected() {
-                appendLog("connected to device ");
-                pairingDevice = device;
-                appendLog("initiate pairing…");
-                //FIXME move
-                byte[] key = {16,9,2,0,-16};
-                step = 1;
-                btConn.writeCommand(key);
-            }
-
-            @Override
-            public void log(String s) {
-                appendLog(s);
-            }
-
-            @Override
-            public void fail(String s) {
-                appendLog(s);
-                if(step == 1)//trying to connect
-                {
-                    appendLog("retrying to connect!");
-                    btConn.connect(pairingDevice);
-                }
-            }
-
-            @Override
-            public void deviceFound(BluetoothDevice device) {
-                if (this.device == null) {
-                    this.device = device;
-                    appendLog("found device first time " + device + " waiting for next");
-                } else if (this.device.getAddress().equals(device.getAddress())) {
-                    pairingDevice = device;
-                    btConn.connect(device);
-                } else {
-                    this.device = device;
-                    appendLog("found device first time " + device + " waiting for next");
-                }
-            }
-
-            @Override
-            public void handleRawData(byte[] buffer, int bytes) {
-                handleData(buffer,bytes);
-            }
-        });
-        btConn.makeDiscoverable();
     }
 
     private void appendLog(final String message) {
@@ -148,8 +166,6 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         });
 
     }
-
-    private byte[] pin;
 
     public void handleRX(byte[] inBuf, int length, boolean rel) {
         //Byte command = (byte) (inBuf[1] & 0x1F);
@@ -225,58 +241,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         byte c = (byte)(command & 0x1F);
         switch (c) {
             case 0x11://key response?
-                try {
-                    Object tf = Twofish_Algorithm.makeKey(pin);
-                    btConn.setAndSaveAddress((byte) ((addresses << 4) & 0xF0));        //Get the address and reverse it since source and destination are reversed from the RX packet
-
-                    byte[] key_pd = new byte[16];                            //Get the bytes for the keys
-                    byte[] key_dp = new byte[16];
-
-                    pBuf.rewind();
-                    pBuf.get(key_pd, 0, key_pd.length);
-                    pBuf.get(key_dp, 0, key_dp.length);
-
-                    String d = "";
-                    for (byte b : key_pd)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Key_PD: " + d);
-
-                    d = "";
-                    for (byte b : key_dp)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Key_DP: " + d);
-
-                    byte[] key_pd_de = Twofish_Algorithm.blockDecrypt(key_pd, 0, tf);
-                    byte[] key_dp_de = Twofish_Algorithm.blockDecrypt(key_dp, 0, tf);
-
-                    SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("dp",Utils.bufferString(key_dp_de,key_dp_de.length));
-                    editor.putString("pd",Utils.bufferString(key_pd_de,key_pd_de.length));
-                    editor.putString("device",pairingDevice.getAddress());
-                    editor.putBoolean("paired",true);
-                    editor.commit();
-
-                    d = "";
-                    for (byte b : key_pd_de)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Decrytped PD: " + d);
-
-                    d = "";
-                    for (byte b : key_dp_de)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Decrytped DP: " + d);
-
-                    //CREATE THE KEY OBJECTS (WHITENING SUBKEYS, ROUND KEYS, S-BOXES)
-                    btConn.pump_tf = Twofish_Algorithm.makeKey(key_pd_de);
-                    btConn.driver_tf = Twofish_Algorithm.makeKey(key_dp_de);
-
-                    Protokoll.sendIDReq(btConn);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    appendLog("failed inRX: " + e.getMessage());
-                }
+                appendLog("key response: " );
                 break;
             case 20:
                 appendLog("got an id response");
@@ -314,6 +279,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                             Application.sendAppConnect(btConn);
                         else
                             Application.sendAppDisconnect(btConn);
+
                     }
                     /*else if(getState() == Transport.P3_SYN_DIS_RESP)
                     {
@@ -330,7 +296,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
             case 0x23: //recieved reliable data/
             case 0x03: //recieve unreliable data
                 if (Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce)) {
-                    SetupFragment.this.processAppResponse(payload, rel);
+                    MainFragment.this.processAppResponse(payload, rel);
                 }
                 break;
 
@@ -338,6 +304,43 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce);
                 break;
 
+            case 0x06:
+                if(Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce))
+                {
+                    byte error = 0;
+                    String err = "";
+
+                    if(payload.length > 0)
+                        error = payload[0];
+
+                    switch(error)
+                    {
+                        case 0x00:
+                            err = "Undefined";
+                            break;
+                        case 0x0F:
+                            err = "Wrong state";
+                           // drv.a.startMode(Driver.COMMAND, true);
+                            err = "Forcing starting of command mode, since the transport layer broke!";
+                            break;
+                        case 0x33:
+                            err = "Invalid service primitive";
+                            break;
+                        case 0x3C:
+                            err = "Invalid payload length";
+                            break;
+                        case 0x55:
+                            err = "Invalid source address";
+                            break;
+                        case 0x66:
+                            err = "Invalid destination address";
+                            break;
+                    }
+
+                    appendLog( "Error in Transport Layer! ("+err+")");
+
+                }
+        break;
             default:
                 appendLog("not yet implemented rx command: " + command + " ( " + String.format("%02X", command));
 
@@ -375,65 +378,38 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
             switch (commId) {
                 case (short) 0xA055://AL_CONNECT_RES:
-                    descrip = "AL_CONNECT_RES";
-                    //if (state == state.CONNECT)
-                        Application.sendAppCommand(Application.COMMANDS_SERVICES_VERSION,btConn);
-
-                    /*else if(getAppState() == Application.SERVICE_CONNECT)			//We are restarting a connection after P&A //TODO
-                        setAppState(Application.SERVICE_ACTIVATE);*/
+                    Application.sendAppCommand(Application.COMMAND_MODE,btConn);
                     break;
                 case (short) 0xA065://AL_SERVICE_VERSION_RES:
-                    descrip = "AL_SERVICE_VER_RES";
-                    Application.sendAppCommand(Application.BINDING,btConn);
-                    /*switch(getAppState())//TODO
-                    {
-                        case Application.COMM_VER_RESP:
-                            setAppState(Application.RT_VER);
-                            break;
-                        case Application.RT_VER_RESP:
-                            setAppState(Application.BIND);
-                            break;
-                    }*/
-                    Application.sendAppCommand(Application.REMOTE_TERMINAL_VERSION,btConn);
-                    break;
                 case (short) 0xA095://AL_BINDING_RES:
-                    step+=100;
-                    Protokoll.sendSyn(btConn);
-
-                    descrip = "AL_BINDING_RES";
-                    /*if(getAppState() == Application.BIND_RESP)//TODO
-                    {
-                        setAppState(Application.BOUND);
-                    }*/
+                    appendLog("not should happen here!");
                     break;
                 case (short) 0xA066://AL_SERVICE_ACTIVATE_RES:
                     descrip = "AL_SERVICE_ACTIVATE_RES";
-                    /*if(getAppState() == Application.SERVICE_ACTIVATE_SENT)//TODO
-                    {
-                        setAppState(Application.SERVICE_STARTUP);
-                    }
-                    Debug.i(TAG, FUNC_TAG, "Service activate response!");*/
+                    Application.cmdPing(btConn);
                     break;
                 case (short) 0x005A://AL_DISCONNECT_RES:
                     descrip = "AL_DISCONNECT_RES";
-                    // Debug.i(TAG, FUNC_TAG, "Disconnect response!");
-
                     break;
                 case (short) 0xA069://AL_SERVICE_DEACTIVATE_RES:
                     descrip = "AL_DEACTIVATE_RES";
-                    //Debug.i(TAG, FUNC_TAG, "Service deactivate response!");
                     break;
                 case (short) 0x00AA://AL_SERVICE_ERROR_RES:
                     descrip = "AL_SERVICE_ERROR_RES";
-                    //Debug.i(TAG, FUNC_TAG, "Service error response!");
                     break;
                 case (short) 0xA06A://AL_SERVICE_DEACTIVATE_ALL_RES:
                     descrip = "AL_DEACTIVATE_ALL_RES";
-                    /*Debug.i(TAG, FUNC_TAG, "Service deactivate all response!  Activating desired service...");
-                    setAppState(Application.SERVICE_ACTIVATE);*///TODO
+                    //setAppState(Application.SERVICE_ACTIVATE);*///TODO
                     break;
                 case (short) 0xAAAA://PING_RES:
                     descrip = "PING_RES";
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            try{Thread.sleep(2000);}catch(Exception e){/*ignore*/}
+                            Application.cmdPing(btConn);
+                        }
+                    }.start();
                     break;
                 case (short) 0xA996://HIST_READ_RES:
                     descrip = "HISTORY_READ_RES";
@@ -509,7 +485,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     break;
             }
         }
-
+        appendLog("appProcess: "+descrip);
         //rx.add(commId); FIXME maybe later
 
     }
@@ -630,101 +606,52 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     int step = 0;
 
     void handleData(byte buffer[], int bytes) {
-        switch (step) {
-            case 1: //we requested con, now we try to request auth
-            {
-                appendLog(this.getId() + " doing A_KEY_REQ");
-                byte[] key = {16, 12, 2, 0, -16};
+        List<Byte> t = new ArrayList<>();
+        for (int i = 0; i < bytes; i++)
+            t.add(buffer[i]);
+        for (List<Byte> x : Frame.frameDeEscaping(t)) {
+            byte[] xx = new byte[x.size()];
+            for (int i = 0; i < x.size(); i++)
+                xx[i] = x.get(i);
+            boolean rel = false;
+            if ((x.get(1) & 0x20) == 0x20) {
+                rel = true;
 
-                btConn.writeCommand(key);
+                byte seq = 0x00;
+                if ((x.get(1) & 0x80) == 0x80)
+                    seq = (byte) 0x80;
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final EditText pinIn = new EditText(getContext());
-                        pinIn.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        pinIn.setHint("XXX XXX XXXX");
-                        new AlertDialog.Builder(getContext())
-                                .setTitle("Enter Pin")
-                                .setMessage("Read the Pin-Code from pump and enter it")
-                                .setView(pinIn)
-                                .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String pin = pinIn.getText().toString();
-                                        appendLog("got the pin: " + pin);
-                                        SetupFragment.this.pin = Utils.generateKey(pin);
-                                        step = 2;
-                                        //sending key available:
-                                        appendLog(" doing A_KEY_AVA");
-                                        byte[] key = {16, 15, 2, 0, -16};
-                                        btConn.writeCommand(key);
+                byte recvSeqNo = seq;
+                {
+                    btConn.incrementNonceTx();
 
-                                    }
-                                })
-                                .show();
+                    List<Byte> packet = Packet.buildPacket(new byte[]{16, 5, 0, 0, 0}, null, true,btConn);
+
+                    //drv.recvSeqNo ^= 0x80;
+
+                    seq = recvSeqNo;
+                    packet.set(1, (byte) (packet.get(1) | recvSeqNo));                //OR the received sequence number
+
+                    packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());
+
+                    List<Byte> temp = Frame.frameEscape(packet);
+                    byte[] ro = new byte[temp.size()];
+                    int i = 0;
+                    for (byte b : temp)
+                        ro[i++] = b;
+                    try {
+                        btConn.write(ro);
+                        appendLog(this.getId() + ": succesful wrote " + temp.size() + " bytes!");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        appendLog(this.getId() + ": error in tx: " + e.getMessage());
                     }
-                });
-
-            }
-            break;
-            default: //we indicated that we have a key, now lets handle the handle to the handle with an handler
-            {
-                List<Byte> t = new ArrayList<>();
-                for (int i = 0; i < bytes; i++)
-                    t.add(buffer[i]);
-                for (List<Byte> x : Frame.frameDeEscaping(t)) {
-                    byte[] xx = new byte[x.size()];
-                    for (int i = 0; i < x.size(); i++)
-                        xx[i] = x.get(i);
-                    boolean rel = false;
-                    if ((x.get(1) & 0x20) == 0x20) {
-                        rel = true;
-
-                        byte seq = 0x00;
-                        if ((x.get(1) & 0x80) == 0x80)
-                            seq = (byte) 0x80;
-
-                        byte recvSeqNo = seq;
-                        {
-                            Utils.incrementArray(btConn.getNonceTx());
-
-                            List<Byte> packet = Packet.buildPacket(new byte[]{16, 5, 0, 0, 0}, null, true,btConn);
-
-                            //drv.recvSeqNo ^= 0x80;
-
-                            seq = recvSeqNo;
-                            packet.set(1, (byte) (packet.get(1) | recvSeqNo));                //OR the received sequence number
-
-                            packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());
-
-                            List<Byte> temp = Frame.frameEscape(packet);
-                            byte[] ro = new byte[temp.size()];
-                            int i = 0;
-                            for (byte b : temp)
-                                ro[i++] = b;
-                            try {
-                                btConn.write(ro);
-                                appendLog(this.getId() + ": succesful wrote " + temp.size() + " bytes!");
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                appendLog(this.getId() + ": error in tx: " + e.getMessage());
-                            }
-                        }
-                    } else {
-                        rel = false;
-                    }
-                    handleRX(xx, x.size(), rel);
                 }
+            } else {
+                rel = false;
             }
-            break;
-                        /* case 3: //we expect an id response
-                        {
-                        ...
-                        }
-                        break;*/
+            handleRX(xx, x.size(), rel);
         }
-        //do something with this
-
     }
 
 }

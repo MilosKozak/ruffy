@@ -11,31 +11,20 @@
     tools:context="org.monkey.d.ruffy.ruffy.SetupFragment"
     android:orientation="vertical">
 
-    <TextView
+    <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Welcome to Ruffy!"
-        style="@style/Base.TextAppearance.AppCompat.Headline"/>
+        android:text="Reset!"
+        android:id="@+id/main_reset"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Lets start by pairing the pump to this App:\n
-        1. Grab your pump\n
-        2. Navigate to Bluetooth Settings\n
-        3. Check if the pump is already paired\n
-        3b. Delete pairing\n
-        4. Start adding new Device on Pump\n
-        5. Click on Connect! Button"
-        />
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Connect!"
-        android:id="@+id/setup_connect"/>
+        android:id="@+id/main_connect"/>
 
     <TextView
-        android:id="@+id/setup_log"
+        android:id="@+id/main_log"
         style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

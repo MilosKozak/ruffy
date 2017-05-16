@@ -2,3 +2,5 @@
 .idea/
 local.properties
 build/
+app/app-release.apk
+.DS_Store
