@@ -98,6 +98,11 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void log(String s) {
+                if(step == 200 && s.equals("got error in read"))
+                {
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new MainFragment()).addToBackStack("Start").commit();
+                    return;
+                }
                 appendLog(s);
             }
 
@@ -313,7 +318,10 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                         if(step<100)
                             Application.sendAppConnect(btConn);
                         else
+                        {
                             Application.sendAppDisconnect(btConn);
+                            step=200;
+                        }
                     }
                     /*else if(getState() == Transport.P3_SYN_DIS_RESP)
                     {

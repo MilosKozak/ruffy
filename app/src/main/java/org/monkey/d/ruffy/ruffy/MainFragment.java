@@ -5,17 +5,25 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
+import android.text.Layout;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.monkey.d.ruffy.ruffy.driver.Application;
@@ -23,14 +31,18 @@ import org.monkey.d.ruffy.ruffy.driver.BTConnection;
 import org.monkey.d.ruffy.ruffy.driver.BTHandler;
 import org.monkey.d.ruffy.ruffy.driver.Frame;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
+import org.monkey.d.ruffy.ruffy.driver.PumpDisplay;
 import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
+import org.monkey.d.ruffy.ruffy.driver.rtFrame;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -42,6 +54,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     //private byte recvSeqNo;
 
     private BTConnection btConn;
+    private PumpDisplay display;
+    private LinearLayout displayView;
 
     public MainFragment() {
 
@@ -60,7 +74,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             public void onClick(View v) {
                 SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
                 prefs.edit().putBoolean("paired",false).commit();
-
+                synRun=false;
+                rtmode=false;
                 getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
             }
         });
@@ -68,13 +83,45 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         connectLog = (TextView) v.findViewById(R.id.main_log);
         connectLog.setMovementMethod(new ScrollingMovementMethod());
 
+        displayView = (LinearLayout) v.findViewById(R.id.pumpPanel);
+        display = (PumpDisplay) displayView.findViewById(R.id.pumpView);
+
+        Button menu = (Button) displayView.findViewById(R.id.pumpMenu);
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rtSeq = Application.rtSendKey(Application.MENU,true,rtSeq,btConn);
+            }
+        });
+        Button check = (Button) displayView.findViewById(R.id.pumpCheck);
+        check.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rtSeq = Application.rtSendKey(Application.CHECK,true,rtSeq,btConn);
+            }
+        });
+        Button up = (Button) displayView.findViewById(R.id.pumpUp);
+        up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rtSeq = Application.rtSendKey(Application.UP,true,rtSeq,btConn);
+            }
+        });
+        Button down= (Button) displayView.findViewById(R.id.pumpDown);
+        down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rtSeq = Application.rtSendKey(Application.DOWN,true,rtSeq,btConn);
+            }
+        });
         return v;
     }
-    boolean r = true;
-    Thread t = new Thread(){
+
+    boolean synRun= true;
+    Thread synThread = new Thread(){
         @Override
         public void run() {
-            while(r)
+            while(synRun)
             {
                 Protokoll.sendSyn(btConn);
                 try {
@@ -105,21 +152,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void deviceConnected() {
                     appendLog("connected to pump");
-                    r=true;
-                    t.start();
-
-
+                    synRun=true;
+                    synThread.start();
                 }
 
                 @Override
                 public void log(String s) {
                     appendLog(s);
+                    if(s.equals("got error in read"))
+                    {
+                        btConn.connect(device,4);
+                    }
                 }
 
                 @Override
                 public void fail(String s) {
                     appendLog("failed: "+s);
-                    r=false;
+                    synRun=false;
                     btConn.connect(device,4);
                 }
 
@@ -131,7 +180,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void handleRawData(byte[] buffer, int bytes) {
                     appendLog("got data from pump");
-                    r=false;
+                    synRun=false;
                     step=0;
                     handleData(buffer,bytes);
                 }
@@ -156,7 +205,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                connectLog.append("\n" + message);
+                if(connectLog.getLineCount()<1000)
+                {
+                    connectLog.append("\n" + message);
+                }
+                else
+                {
+                    connectLog.setText("");
+                }
                 final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
                 if (scrollAmount > 0)
                     connectLog.scrollTo(0, scrollAmount);
@@ -168,6 +224,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     public void handleRX(byte[] inBuf, int length, boolean rel) {
+        if(length<10)
+        {
+            appendLog("to short package? "+length+" bytes: "+Utils.bufferString(inBuf,length));
+        }
         //Byte command = (byte) (inBuf[1] & 0x1F);
         boolean expected = false;
         String descrip = "";
@@ -206,7 +266,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         buffer.rewind();
 //logging:
-        appendLog(String.format("Version: %02X", version));
+        /*appendLog(String.format("Version: %02X", version));
         appendLog(String.format("Command: %02X", command));
         appendLog(String.format("Length: %04X", payloadlength));
         appendLog(String.format("Address: %02X", addresses));
@@ -231,7 +291,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             dat += String.format("%02X ", b);
         appendLog("Packet No UMAC: " + dat);
 
-
+*/
         /*byte seq = 0x00;
         if ((inBuf[1] & 0x80) == 0x80)
             seq = (byte) 0x80;
@@ -278,7 +338,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         if(step<100)
                             Application.sendAppConnect(btConn);
                         else
+                        {
                             Application.sendAppDisconnect(btConn);
+                            step = 200;
+                        }
 
                     }
                     /*else if(getState() == Transport.P3_SYN_DIS_RESP)
@@ -368,6 +431,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         appendLog("Service ID: " + String.format("%X", servId) + " Comm ID: " + String.format("%X", commId) + " reliable: " + reliable);
 
+        //time = System.currentTimeMillis();
         String descrip = null;
         if (reliable)                                            //If its a reliable packet the next 2 bytes are an error code to be evaluated
         {
@@ -378,7 +442,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
             switch (commId) {
                 case (short) 0xA055://AL_CONNECT_RES:
-                    Application.sendAppCommand(Application.COMMAND_MODE,btConn);
+                    Application.sendAppCommand(Application.RT_MODE,btConn);
                     break;
                 case (short) 0xA065://AL_SERVICE_VERSION_RES:
                 case (short) 0xA095://AL_BINDING_RES:
@@ -386,19 +450,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 case (short) 0xA066://AL_SERVICE_ACTIVATE_RES:
                     descrip = "AL_SERVICE_ACTIVATE_RES";
-                    Application.cmdPing(btConn);
+                    startRT();
                     break;
                 case (short) 0x005A://AL_DISCONNECT_RES:
                     descrip = "AL_DISCONNECT_RES";
                     break;
                 case (short) 0xA069://AL_SERVICE_DEACTIVATE_RES:
                     descrip = "AL_DEACTIVATE_RES";
+                    rtmode=false;
+                    Application.sendAppCommand(Application.RT_MODE,btConn);
                     break;
                 case (short) 0x00AA://AL_SERVICE_ERROR_RES:
                     descrip = "AL_SERVICE_ERROR_RES";
                     break;
                 case (short) 0xA06A://AL_SERVICE_DEACTIVATE_ALL_RES:
                     descrip = "AL_DEACTIVATE_ALL_RES";
+                    rtmode=false;
+                    Application.sendAppCommand(Application.RT_MODE,btConn);
                     //setAppState(Application.SERVICE_ACTIVATE);*///TODO
                     break;
                 case (short) 0xAAAA://PING_RES:
@@ -442,7 +510,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 case (short) 0xAAA5://READ_ERR_STATUS_RESP:
                     descrip = "READ_ERR_STATUS_RESP";
-                    //cmdProcessErrStatus(b);//TODO
+                    cmdProcessErrStatus(b);
                     break;
                 case (short) 0xAAA6://READ_TIME_RESP:
                     descrip = "READ_TIME_RESP";
@@ -456,11 +524,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             switch (commId) {
                 case (short) 0x0555://RT_DISPLAY:
                     descrip = "RT_DISPLAY";
-                    //rtProcessDisplay(b);//TODO
+                    rtProcessDisplay(b);
                     break;
                 case (short) 0x0556://RT_KEY_CONF:
                     descrip = "RT_KEY_CONF";
                     //rtProcessKeyConfirmation(b);//TODO
+                    rtSeq = Application.rtSendKey(Application.NO_KEY,true,rtSeq,btConn);
                     break;
                 case (short) 0x0559://RT_AUDIO:
                     descrip = "RT_AUDIO";
@@ -472,7 +541,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 case (short) 0x0566://RT_ALIVE:
                     descrip = "RT_ALIVE";
-                    //rtProcessAlive(b);//TODO
+                    rtProcessAlive(b);
                     break;
                 case (short) 0x0569://RT_PAUSE:
                     descrip = "RT_PAUSE";
@@ -489,6 +558,58 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         //rx.add(commId); FIXME maybe later
 
     }
+    private void rtProcessAlive(ByteBuffer b)
+    {
+        final String FUNC_TAG = "processAlive";
+
+        short sequence = b.getShort();
+
+        appendLog("alive Seq: "+sequence);
+    }
+
+    boolean rtmode = false;
+    long time = 0;
+    short rtSeq = 0;
+
+
+    private void stopRT()
+    {
+        rtmode = false;
+        rtSeq=0;
+    }
+    enum RTMODE
+    {
+
+    }
+    private void startRT() {
+        appendLog("starting RT keepAlive");
+        new Thread(){
+            @Override
+            public void run() {
+                rtmode = true;
+                rtSeq = 0;
+                time = System.currentTimeMillis();
+                rtmode = true;
+                while(rtmode)
+                {
+                    if(System.currentTimeMillis() > time+1000L) {
+                        appendLog("sending keep alive");
+                        rtSeq = Application.sendRTKeepAlive(rtSeq, btConn);
+                        time = System.currentTimeMillis();
+                    }
+                    try{Thread.sleep(250);}catch(Exception e){/*ignore*/}
+                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        displayView.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }.start();
+    }
+    private static int MODE_ERROR_TRESHHOLD = 3;
+    private int modeErrorCount = 0;
 
     private boolean cmdProcessError(short error) {
         final String FUNC_TAG = "processError";
@@ -527,16 +648,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 case (short) 0xF05F:
                     sError = "Command not allowed, RT while in CMD mode, CMD while in RT mode";
-                    //modeErrorCount++;
+                    modeErrorCount++;
 
-                    /*if(modeErrorCount > MODE_ERROR_THRESH)
+                    if(modeErrorCount > MODE_ERROR_TRESHHOLD)
                     {
-                        Debug.e(TAG, FUNC_TAG, "The system is in the wrong mode, transitioning to COMMAND mode!");
-                        Driver.log("ROCHE", FUNC_TAG, "The system is in the wrong mode, transitioning to COMMAND mode!");
+                        stopRT();
+                        appendLog("The system is in the wrong mode, transitioning to COMMAND mode!");
 
                         modeErrorCount = 0;
-                        startMode(Driver.COMMAND, false);
-                    }*/
+                        Application.sendAppCommand(Application.DEACTIVATE_ALL,btConn);
+                    }
                     break;
 
                 //Remote Terminal ************************************************//
@@ -557,6 +678,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     break;
                 case (short) 0xF50C:
                     sError = "RT command has incorrect sequence number";
+                    Application.sendAppCommand(Application.RT_DEACTIVATE,btConn);
                     break;
                 case (short) 0xF533:
                     sError = "RT alive timeout expired";
@@ -614,7 +736,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             for (int i = 0; i < x.size(); i++)
                 xx[i] = x.get(i);
             boolean rel = false;
-            if ((x.get(1) & 0x20) == 0x20) {
+            if (x.size()>1 && (x.get(1) & 0x20) == 0x20) {
                 rel = true;
 
                 byte seq = 0x00;
@@ -654,4 +776,203 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void cmdProcessErrStatus(ByteBuffer b)
+    {
+        final String FUNC_TAG = "processErrStatus";
+
+        byte error = b.get();
+        byte warn = b.get();
+
+        boolean er = false, wn = false;
+
+        if(error == (byte)0x48)
+            appendLog("No Error");
+        else
+        {
+            appendLog("Error found!");
+            er = true;
+        }
+
+        if(warn == (byte)0x48)
+            appendLog( "No warning/reminder!");
+        else
+        {
+            appendLog("Warning/reminder found!");
+            wn = true;
+        }
+
+        String message = "";
+
+        if(wn && er)			//Both an error and warning!
+        {
+            message = "The pump has both a warning and an error message, please clear to continue...";
+        }
+        else if(wn && !er)		//A warning!
+        {
+            message = "The pump has a warning message, please clear to continue...";
+        }
+        else if(!wn && er)		//An error!
+        {
+            message = "The pump has an error message, please clear to continue...";
+        }
+
+        /*if(drv.cancelBolus)
+        {
+            drv.cancelBolus = false;
+*/
+            if(wn || er)
+            {
+                appendLog("Clearing warning as part of stopping TBR!");
+                //FIXME setRtState(Application.TBR_CLEAR_WARNING);
+            }
+            else
+            {
+                appendLog("No warnings to clear...");
+                //FIXME setRtState(Application.TBR_EVALUATE_MAIN_SCREEN);
+            }
+/*
+            if(Driver.getMode() == Driver.COMMAND)					//We have to transition to RT
+                startMode(Driver.RT, false);
+        }
+        else if(!message.equalsIgnoreCase(""))
+        {
+            Bundle bun = new Bundle();
+            bun.putString("description", message);
+            Event.addEvent(Driver.serv, Event.EVENT_PUMP_WARNING_ERROR, Event.makeJsonString(bun), Event.SET_POPUP_AUDIBLE_ALARM);
+        }
+        */
+    }
+
+    public static rtFrame frame = new rtFrame();
+
+
+    private void rtProcessDisplay(ByteBuffer b)
+    {
+        final String FUNC_TAG = "rtProcessDisplay";
+
+        short sequence = b.getShort();
+        byte reason = b.get();
+        int index = (int)(b.get() & 0xFF);
+        byte row = b.get();
+
+        byte[] map = new byte[96];		//New array
+        b.get(map);						//Read in array from packet
+
+        String r = "";					//Determine reason
+        if(reason == (byte)0x48)
+            r = "Pump";
+        else if(reason == (byte)0xB7)
+            r = "DM";
+
+        appendLog("rtProcessDisplay: Seq: "+sequence+" | Reason: "+r+" | Index: "+index+" | Row: "+String.format("%X", row));
+
+        String[] screen = new String[]{"","","","","","","",""};
+        for(byte d:map)
+        {
+            if((d & 0x01) == 0x01)
+                screen[0] += "8";
+            else
+                screen[0] += " ";
+
+            if((d & 0x02) == 0x02)
+                screen[1] += "8";
+            else
+                screen[1] += " ";
+
+            if((d & 0x04) == 0x04)
+                screen[2] += "8";
+            else
+                screen[2] += " ";
+
+            if((d & 0x08) == 0x08)
+                screen[3] += "8";
+            else
+                screen[3] += " ";
+
+            if((d & 0x10) == 0x10)
+                screen[4] += "8";
+            else
+                screen[4] += " ";
+
+            if((d & 0x20) == 0x20)
+                screen[5] += "8";
+            else
+                screen[5] += " ";
+
+            if((d & 0x40) == 0x40)
+                screen[6] += "8";
+            else
+                screen[6] += " ";
+
+            if((d & 0x80) == 0x80)
+                screen[7] += "8";
+            else
+                screen[7] += " ";
+        }
+
+        screen[0] = new StringBuffer(screen[0]).reverse().toString();
+        screen[1] = new StringBuffer(screen[1]).reverse().toString();
+        screen[2] = new StringBuffer(screen[2]).reverse().toString();
+        screen[3] = new StringBuffer(screen[3]).reverse().toString();
+        screen[4] = new StringBuffer(screen[4]).reverse().toString();
+        screen[5] = new StringBuffer(screen[5]).reverse().toString();
+        screen[6] = new StringBuffer(screen[6]).reverse().toString();
+        screen[7] = new StringBuffer(screen[7]).reverse().toString();
+
+        if(frame.index == -1)
+        {
+            appendLog(FUNC_TAG+ ": Brand new frame!");
+            frame.index = index;
+            frame.reason = reason;
+        }
+        else if(frame.index != index)
+        {
+            appendLog(FUNC_TAG+ ": Different index so we need to start a new frame!");
+            frame = new rtFrame();		//Generate a new frame
+            frame.index = index;			//Copy the index
+            frame.reason = reason;
+        }
+
+        if(row == (byte)0x47)		//Row 1
+            frame.addR1(screen);
+        else if(row == (byte)0x48)	//Row 2
+            frame.addR2(screen);
+        else if(row == (byte)0xB7)	//Row 3
+            frame.addR3(screen);
+        else if(row == (byte)0xB8)	//Row 4
+            frame.addR4(screen);
+
+        if(frame.isComplete())
+        {
+            //final String TAG = "rtFrame";
+
+            appendLog(FUNC_TAG+ ": Found complete frame!");
+
+            /*int i = 0;
+            appendLog(FUNC_TAG+ ": ----------------------------------------------------------------------------------------------------");
+            for(i = 0;i<8;i++)
+                appendLog(FUNC_TAG+ ": "+ frame.row1[i]);
+            //appendLog(FUNC_TAG+ ": ----------------------------------------------------------------------------------------------------");
+            for(i = 0;i<8;i++)
+                appendLog(FUNC_TAG+ ": "+ frame.row2[i]);
+            //appendLog(FUNC_TAG+ ": ----------------------------------------------------------------------------------------------------");
+            for(i = 0;i<8;i++)
+                appendLog(FUNC_TAG+ ": "+ frame.row3[i]);
+            //appendLog(FUNC_TAG+ ": ----------------------------------------------------------------------------------------------------");
+            for(i = 0;i<8;i++)
+                appendLog(FUNC_TAG+ ": "+ frame.row4[i]);
+            appendLog(FUNC_TAG+ ": ----------------------------------------------------------------------------------------------------");
+*/
+            //rtTbrFSM();
+            if(displayView.getVisibility()==View.GONE)
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        displayView.setVisibility(View.VISIBLE);
+                    }
+                });
+
+            display.draw(frame);
+        }
+    }
 }

@@ -28,13 +28,52 @@
         style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:background="@color/colorPrimaryDark"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
         android:text="Log"
-        android:textSize="10sp" />
+        android:textSize="10sp"
+        />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/pumpPanel"
+        android:visibility="gone"
+        android:orientation="vertical"
+        >
 
-
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="menu"
+                android:id="@+id/pumpMenu"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="check"
+                android:id="@+id/pumpCheck"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="up"
+                android:id="@+id/pumpUp"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="dn"
+                android:id="@+id/pumpDown"/>
+        </LinearLayout>
+        <org.monkey.d.ruffy.ruffy.driver.PumpDisplay
+            android:id="@+id/pumpView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="32dp" />
+    </LinearLayout>
 </LinearLayout>

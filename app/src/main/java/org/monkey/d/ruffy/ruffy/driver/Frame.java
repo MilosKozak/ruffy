@@ -27,12 +27,23 @@ public class Frame {
         return temp;
     }
 
+    private static List<Byte> packet = new ArrayList<Byte>();
+    private static boolean start = false, stop = false, escaped = false;
+
     public static List<List<Byte>> frameDeEscaping(List<Byte> buffer)
     {
         List<List<Byte>> complete = new ArrayList<List<Byte>>();
 
-        List<Byte> packet = new ArrayList<Byte>();
-        boolean escaped = false ,start = false, stop=false;
+        if(start)
+        {
+
+        }
+        else
+        {
+            start = stop = escaped = false;
+            packet.clear();
+        }
+
         for(int i=0;i<buffer.size();i++)
         {
             if(escaped == true)

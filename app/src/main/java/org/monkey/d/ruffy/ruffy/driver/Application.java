@@ -16,6 +16,10 @@ public class Application {
     public static final int REMOTE_TERMINAL_VERSION = 1;
     public static final int BINDING = 2;
     public static final int COMMAND_MODE = 3;
+    public static final int COMMAND_DEACTIVATE = 4;
+    public static final int RT_MODE = 5;
+    public static final int RT_DEACTIVATE = 6;
+    public static final int DEACTIVATE_ALL = 7;
 
     public static void sendAppConnect(BTConnection btConn) {
         ByteBuffer payload = null;
@@ -73,6 +77,16 @@ public class Application {
                     // VERSION: 8 bits \    Service ID \                Command ID
                     16    , 0,    0x66, (byte)0x90
             };
+    private static byte[] service_deactivate = new byte[]
+            {
+                    // VERSION: 8 bits \    Service ID \                Command ID
+                    16    ,  0,    0x69, (byte)0x90
+            };
+    private static byte[] service_deactivate_all = new byte[]
+            {
+                    // VERSION: 8 bits \    Service ID \                Command ID
+                    16    ,  0,    0x6A, (byte)0x90
+            };
     public static void sendAppCommand(int command, BTConnection btConn){
         ByteBuffer payload = null;
 
@@ -88,27 +102,27 @@ public class Application {
                     payload.put((byte)0x01);
                     payload.put((byte)0x00);
                     break;
-                /*
-                case COMMANDS_COMMAND_DEACTIVATE:
+
+                case COMMAND_DEACTIVATE:
                     s = "COMMAND DEACTIVATE";
                     payload = ByteBuffer.allocate(5);
                     payload.put(service_deactivate);
-                    payload.put(COMMAND_MODE_SERVICE_ID);
+                    payload.put((byte)0xB7);
                     break;
-                case COMMANDS_RT_ACTIVATE:
+                case RT_MODE:
                     s = "RT_ACTIVATE";
                     payload = ByteBuffer.allocate(7);
                     payload.put(service_activate);
-                    payload.put(REMOTE_TERMINAL_SERVICE_ID);
-                    payload.put(RT_MODE_MAJOR_VERSION);
-                    payload.put(RT_MODE_MINOR_VERSION);
+                    payload.put((byte)0x48);
+                    payload.put((byte)0x01);
+                    payload.put((byte)0x00);
                     break;
-                case COMMANDS_RT_DEACTIVATE:
+                case RT_DEACTIVATE:
                     s = "RT DEACTIVATE";
                     payload = ByteBuffer.allocate(5);
                     payload.put(service_deactivate);
-                    payload.put(REMOTE_TERMINAL_SERVICE_ID);
-                    break;*/
+                    payload.put((byte)0x48);
+                    break;
             case COMMANDS_SERVICES_VERSION:
                 s = "COMMAND_SERVICES_VERSION";
                 payload = ByteBuffer.allocate(5);
@@ -176,6 +190,64 @@ public class Application {
         payload.put((byte) (0x9AAA & 0xFF));
         payload.put((byte) ((0x9AAA>>8) & 0xFF));
 
+        sendData(payload, false, btConn);
+    }
+
+    public static short sendRTKeepAlive(short rtSeq, BTConnection btConn) {
+        ByteBuffer payload = ByteBuffer.allocate(6);
+            payload.put((byte)16);
+            payload.put((byte)0x48);
+            payload.put((byte) (0x0566 & 0xFF));
+            payload.put((byte) ((0x0566>>8) & 0xFF));
+
+            payload.put((byte) (rtSeq & 0xFF));
+            payload.put((byte) ((rtSeq>>8) & 0xFF));
+
+            sendData(payload,false,btConn);
+             rtSeq++;
+        return rtSeq;
+
+    }
+
+    public static void cmdErrStatus(BTConnection btConn)
+    {
+        ByteBuffer payload = ByteBuffer.allocate(4);
+        payload.put((byte)16);
+
+        payload.put((byte)0x48);
+
+        payload.put((byte) (0x9AA5 & 0xFF));
+        payload.put((byte) ((0x9AA5>>8) & 0xFF));
+
         sendData(payload, true, btConn);
+    }
+    public static byte NO_KEY				=(byte)0x00;
+    public static byte MENU					=(byte)0x03;
+    public static byte CHECK				=(byte)0x0C;
+    public static byte UP					=(byte)0x30;
+    public static byte DOWN					=(byte)0xC0;
+
+    public static short rtSendKey(byte key, boolean changed,short rtSeq, BTConnection btConn)
+    {
+        ByteBuffer payload = ByteBuffer.allocate(8);
+
+        payload.put((byte)16);
+        payload.put((byte)0x48);
+        payload.put((byte) 0x65);
+        payload.put((byte) 0x05);
+
+        payload.put((byte) (rtSeq & 0xFF));
+        payload.put((byte) ((rtSeq>>8) & 0xFF));
+
+        payload.put(key);
+
+        if(changed)
+            payload.put((byte) 0xB7);
+        else
+            payload.put((byte) 0x48);
+
+        sendData(payload, false, btConn);
+         rtSeq++;
+        return rtSeq;
     }
 }
