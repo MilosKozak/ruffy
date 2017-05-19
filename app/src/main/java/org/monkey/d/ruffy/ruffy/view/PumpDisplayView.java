@@ -1,4 +1,4 @@
-package org.monkey.d.ruffy.ruffy.driver;
+package org.monkey.d.ruffy.ruffy.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,13 +11,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-public class PumpDisplay extends SurfaceView implements DisplayUpdater {
+import org.monkey.d.ruffy.ruffy.driver.DisplayUpdater;
+
+public class PumpDisplayView extends SurfaceView implements DisplayUpdater {
 
     private SurfaceHolder surfaceHolder;
     private final Paint black;
     private final Paint white;
 
-    public PumpDisplay(Context c, AttributeSet s) {
+    public PumpDisplayView(Context c, AttributeSet s) {
         super(c,s);
         surfaceHolder = getHolder();
         //surfaceHolder.setFixedSize(96,32);
@@ -67,14 +69,13 @@ public class PumpDisplay extends SurfaceView implements DisplayUpdater {
             return;
 
         tempCanvas.drawColor(Color.WHITE);
-        //tempCanvas.drawRect(0,y*(which*8),x*96,y*((which*8)+1),white);
+
         for(int r = 0; r < 8; r++)
             for(int c = 0; c < 96; c++)
 
                 if(pixel[r][c])
                     tempCanvas.drawRect(x*c,y*((which*8)+r),x*(c+1),y*((which*8)+r+1),black);
-                //else
-                  //  tempCanvas.drawRect(x*c,y*((which*8)+r),x*(c+1),y*((which*8)+r+1),white);
+
         surfaceHolder.unlockCanvasAndPost(tempCanvas);
     }
 
