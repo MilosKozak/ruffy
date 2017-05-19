@@ -41,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static android.content.ContentValues.TAG;
 
@@ -56,16 +57,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private BTConnection btConn;
     private PumpDisplay display;
     private LinearLayout displayView;
+    private Button connect;
 
     public MainFragment() {
 
     }
 
+    private void sleep(long millis)
+    {
+        try{Thread.sleep(millis);}catch(Exception e){/*ignore*/}
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        Button connect = (Button) v.findViewById(R.id.main_connect);
+        connect = (Button) v.findViewById(R.id.main_connect);
         connect.setOnClickListener(this);
 
         Button reset = (Button) v.findViewById(R.id.main_reset);
@@ -90,28 +96,56 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rtSeq = Application.rtSendKey(Application.MENU,true,rtSeq,btConn);
+                time = System.currentTimeMillis();
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.MENU, true, rtSeq, btConn);
+                }
+                sleep(100);
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.NO_KEY, true, rtSeq, btConn);
+                }
             }
         });
         Button check = (Button) displayView.findViewById(R.id.pumpCheck);
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rtSeq = Application.rtSendKey(Application.CHECK,true,rtSeq,btConn);
+                time = System.currentTimeMillis();
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.CHECK, true, rtSeq, btConn);
+                }
+                sleep(100);
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.NO_KEY, true, rtSeq, btConn);
+                }
             }
         });
         Button up = (Button) displayView.findViewById(R.id.pumpUp);
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rtSeq = Application.rtSendKey(Application.UP,true,rtSeq,btConn);
+                time = System.currentTimeMillis();
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.UP, true, rtSeq, btConn);
+                }
+                sleep(100);
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.NO_KEY, true, rtSeq, btConn);
+                }
             }
         });
         Button down= (Button) displayView.findViewById(R.id.pumpDown);
         down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rtSeq = Application.rtSendKey(Application.DOWN,true,rtSeq,btConn);
+                time = System.currentTimeMillis();
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.DOWN, true, rtSeq, btConn);
+                }
+                sleep(100);
+                synchronized (sem) {
+                    rtSeq = Application.rtSendKey(Application.NO_KEY, true, rtSeq, btConn);
+                }
             }
         });
         return v;
@@ -529,7 +563,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 case (short) 0x0556://RT_KEY_CONF:
                     descrip = "RT_KEY_CONF";
                     //rtProcessKeyConfirmation(b);//TODO
-                    rtSeq = Application.rtSendKey(Application.NO_KEY,true,rtSeq,btConn);
                     break;
                 case (short) 0x0559://RT_AUDIO:
                     descrip = "RT_AUDIO";
@@ -569,6 +602,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     boolean rtmode = false;
     long time = 0;
+
+    final Object sem = new Object();
     short rtSeq = 0;
 
 
@@ -581,6 +616,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     {
 
     }
+
+    int numStartRT = 0;
     private void startRT() {
         appendLog("starting RT keepAlive");
         new Thread(){
@@ -590,14 +627,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 rtSeq = 0;
                 time = System.currentTimeMillis();
                 rtmode = true;
+                numStartRT++;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connect.setText("Connected the "+numStartRT+". time!");
+                    }
+                });
                 while(rtmode)
                 {
                     if(System.currentTimeMillis() > time+1000L) {
                         appendLog("sending keep alive");
-                        rtSeq = Application.sendRTKeepAlive(rtSeq, btConn);
-                        time = System.currentTimeMillis();
+                        synchronized (sem) {
+                            rtSeq = Application.sendRTKeepAlive(rtSeq, btConn);
+                            time = System.currentTimeMillis();
+                        }
                     }
-                    try{Thread.sleep(250);}catch(Exception e){/*ignore*/}
+                    try{Thread.sleep(500);}catch(Exception e){/*ignore*/}
                 }
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

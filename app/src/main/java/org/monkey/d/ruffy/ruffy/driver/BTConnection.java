@@ -290,4 +290,9 @@ public class BTConnection {
         SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
         prefs.edit().putString("nonceTx",Utils.bufferString(nonceTx,nonceTx.length)).commit();
     }
+
+    public void log(String s) {
+        if(handler!=null)
+            handler.log(s);
+    }
 }

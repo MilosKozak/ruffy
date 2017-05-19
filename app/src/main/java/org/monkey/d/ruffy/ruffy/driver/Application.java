@@ -204,7 +204,11 @@ public class Application {
             payload.put((byte) ((rtSeq>>8) & 0xFF));
 
             sendData(payload,false,btConn);
-             rtSeq++;
+
+        btConn.log("/////////////////////////////////////////////////////////////////////");
+        btConn.log("send alive with seq: "+rtSeq);
+        btConn.log("/////////////////////////////////////////////////////////////////////");
+        rtSeq++;
         return rtSeq;
 
     }
@@ -246,8 +250,31 @@ public class Application {
         else
             payload.put((byte) 0x48);
 
+        btConn.log("/////////////////////////////////////////////////////////////////////");
+        String k = "";
+        switch (key)
+        {
+            case 0x00:
+                k="NOKEY";
+                break;
+            case 0x03:
+                k="MENU";
+                break;
+            case 0x0C:
+                k="CHECK";
+                break;
+            case 0x30:
+                k="UP";
+                break;
+            case (byte)0xC0:
+                k="DOWN";
+                break;
+        }
+        btConn.log("send key "+k+" with seq: "+rtSeq);
+        btConn.log("/////////////////////////////////////////////////////////////////////");
         sendData(payload, false, btConn);
-         rtSeq++;
+
+        rtSeq++;
         return rtSeq;
     }
 }
