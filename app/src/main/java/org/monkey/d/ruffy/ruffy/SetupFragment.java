@@ -385,14 +385,14 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 case (short) 0xA055://AL_CONNECT_RES:
                     descrip = "AL_CONNECT_RES";
                     //if (state == state.CONNECT)
-                        Application.sendAppCommand(Application.COMMANDS_SERVICES_VERSION,btConn);
+                        Application.sendAppCommand(Application.Command.COMMANDS_SERVICES_VERSION,btConn);
 
                     /*else if(getAppState() == Application.SERVICE_CONNECT)			//We are restarting a connection after P&A //TODO
                         setAppState(Application.SERVICE_ACTIVATE);*/
                     break;
                 case (short) 0xA065://AL_SERVICE_VERSION_RES:
                     descrip = "AL_SERVICE_VER_RES";
-                    Application.sendAppCommand(Application.BINDING,btConn);
+                    Application.sendAppCommand(Application.Command.BINDING,btConn);
                     /*switch(getAppState())//TODO
                     {
                         case Application.COMM_VER_RESP:
@@ -402,7 +402,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                             setAppState(Application.BIND);
                             break;
                     }*/
-                    Application.sendAppCommand(Application.REMOTE_TERMINAL_VERSION,btConn);
+                    Application.sendAppCommand(Application.Command.REMOTE_TERMINAL_VERSION,btConn);
                     break;
                 case (short) 0xA095://AL_BINDING_RES:
                     step+=100;

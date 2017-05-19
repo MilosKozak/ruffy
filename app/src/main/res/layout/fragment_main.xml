@@ -40,20 +40,22 @@
         android:id="@+id/pumpPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_margin="2dp"
+        android:orientation="vertical"
         android:visibility="visible">
-        <org.monkey.d.ruffy.ruffy.driver.PumpDisplay
+
+        <org.monkey.d.ruffy.ruffy.view.PumpDisplayView
             android:id="@+id/pumpView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:minHeight="32dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="1"
-            >
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -90,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:text="down" />
             </LinearLayout>
-</LinearLayout>
+        </LinearLayout>
 
 
     </LinearLayout>

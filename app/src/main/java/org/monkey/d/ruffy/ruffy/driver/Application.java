@@ -1,33 +1,36 @@
 package org.monkey.d.ruffy.ruffy.driver;
 
-import org.monkey.d.ruffy.ruffy.SetupFragment;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
 /**
- * Created by fishermen21 on 16.05.17.
+ * Some statics to do some things on application level
  */
-
 public class Application {
-    public static final int COMMANDS_SERVICES_VERSION = 0;
-    public static final int REMOTE_TERMINAL_VERSION = 1;
-    public static final int BINDING = 2;
-    public static final int COMMAND_MODE = 3;
-    public static final int COMMAND_DEACTIVATE = 4;
-    public static final int RT_MODE = 5;
-    public static final int RT_DEACTIVATE = 6;
-    public static final int DEACTIVATE_ALL = 7;
+    /**
+     * how often we accept an mode error before accepting we are in the wrong mode
+     */
+    public static int MODE_ERROR_TRESHHOLD = 3;
+
+    public static enum Command
+    {
+        COMMANDS_SERVICES_VERSION,
+        REMOTE_TERMINAL_VERSION,
+        BINDING,
+        COMMAND_MODE,
+        COMMAND_DEACTIVATE,
+        RT_MODE,
+        RT_DEACTIVATE,
+        DEACTIVATE_ALL,
+        APP_DISCONNECT,
+        CMD_PING,
+    }
 
     public static void sendAppConnect(BTConnection btConn) {
         ByteBuffer payload = null;
-        byte[] connect_app_layer = new byte[]
-                {
-                        // VERSION: 8 bits \    Service ID \               Command ID
-                        16    ,  0,    85, -112
-                };
+        byte[] connect_app_layer = {16, 0, 85, -112};
+
         payload = ByteBuffer.allocate(8);				//4 bytes for application header, 4 for payload
         payload.put(connect_app_layer);					//Add prefix array
         payload.order(ByteOrder.LITTLE_ENDIAN);
@@ -72,57 +75,52 @@ public class Application {
 
         return b;
     }
-    private static byte[] service_activate = new byte[]
-            {
-                    // VERSION: 8 bits \    Service ID \                Command ID
-                    16    , 0,    0x66, (byte)0x90
-            };
-    private static byte[] service_deactivate = new byte[]
-            {
-                    // VERSION: 8 bits \    Service ID \                Command ID
-                    16    ,  0,    0x69, (byte)0x90
-            };
-    private static byte[] service_deactivate_all = new byte[]
-            {
-                    // VERSION: 8 bits \    Service ID \                Command ID
-                    16    ,  0,    0x6A, (byte)0x90
-            };
-    public static void sendAppCommand(int command, BTConnection btConn){
+    private static byte[] service_activate = {16, 0, 0x66, (byte)0x90};
+    private static byte[] service_deactivate = {16, 0, 0x69, (byte)0x90};
+    private static byte[] service_deactivate_all = {16, 0, 0x6A, (byte)0x90};
+
+    public static void sendAppCommand(Command command, BTConnection btConn){
         ByteBuffer payload = null;
 
         String s = "";
 
+        boolean reliable = true;
+
         switch(command)
         {
-                case COMMAND_MODE:
-                    s = "COMMAND_ACTIVATE";
-                    payload = ByteBuffer.allocate(7);
-                    payload.put(service_activate);
-                    payload.put((byte)0xB7);
-                    payload.put((byte)0x01);
-                    payload.put((byte)0x00);
-                    break;
+            case COMMAND_MODE:
+                s = "COMMAND_ACTIVATE";
+                payload = ByteBuffer.allocate(7);
+                payload.put(service_activate);
+                payload.put((byte)0xB7);
+                payload.put((byte)0x01);
+                payload.put((byte)0x00);
+                reliable = true;
+                break;
 
-                case COMMAND_DEACTIVATE:
-                    s = "COMMAND DEACTIVATE";
-                    payload = ByteBuffer.allocate(5);
-                    payload.put(service_deactivate);
-                    payload.put((byte)0xB7);
-                    break;
-                case RT_MODE:
-                    s = "RT_ACTIVATE";
-                    payload = ByteBuffer.allocate(7);
-                    payload.put(service_activate);
-                    payload.put((byte)0x48);
-                    payload.put((byte)0x01);
-                    payload.put((byte)0x00);
-                    break;
-                case RT_DEACTIVATE:
-                    s = "RT DEACTIVATE";
-                    payload = ByteBuffer.allocate(5);
-                    payload.put(service_deactivate);
-                    payload.put((byte)0x48);
-                    break;
+            case COMMAND_DEACTIVATE:
+                s = "COMMAND DEACTIVATE";
+                payload = ByteBuffer.allocate(5);
+                payload.put(service_deactivate);
+                payload.put((byte)0xB7);
+                reliable = true;
+                break;
+            case RT_MODE:
+                s = "RT_ACTIVATE";
+                payload = ByteBuffer.allocate(7);
+                payload.put(service_activate);
+                payload.put((byte)0x48);
+                payload.put((byte)0x01);
+                payload.put((byte)0x00);
+                reliable = true;
+                break;
+            case RT_DEACTIVATE:
+                s = "RT DEACTIVATE";
+                payload = ByteBuffer.allocate(5);
+                payload.put(service_deactivate);
+                payload.put((byte)0x48);
+                reliable = true;
+                break;
             case COMMANDS_SERVICES_VERSION:
                 s = "COMMAND_SERVICES_VERSION";
                 payload = ByteBuffer.allocate(5);
@@ -131,7 +129,7 @@ public class Application {
                 payload.put((byte) (((short)0x9065) & 0xFF));
                 payload.put((byte) ((((short)0x9065)>>8) & 0xFF));
                 payload.put((byte)0xb7);
-                //state=state.COMM_VER;
+                reliable = true;
                 break;
             case REMOTE_TERMINAL_VERSION:
                 s = "REMOTE_TERMINAL_VERSION";
@@ -141,21 +139,36 @@ public class Application {
                 payload.put((byte) (((short)0x9065) & 0xFF));
                 payload.put((byte) ((((short)0x9065)>>8) & 0xFF));
                 payload.put((byte)0x48);
-                //state=state.RT_VER;
+                reliable = true;
                 break;
             case BINDING:
-                    s = "BINDING";
-                    payload = ByteBuffer.allocate(5);
-                    payload.put((byte)16);
-                    payload.put((byte)0);
-                    payload.put((byte) (((short)0x9095) & 0xFF));
-                    payload.put((byte) ((((short)0x9095)>>8) & 0xFF));
-                    payload.put((byte) 0x48);		//Binding OK
-                    break;
-                /*
-                case NONE:
-                    s="";
-                break;*/
+                s = "BINDING";
+                payload = ByteBuffer.allocate(5);
+                payload.put((byte)16);
+                payload.put((byte)0);
+                payload.put((byte) (((short)0x9095) & 0xFF));
+                payload.put((byte) ((((short)0x9095)>>8) & 0xFF));
+                payload.put((byte) 0x48);		//Binding OK
+                reliable = true;
+                break;
+
+            case APP_DISCONNECT:
+                byte[] connect_app_layer = {16 , 0, 0x5a, 0x00};
+                payload = ByteBuffer.allocate(6);				//4 bytes for application header, 4 for payload
+                payload.put(connect_app_layer);					//Add prefix array
+                payload.order(ByteOrder.LITTLE_ENDIAN);
+                payload.putShort((byte)0x6003);
+                reliable = true;
+                break;
+
+            case CMD_PING:
+                payload.put((byte)16);
+                payload.put((byte)0xB7);
+                payload.put((byte) (0x9AAA & 0xFF));
+                payload.put((byte) ((0x9AAA>>8) & 0xFF));
+                reliable = false;
+                break;
+
             default:
                 s = "uknown subcommand: "+command;
                 break;
@@ -163,47 +176,30 @@ public class Application {
 
         if(payload != null)
         {
-            sendData(payload,true,btConn);
+            sendData(payload,reliable,btConn);
         }
     }
 
     public static void sendAppDisconnect(BTConnection btConn) {
-        ByteBuffer payload = null;
-        byte[] connect_app_layer = new byte[]
-                {
-                        // VERSION: 8 bits \    Service ID \               Command ID
-                        16    ,  0,    0x5a, 0x00
-                };
-        payload = ByteBuffer.allocate(6);				//4 bytes for application header, 4 for payload
-        payload.put(connect_app_layer);					//Add prefix array
-        payload.order(ByteOrder.LITTLE_ENDIAN);
-        payload.putShort((byte)0x6003);
-
-        Application.sendData(payload,true,btConn);
+        sendAppCommand(Command.APP_DISCONNECT,btConn);
     }
 
     public static void cmdPing(BTConnection btConn)
     {
-        ByteBuffer payload = ByteBuffer.allocate(4);
-        payload.put((byte)16);
-        payload.put((byte)0xB7);
-        payload.put((byte) (0x9AAA & 0xFF));
-        payload.put((byte) ((0x9AAA>>8) & 0xFF));
-
-        sendData(payload, false, btConn);
+        sendAppCommand(Command.CMD_PING,btConn);
     }
 
     public static short sendRTKeepAlive(short rtSeq, BTConnection btConn) {
         ByteBuffer payload = ByteBuffer.allocate(6);
-            payload.put((byte)16);
-            payload.put((byte)0x48);
-            payload.put((byte) (0x0566 & 0xFF));
-            payload.put((byte) ((0x0566>>8) & 0xFF));
+        payload.put((byte)16);
+        payload.put((byte)0x48);
+        payload.put((byte) (0x0566 & 0xFF));
+        payload.put((byte) ((0x0566>>8) & 0xFF));
 
-            payload.put((byte) (rtSeq & 0xFF));
-            payload.put((byte) ((rtSeq>>8) & 0xFF));
+        payload.put((byte) (rtSeq & 0xFF));
+        payload.put((byte) ((rtSeq>>8) & 0xFF));
 
-            sendData(payload,false,btConn);
+        sendData(payload,false,btConn);
 
         btConn.log("/////////////////////////////////////////////////////////////////////");
         btConn.log("send alive with seq: "+rtSeq);
@@ -225,6 +221,7 @@ public class Application {
 
         sendData(payload, true, btConn);
     }
+
     public static byte NO_KEY				=(byte)0x00;
     public static byte MENU					=(byte)0x03;
     public static byte CHECK				=(byte)0x0C;
@@ -276,5 +273,101 @@ public class Application {
 
         rtSeq++;
         return rtSeq;
+    }
+
+    public static void processAppResponse(byte[] payload, boolean reliable, AppHandler handler) {
+        handler.log("processing app response");
+        ByteBuffer b = ByteBuffer.wrap(payload);
+        b.order(ByteOrder.LITTLE_ENDIAN);
+
+        b.get();//ignore
+        byte servId = b.get();
+        short commId = b.getShort();
+
+        handler.log("Service ID: " + String.format("%X", servId) + " Comm ID: " + String.format("%X", commId) + " reliable: " + reliable);
+
+        String descrip = null;
+        if(reliable)
+        {
+            short error = b.getShort();
+            if (!cmdProcessError(error,handler)) {
+                return;
+            }
+
+            switch (commId) {
+                case (short) 0xA055://connect answer:
+                    handler.connected();
+                    break;
+                case (short) 0xA065://something
+                case (short) 0xA095://bind
+                    handler.log("not should happen here!");
+                    break;
+                case (short) 0xA066://activate rt:
+                    handler.rtModeActivated();
+                    break;
+                case (short) 0x005A://AL_DISCONNECT_RES:
+                    descrip = "AL_DISCONNECT_RES";
+                    break;
+                case (short) 0xA069://service deactivated
+                    descrip = "AL_DEACTIVATE_RES";
+                    handler.modeDeactivated();
+                    break;
+                case (short) 0xA06A://service all deactivate
+                    descrip = "AL_DEACTIVATE_ALL_RES";
+                    handler.modeDeactivated();
+                    break;
+                default:
+                    descrip = "UNKNOWN";
+                    break;
+            }
+        } else {
+            switch (commId) {
+                case (short) 0x0555://Display frame
+                    handler.addDisplayFrame(b);
+                    break;
+                case (short) 0x0556://key answer:
+                    break;
+                case (short) 0x0566://alive answer, often missed:
+                    break;
+                default:
+                    descrip = "UNKNOWN";
+                    break;
+            }
+        }
+        handler.log("appProcess: "+descrip);
+    }
+
+    private static boolean cmdProcessError(short error, AppHandler handler) {
+        String desc = "Error > " + String.format("%X", error) + " ";
+
+        if (error == 0x0000) {
+            desc = "No error found!";
+            return true;
+        } else {
+            switch (error) {
+                //Application Layer **********************************************//
+                case (short) 0xF003:
+                    desc = "Unknown Service ID, AL, RT, or CMD";
+                    break;
+                case (short) 0xF006:
+                    desc = "Invalid payload length";
+                    break;
+                case (short) 0xF05F:
+                    desc = "wrong mode";
+                    handler.modeError();
+                    break;
+
+                case (short) 0xF50C:
+                    desc = "wrong sequence";
+                    handler.sequenceError();
+                    break;
+                case (short) 0xF533:
+                    desc = "died - no alive";
+                    break;
+            }
+
+            handler.log(desc);
+            return false;
+        }
     }
 }

@@ -295,4 +295,20 @@ public class BTConnection {
         if(handler!=null)
             handler.log(s);
     }
+
+    public void disconnect() {
+        try {
+            this.currentOutput.close();
+        } catch (Exception e) {/*ignore*/}
+        try {
+            this.currentInput.close();
+        } catch (Exception e) {/*ignore*/}
+        try {
+            this.currentConnection.close();
+        } catch (Exception e) {/*ignore*/}
+        this.currentInput=null;
+        this.currentOutput=null;
+        this.currentConnection=null;
+        handler.log("closed current Connection");
+    }
 }
