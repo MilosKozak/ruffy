@@ -1,9 +1,7 @@
 package org.monkey.d.ruffy.ruffy;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -25,16 +23,13 @@ import org.monkey.d.ruffy.ruffy.driver.BTConnection;
 import org.monkey.d.ruffy.ruffy.driver.BTHandler;
 import org.monkey.d.ruffy.ruffy.driver.Frame;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
+import org.monkey.d.ruffy.ruffy.driver.Protokoll;
 import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**

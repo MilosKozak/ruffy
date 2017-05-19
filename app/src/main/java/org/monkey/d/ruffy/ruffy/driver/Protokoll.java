@@ -1,4 +1,4 @@
-package org.monkey.d.ruffy.ruffy;
+package org.monkey.d.ruffy.ruffy.driver;
 
 import android.bluetooth.BluetoothAdapter;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Created by fishermen21 on 16.05.17.
  */
 
-class Protokoll {
+public class Protokoll {
     public static void sendSyn(BTConnection btConn)  {
 
         Utils.incrementArray(btConn.getNonceTx());
@@ -75,5 +75,23 @@ class Protokoll {
             ro[i++]=b;
 
        btConn.write(ro);
+    }
+
+    public static void sendAck(byte sequenceNUmber,BTConnection btConn) {
+        btConn.incrementNonceTx();
+
+        List<Byte> packet = Packet.buildPacket(new byte[]{16, 5, 0, 0, 0}, null, true,btConn);
+
+        packet.set(1, (byte) (packet.get(1) | sequenceNUmber));
+
+        packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());
+
+        List<Byte> temp = Frame.frameEscape(packet);
+        byte[] ro = new byte[temp.size()];
+        int i = 0;
+        for (byte b : temp)
+            ro[i++] = b;
+
+        btConn.write(ro);
     }
 }
