@@ -325,9 +325,9 @@ public class Application {
                 case (short) 0x0555://Display frame
                     handler.addDisplayFrame(b);
                     break;
-                case (short) 0x0556://key answer:
+                case (short) 0x0556://key answer
                     break;
-                case (short) 0x0566://alive answer, often missed:
+                case (short) 0x0566://alive answer, often missed
                     break;
                 default:
                     descrip = "UNKNOWN";

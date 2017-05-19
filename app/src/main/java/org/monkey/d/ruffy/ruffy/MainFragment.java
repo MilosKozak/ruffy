@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -51,6 +52,62 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     }
 
+    private int upRunning = 0;
+    private Thread upThread = new Thread()
+    {
+        @Override
+        public void run() {
+            while(upRunning >0)
+            {
+                if(upRunning==1) {
+                    lastRtMessageSent = System.currentTimeMillis();
+                    upRunning++;
+                    synchronized (rtSequenceSemaphore) {
+                        rtSequence = Application.rtSendKey(Application.UP, true, rtSequence, btConn);
+                    }
+                }
+                else
+                {
+                    lastRtMessageSent = System.currentTimeMillis();
+                    synchronized (rtSequenceSemaphore) {
+                        rtSequence = Application.rtSendKey(Application.UP, false, rtSequence, btConn);
+                    }
+                }
+                try{sleep(200);}catch(Exception e){}
+            }
+            synchronized (rtSequenceSemaphore) {
+                rtSequence = Application.rtSendKey(Application.NO_KEY, true, rtSequence, btConn);
+            }
+        }
+    };
+    private int downRunning = 0;
+    private Thread downThread = new Thread()
+    {
+        @Override
+        public void run() {
+            while(downRunning >0)
+            {
+                if(downRunning==1) {
+                    lastRtMessageSent = System.currentTimeMillis();
+                    downRunning++;
+                    synchronized (rtSequenceSemaphore) {
+                        rtSequence = Application.rtSendKey(Application.DOWN, true, rtSequence, btConn);
+                    }
+                }
+                else
+                {
+                    lastRtMessageSent = System.currentTimeMillis();
+                    synchronized (rtSequenceSemaphore) {
+                        rtSequence = Application.rtSendKey(Application.DOWN, false, rtSequence, btConn);
+                    }
+                }
+                try{sleep(200);}catch(Exception e){}
+            }
+            synchronized (rtSequenceSemaphore) {
+                rtSequence = Application.rtSendKey(Application.NO_KEY, true, rtSequence, btConn);
+            }
+        }
+    };
     private void sleep(long millis)
     {
         try{Thread.sleep(millis);}catch(Exception e){/*ignore*/}
@@ -116,31 +173,41 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         });
         Button up = (Button) displayLayout.findViewById(R.id.pumpUp);
-        up.setOnClickListener(new View.OnClickListener() {
+        up.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                lastRtMessageSent = System.currentTimeMillis();
-                synchronized (rtSequenceSemaphore) {
-                    rtSequence = Application.rtSendKey(Application.UP, true, rtSequence, btConn);
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        upRunning=1;
+                        upThread.start();
+                    break;
+
+                    case MotionEvent.ACTION_UP:
+                        upRunning=0;
+                        break;
                 }
-                sleep(100);
-                synchronized (rtSequenceSemaphore) {
-                    rtSequence = Application.rtSendKey(Application.NO_KEY, true, rtSequence, btConn);
-                }
+
+                return false;
             }
         });
         Button down= (Button) displayLayout.findViewById(R.id.pumpDown);
-        down.setOnClickListener(new View.OnClickListener() {
+        down.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                lastRtMessageSent = System.currentTimeMillis();
-                synchronized (rtSequenceSemaphore) {
-                    rtSequence = Application.rtSendKey(Application.DOWN, true, rtSequence, btConn);
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        downRunning=1;
+                        downThread.start();
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        downRunning=0;
+                        break;
                 }
-                sleep(100);
-                synchronized (rtSequenceSemaphore) {
-                    rtSequence = Application.rtSendKey(Application.NO_KEY, true, rtSequence, btConn);
-                }
+
+                return false;
             }
         });
         return v;
