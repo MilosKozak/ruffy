@@ -2,8 +2,10 @@ package org.monkey.d.ruffy.ruffy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,9 +23,12 @@ import org.monkey.d.ruffy.ruffy.driver.AppHandler;
 import org.monkey.d.ruffy.ruffy.driver.Application;
 import org.monkey.d.ruffy.ruffy.driver.BTConnection;
 import org.monkey.d.ruffy.ruffy.driver.BTHandler;
+import org.monkey.d.ruffy.ruffy.driver.CompleteDisplayHandler;
+import org.monkey.d.ruffy.ruffy.driver.LogHandler;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
 import org.monkey.d.ruffy.ruffy.driver.PacketHandler;
 import org.monkey.d.ruffy.ruffy.driver.Protokoll;
+import org.monkey.d.ruffy.ruffy.driver.PumpData;
 import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
 import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
@@ -42,11 +47,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private PumpDisplayView displayView;
     private LinearLayout displayLayout;
     private Display display;
-
-
     private Button connect;
-
-    private String device;
+    private PumpData pumpData;
+    private TextView frameCounter;
 
     public MainFragment() {
 
@@ -144,6 +147,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         displayView = (PumpDisplayView) displayLayout.findViewById(R.id.pumpView);
 
         display = new Display(displayView);
+        
+        frameCounter = (TextView) v.findViewById(R.id.frameCounter);
+        display.setCompletDisplayHandler(completHandler);
         Button menu = (Button) displayLayout.findViewById(R.id.pumpMenu);
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -229,8 +235,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    BluetoothDevice pairingDevice;
-
     BTHandler rtBTHandler = new BTHandler() {
         @Override
         public void deviceConnected() {
@@ -244,7 +248,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             appendLog(s);
             if(s.equals("got error in read") && step < 200)
             {
-                btConn.connect(device,4);
+                btConn.connect(pumpData,4);
             }
         }
 
@@ -253,7 +257,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             appendLog("failed: "+s);
             synRun=false;
             if(step < 200)
-                btConn.connect(device,4);
+                btConn.connect(pumpData,4);
             else
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -275,6 +279,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             synRun=false;
             step=0;
             Packet.handleRawData(buffer,bytes, rtPacketHandler);
+        }
+
+        @Override
+        public void requestBlueTooth() {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            getActivity().startActivityForResult(enableBtIntent, 1);
         }
     };
 
@@ -373,10 +383,37 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public Object getToDeviceKey() {
-            return btConn.pump_tf;
+            return pumpData.getToDeviceKey();
         }
     };
 
+    private LogHandler logHandler = new LogHandler() {
+        @Override
+        public void log(String s) {
+            appendLog(s);
+        }
+
+        @Override
+        public void fail(String s) {
+            appendLog(s);
+        }
+    };
+
+    private int framesRecieved = 0;
+    CompleteDisplayHandler completHandler = new CompleteDisplayHandler() {
+        @Override
+        public void handleCompleteFrame(boolean[][][] pixels) {
+            appendLog("got full frame");
+            framesRecieved++;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    frameCounter.setText(framesRecieved+" frames recieved");
+                }
+            });
+            
+        }
+    };
     @Override
     public void onClick(final View view) {
         if(connect.getText().toString().startsWith("Disco"))
@@ -390,29 +427,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         step= 0;
         view.setEnabled(false);
 
-        SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        String dp = prefs.getString("dp",null);
-        String pd = prefs.getString("pd",null);
-        device = prefs.getString("device",null);
-
-        connectLog.setText("Starting connection to Pump "+device);
-
-        if(device != null)
-        {
-            btConn = new BTConnection(getActivity(), rtBTHandler);
-
-            try {
-                btConn.pump_tf = Twofish_Algorithm.makeKey(Utils.hexStringToByteArray(pd));
-                btConn.driver_tf = Twofish_Algorithm.makeKey(Utils.hexStringToByteArray(dp));
-            } catch(Exception e)
-            {
-                e.printStackTrace();
-                appendLog("unable to load keys!");
-                return;
-            }
-
-            btConn.connect(device,10);
+        pumpData = PumpData.loadPump(getActivity(),logHandler);
+        if(pumpData != null) {
+            btConn = new BTConnection(rtBTHandler);
+            btConn.connect(pumpData, 10);
         }
+
     }
 
     private void appendLog(final String message) {

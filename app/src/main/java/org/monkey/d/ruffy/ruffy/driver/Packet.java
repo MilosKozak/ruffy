@@ -43,10 +43,10 @@ public class Packet {
         if(address)											//Replace the default address with the real one
         {
             output.remove(command.length-1);				//Remove the last byte (address)
-            output.add(btConn.getAddress());		//Add the real address byte
+            output.add(btConn.getPumpData().getAddress());		//Add the real address byte
         }
 
-        Packet.addNonce(output, btConn.getNonceTx());
+        Packet.addNonce(output, btConn.getPumpData().getNonceTx());
 
         if(payload!=null)
         {

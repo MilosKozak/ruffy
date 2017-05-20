@@ -40,7 +40,7 @@ public class Application {
     }
 
     private static void sendData(ByteBuffer payload, boolean reliable,BTConnection btConn)  {
-        btConn.incrementNonceTx();
+        btConn.getPumpData().incrementNonceTx();
 
         byte[] sendR = {16,3,0,0,0};
 
@@ -52,7 +52,7 @@ public class Application {
         }
         Packet.adjustLength(packet, payload.capacity());							//Set the payload length
 
-        packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());		//Authenticate packet
+        packet = Utils.ccmAuthenticate(packet, btConn.getPumpData().getToPumpKey(), btConn.getPumpData().getNonceTx());		//Authenticate packet
 
 
         List<Byte> temp = Frame.frameEscape(packet);

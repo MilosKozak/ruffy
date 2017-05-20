@@ -22,19 +22,18 @@ import java.util.UUID;
 
 public class BTConnection {
     private final BTHandler handler;
-    private final Activity activity;
     private BluetoothAdapter bluetoothAdapter;
     private ListenThread listen;
 
     private BluetoothSocket currentConnection;
 
-    private byte[] nonceRx = new byte[13];
+    /*private byte[] nonceRx = new byte[13];
     private byte[] nonceTx = new byte[13];
 
     private byte address;
 
     public Object pump_tf;
-    public Object driver_tf;
+    public Object driver_tf;*/
 
     public int seqNo;
     private InputStream currentInput;
@@ -42,43 +41,20 @@ public class BTConnection {
     private PairingRequest pairingReciever;
     private ConnectReciever connectReciever;
 
-    public byte[] getNonceRx() {
-        return nonceRx;
-    }
+    private PumpData pumpData;
 
-    public byte[] getNonceTx() {
-        return nonceTx;
-    }
-
-    public void setAndSaveAddress(byte address) {
-        this.address = address;
-        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        prefs.edit().putInt("address",address).commit();
-
-    }
-
-    public byte getAddress() {
-        return address;
-    }
-
-    public BTConnection(final Activity activity, final BTHandler handler)
+    public BTConnection(final BTHandler handler)
     {
         this.handler = handler;
-        this.activity = activity;
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (!bluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivityForResult(enableBtIntent, 1);
+            handler.requestBlueTooth();
         }
-        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        address = (byte)prefs.getInt("address",0);
-
-        nonceTx = Utils.hexStringToByteArray(prefs.getString("nonceTx","00 00 00 00 00 00 00 00 00 00 00 00 00"));
     }
 
-    public void makeDiscoverable() {
-        resetRxNonce();
-        resetTxNonce();
+    public void makeDiscoverable(Activity activity) {
+
+        this.pumpData = new PumpData(activity);
 
         IntentFilter filter = new IntentFilter("android.bluetooth.device.action.PAIRING_REQUEST");
         pairingReciever = new PairingRequest(activity, handler);
@@ -122,8 +98,15 @@ public class BTConnection {
         connect(device.getAddress(), 4);
     }
 
-    int state = 0;
-    public void connect(String deviceAddress, int retry) {
+    public void connect(PumpData pumpData, int retries)
+    {
+        this.pumpData = pumpData;
+        connect(pumpData.getPumpMac(),retries);
+    }
+
+    private int state = 0;
+
+    private void connect(String deviceAddress, int retry) {
 
         if(state!=0)
         {
@@ -181,10 +164,10 @@ public class BTConnection {
                     handler.fail("no connection possible");
                 }
                 try {
-                    activity.unregisterReceiver(connectReciever);
+                    pumpData.getActivity().unregisterReceiver(connectReciever);
                 }catch(Exception e){/*ignore*/}
                 try {
-                    activity.unregisterReceiver(pairingReciever);
+                    pumpData.getActivity().unregisterReceiver(pairingReciever);
                 }catch(Exception e){/*ignore*/}
                 state=0;
                 handler.deviceConnected();
@@ -213,7 +196,7 @@ public class BTConnection {
         List<Byte> out = new LinkedList<Byte>();
         for(Byte b : key)
             out.add(b);
-        for (Byte n : nonceTx)
+        for (Byte n : pumpData.getNonceTx())
             out.add(n);
         Utils.addCRC(out);
 
@@ -273,24 +256,6 @@ public class BTConnection {
         }
     }
 
-    public void resetTxNonce() {
-        for (int i = 0; i < nonceTx.length; i++)
-            nonceTx[i] = 0;
-        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        prefs.edit().putString("nonceTx",Utils.bufferString(nonceTx,nonceTx.length)).commit();
-    }
-
-    public void resetRxNonce() {
-        for (int i = 0; i < nonceRx.length; i++)
-            nonceRx[i] = 0;
-    }
-
-    public void incrementNonceTx() {
-        Utils.incrementArray(nonceTx);
-        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        prefs.edit().putString("nonceTx",Utils.bufferString(nonceTx,nonceTx.length)).commit();
-    }
-
     public void log(String s) {
         if(handler!=null)
             handler.log(s);
@@ -309,6 +274,12 @@ public class BTConnection {
         this.currentInput=null;
         this.currentOutput=null;
         this.currentConnection=null;
+        this.pumpData = null;
+
         handler.log("closed current Connection");
+    }
+
+    public PumpData getPumpData() {
+        return pumpData;
     }
 }

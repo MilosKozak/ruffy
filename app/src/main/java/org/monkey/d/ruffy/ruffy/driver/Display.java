@@ -9,28 +9,47 @@ public class Display {
 
     private final DisplayUpdater updater;
     private boolean pixels[][][] = new boolean[4][8][96];
+    private int index = -1;
+    private CompleteDisplayHandler completeHandler;
+    private boolean[] complete = {false,false,false,false};
 
     public Display(DisplayUpdater updater)
     {
         this.updater = updater;
     }
+
+    public void setCompletDisplayHandler(CompleteDisplayHandler completeHandler) {this.completeHandler = completeHandler;}
     public void clear()
     {
         pixels = new boolean[4][8][96];
         updater.clear();
     }
 
-    private void update(boolean quarter[][], int which)
+    private void update(boolean quarter[][], int which, int index)
     {
         pixels[which] = quarter;
         updater.update(quarter,which);
+        if(this.index==index)
+        {
+            complete[which]=true;
+            if(this.completeHandler != null && complete[0] && complete[1] && complete[2] && complete[3])
+                completeHandler.handleCompleteFrame(pixels);
+
+        }
+        else
+        {
+            this.index = index;
+            complete = new boolean[]{false,false,false,false};
+            complete[which] = true;
+        }
     }
 
     public void addDisplayFrame(ByteBuffer b)
     {
-        //discard first 4
+        //discard first 3
         b.getShort();
-        b.getShort();
+        b.get();
+        int index = (int)(b.get() & 0xFF);
         byte row = b.get();
 
         byte[] map = new byte[96];		//New array
@@ -56,16 +75,16 @@ public class Display {
         switch(row)
         {
             case 0x47:
-                update(quarter,0);
+                update(quarter,0,index);
                 break;
             case 0x48:
-                update(quarter,1);
+                update(quarter,1,index);
                 break;
             case (byte)0xB7:
-                update(quarter,2);
+                update(quarter,2,index);
                 break;
             case (byte)0xB8:
-                update(quarter,3);
+                update(quarter,3,index);
                 break;
         }
     }

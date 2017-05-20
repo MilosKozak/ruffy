@@ -17,4 +17,6 @@ public interface BTHandler {
     void deviceFound(BluetoothDevice bd);
 
     void handleRawData(byte[] buffer, int bytes);
+
+    void requestBlueTooth();
 }

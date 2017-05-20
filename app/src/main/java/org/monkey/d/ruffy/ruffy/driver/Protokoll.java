@@ -19,12 +19,12 @@ import java.util.List;
 public class Protokoll {
     public static void sendSyn(BTConnection btConn)  {
 
-        Utils.incrementArray(btConn.getNonceTx());
+        Utils.incrementArray(btConn.getPumpData().getNonceTx());
 
         byte[] p_s = {16,23,0,0,0};
 
         List<Byte> packet = Packet.buildPacket(p_s, null, true, btConn);							//Use real address (gathered in Key Response)
-        packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());			//Add U-MAC (Use D->P key)
+        packet = Utils.ccmAuthenticate(packet, btConn.getPumpData().getToPumpKey(), btConn.getPumpData().getNonceTx());			//Add U-MAC (Use D->P key)
 
         List<Byte> temp = Frame.frameEscape(packet);
         byte[] ro = new byte[temp.size()];
@@ -35,8 +35,8 @@ public class Protokoll {
         btConn.write(ro);
     }
     public static void sendIDReq(BTConnection btConn) {
-        btConn.resetTxNonce();														//Reset TX Nonce (previous to this the nonce is not used and is zero)
-        Utils.incrementArray(btConn.getNonceTx());														//Increment it to 1
+        btConn.getPumpData().resetTxNonce();														//Reset TX Nonce (previous to this the nonce is not used and is zero)
+        Utils.incrementArray(btConn.getPumpData().getNonceTx());														//Increment it to 1
 
         ByteBuffer ids = ByteBuffer.allocate(17);								//Allocate payload
 
@@ -66,7 +66,7 @@ public class Protokoll {
         byte[] p_r = {16,0x12,17,0,0};
 
         List<Byte> packet = Packet.buildPacket(p_r, ids, true,btConn);							//Use real address (gathered in Key Response)
-        packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());			//Add U-MAC (Use D->P key)
+        packet = Utils.ccmAuthenticate(packet, btConn.getPumpData().getToPumpKey(), btConn.getPumpData().getNonceTx());			//Add U-MAC (Use D->P key)
 
         List<Byte> temp = Frame.frameEscape(packet);
         byte[] ro = new byte[temp.size()];
@@ -78,13 +78,13 @@ public class Protokoll {
     }
 
     public static void sendAck(byte sequenceNUmber,BTConnection btConn) {
-        btConn.incrementNonceTx();
+        btConn.getPumpData().incrementNonceTx();
 
         List<Byte> packet = Packet.buildPacket(new byte[]{16, 5, 0, 0, 0}, null, true,btConn);
 
         packet.set(1, (byte) (packet.get(1) | sequenceNUmber));
 
-        packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());
+        packet = Utils.ccmAuthenticate(packet, btConn.getPumpData().getToPumpKey(), btConn.getPumpData().getNonceTx());
 
         List<Byte> temp = Frame.frameEscape(packet);
         byte[] ro = new byte[temp.size()];

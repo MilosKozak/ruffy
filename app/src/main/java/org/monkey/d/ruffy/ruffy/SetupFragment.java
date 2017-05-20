@@ -1,9 +1,11 @@
 package org.monkey.d.ruffy.ruffy;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,8 +41,6 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private TextView connectLog;
 
-    //private byte recvSeqNo;
-
     private BTConnection btConn;
 
     public SetupFragment() {
@@ -67,7 +67,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
         connectLog.setText("Starting rfcomm to wait for Pump connection…");
 
 
-        int sdk = android.os.Build.VERSION.SDK_INT;
+        /*int sdk = android.os.Build.VERSION.SDK_INT;
         if (sdk < android.os.Build.VERSION_CODES.HONEYCOMB) {
             android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
             clipboard.setText("}gZ='GD?gj2r|B}>");
@@ -75,9 +75,9 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("text label", "}gZ='GD?gj2r|B}>");
             clipboard.setPrimaryClip(clip);
-        }
+        }*/
 
-        btConn = new BTConnection(getActivity(), new BTHandler() {
+        btConn = new BTConnection(new BTHandler() {
             BluetoothDevice device;
 
             @Override
@@ -129,8 +129,14 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
             public void handleRawData(byte[] buffer, int bytes) {
                 handleData(buffer,bytes);
             }
+
+            @Override
+            public void requestBlueTooth() {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                getActivity().startActivityForResult(enableBtIntent, 1);
+            }
         });
-        btConn.makeDiscoverable();
+        btConn.makeDiscoverable(getActivity());
     }
 
     private void appendLog(final String message) {
@@ -227,7 +233,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
             case 0x11://key response?
                 try {
                     Object tf = Twofish_Algorithm.makeKey(pin);
-                    btConn.setAndSaveAddress((byte) ((addresses << 4) & 0xF0));        //Get the address and reverse it since source and destination are reversed from the RX packet
+                    btConn.getPumpData().setAndSaveAddress((byte) ((addresses << 4) & 0xF0));        //Get the address and reverse it since source and destination are reversed from the RX packet
 
                     byte[] key_pd = new byte[16];                            //Get the bytes for the keys
                     byte[] key_dp = new byte[16];
@@ -246,32 +252,10 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                         d += String.format("%02X ", b);
                     appendLog("parseRx >>> Key_DP: " + d);
 
-                    byte[] key_pd_de = Twofish_Algorithm.blockDecrypt(key_pd, 0, tf);
-                    byte[] key_dp_de = Twofish_Algorithm.blockDecrypt(key_dp, 0, tf);
 
-                    SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("dp",Utils.bufferString(key_dp_de,key_dp_de.length));
-                    editor.putString("pd",Utils.bufferString(key_pd_de,key_pd_de.length));
-                    editor.putString("device",pairingDevice.getAddress());
-                    editor.putBoolean("paired",true);
-                    editor.commit();
-
-                    d = "";
-                    for (byte b : key_pd_de)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Decrytped PD: " + d);
-
-                    d = "";
-                    for (byte b : key_dp_de)
-                        d += String.format("%02X ", b);
-                    appendLog("parseRx >>> Decrytped DP: " + d);
-
-                    //CREATE THE KEY OBJECTS (WHITENING SUBKEYS, ROUND KEYS, S-BOXES)
-                    btConn.pump_tf = Twofish_Algorithm.makeKey(key_pd_de);
-                    btConn.driver_tf = Twofish_Algorithm.makeKey(key_dp_de);
-
+                    btConn.getPumpData().setAndSaveToDeviceKey(key_pd,tf);
+                    btConn.getPumpData().setAndSaveToPumpKey(key_dp,tf);
+                    btConn.getPumpData().setAndSavePumpMac(pairingDevice.getAddress());
                     Protokoll.sendIDReq(btConn);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -280,7 +264,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 break;
             case 20:
                 appendLog("got an id response");
-                if (Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce)) {
+                if (Utils.ccmVerify(packetNoUmac, btConn.getPumpData().getToDeviceKey(), umac, nonce)) {
                     byte[] device = new byte[13];
 
                     pBuf.order(ByteOrder.LITTLE_ENDIAN);
@@ -302,7 +286,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 break;
             case 24:
                 appendLog("got a sync response ");
-                if (Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce)) {
+                if (Utils.ccmVerify(packetNoUmac, btConn.getPumpData().getToDeviceKey(), umac, nonce)) {
                     //if(getState() == Transport.P3_SYN_ACK) FIXME maybe later
                     {
                         btConn.seqNo = 0x00;
@@ -318,27 +302,17 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                             step=200;
                         }
                     }
-                    /*else if(getState() == Transport.P3_SYN_DIS_RESP)
-                    {
-                        Debug.i(TAG, FUNC_TAG, "Resetting TX layer of pump after binding...");
-                        setState(Transport.P3_APP_DISCONNECT);
-                    }
-                    else if(getState() == Transport.CM_SYN_RESP)
-                    {
-                        setState(Transport.CM_SYN_ACKD);
-                    }*/
                 }
                 break;
 
             case 0x23: //recieved reliable data/
             case 0x03: //recieve unreliable data
-                if (Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce)) {
+                if (Utils.ccmVerify(packetNoUmac, btConn.getPumpData().getToDeviceKey(), umac, nonce)) {
                     SetupFragment.this.processAppResponse(payload, rel);
                 }
                 break;
 
             case 5://ack response
-                Utils.ccmVerify(packetNoUmac, btConn.pump_tf, umac, nonce);
                 break;
 
             default:
@@ -689,7 +663,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
                         byte recvSeqNo = seq;
                         {
-                            Utils.incrementArray(btConn.getNonceTx());
+                            btConn.getPumpData().incrementNonceTx();
 
                             List<Byte> packet = Packet.buildPacket(new byte[]{16, 5, 0, 0, 0}, null, true,btConn);
 
@@ -698,7 +672,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                             seq = recvSeqNo;
                             packet.set(1, (byte) (packet.get(1) | recvSeqNo));                //OR the received sequence number
 
-                            packet = Utils.ccmAuthenticate(packet, btConn.driver_tf, btConn.getNonceTx());
+                            packet = Utils.ccmAuthenticate(packet, btConn.getPumpData().getToPumpKey(), btConn.getPumpData().getNonceTx());
 
                             List<Byte> temp = Frame.frameEscape(packet);
                             byte[] ro = new byte[temp.size()];
