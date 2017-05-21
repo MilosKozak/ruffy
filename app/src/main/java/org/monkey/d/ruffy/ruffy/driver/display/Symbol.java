@@ -1,0 +1,50 @@
+package org.monkey.d.ruffy.ruffy.driver.display;
+
+/**
+ * Created by fishermen21 on 20.05.17.
+ */
+
+public enum Symbol {
+    CLOCK,
+    LOCK_CLOSED,
+    LOCK_OPENED,
+    CHECK,
+    LOW_BAT,
+    WARNING,
+    DIVIDE,
+    LOW_INSULIN,
+    CALENDAR,
+    SEPERATOR,
+    ARROW,
+    UNITS_PER_HOUR,
+    BOLUS,
+    MULTIWAVE,
+    SPEAKER,
+    ERROR,
+    DOT,
+    DOWN,
+    SUM,
+    PARANTHESIS_RIGHT,
+    PARANTHESIS_LEFT,
+    EXTENDED_BOLUS,
+
+    LARGE_DOT,
+    LARGE_SEPERATOR,
+    LARGE_WARNING,
+    LARGE_PERCENT,
+    LARGE_UNITS_PER_HOUR,
+    LARGE_BASAL_SET,
+    LARGE_AMPULE_FULL,
+    LARGE_ARROW,
+    LARGE_STOP,
+    LARGE_CALENDAR,
+    LARGE_TBR,
+    LARGE_MULTIWAVE,
+    LARGE_EXTENDED_BOLUS,
+    LARGE_BLUETOOTH_SETTINGS,
+    LARGE_THERAPIE_SETTINGS,
+    LARGE_PUMP_SETTINGS,
+    LARGE_MENU_SETTINGS,
+    LARGE_BASAL,
+
+}

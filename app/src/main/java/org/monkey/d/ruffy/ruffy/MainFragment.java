@@ -29,9 +29,9 @@ import org.monkey.d.ruffy.ruffy.driver.Packet;
 import org.monkey.d.ruffy.ruffy.driver.PacketHandler;
 import org.monkey.d.ruffy.ruffy.driver.Protokoll;
 import org.monkey.d.ruffy.ruffy.driver.PumpData;
+import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
+import org.monkey.d.ruffy.ruffy.driver.display.Menu;
 import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
-import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
-import org.monkey.d.ruffy.ruffy.driver.Utils;
 import org.monkey.d.ruffy.ruffy.driver.Display;
 
 import java.nio.ByteBuffer;
@@ -149,7 +149,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         display = new Display(displayView);
         
         frameCounter = (TextView) v.findViewById(R.id.frameCounter);
-        display.setCompletDisplayHandler(completHandler);
+        display.setCompletDisplayHandler(displayCompletHandle);
         Button menu = (Button) displayLayout.findViewById(R.id.pumpMenu);
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -339,6 +339,20 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         public void sequenceError() {
             Application.sendAppCommand(Application.Command.RT_DEACTIVATE, btConn);
         }
+
+        @Override
+        public void error(short error, String desc) {
+            switch (error)
+            {
+                case (short) 0xF056:
+                    PumpData d = btConn.getPumpData();
+                    btConn.disconnect();
+                    btConn.connect(d,4);
+                    break;
+                default:
+                    appendLog(desc);
+            }
+        }
     };
     PacketHandler rtPacketHandler = new PacketHandler(){
         @Override
@@ -399,19 +413,32 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    private int framesRecieved = 0;
-    CompleteDisplayHandler completHandler = new CompleteDisplayHandler() {
+    CompleteDisplayHandler displayCompletHandle = new CompleteDisplayHandler() {
         @Override
-        public void handleCompleteFrame(boolean[][][] pixels) {
-            appendLog("got full frame");
-            framesRecieved++;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    frameCounter.setText(framesRecieved+" frames recieved");
-                }
-            });
-            
+        public void handleCompleteFrame(byte[][] display) {
+            appendLog("got display");
+
+            final Menu menu = DisplayParser.findMenu(display);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(menu!=null)
+                        {
+                            String ats = "";
+                            for(String k : menu.attributes())
+                            {
+                                ats+="\n"+k+": "+menu.getAttribute(k);
+                            }
+                            frameCounter.setText("found menu: "+menu.getName()+ ats);
+                        }
+                        else
+                        {
+                            frameCounter.setText("menu not recognized");
+                        }
+                    }
+                });
+
         }
     };
     @Override

@@ -160,7 +160,7 @@ public class BTConnection {
                     currentInput = currentConnection.getInputStream();
                     currentOutput = currentConnection.getOutputStream();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     handler.fail("no connection possible");
                 }
                 try {
@@ -182,7 +182,7 @@ public class BTConnection {
                         //FIXME deesacape
                         //FIXME but into handler
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                         //do not fail here as we maybe just closed the socket..
                         handler.log("got error in read");
                         return;
@@ -251,7 +251,7 @@ public class BTConnection {
             handler.log("wrote "+ro.length+" bytes: "+Utils.bufferString(ro,ro.length));
         }catch(Exception e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
             handler.fail("failed write of "+ro.length+" bytes!");
         }
     }

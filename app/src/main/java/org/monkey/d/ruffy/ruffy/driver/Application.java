@@ -364,9 +364,12 @@ public class Application {
                 case (short) 0xF533:
                     desc = "died - no alive";
                     break;
+                case (short) 0xF056:
+                    desc = "not complete connected";
+                    break;
             }
 
-            handler.log(desc);
+            handler.error(error,desc);
             return false;
         }
     }

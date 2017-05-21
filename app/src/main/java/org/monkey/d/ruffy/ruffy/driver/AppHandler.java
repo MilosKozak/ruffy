@@ -19,4 +19,6 @@ public interface AppHandler {
     void modeError();
 
     void sequenceError();
+
+    void error(short error, String desc);
 }
