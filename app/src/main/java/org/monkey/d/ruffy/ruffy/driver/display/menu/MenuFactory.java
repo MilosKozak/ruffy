@@ -34,6 +34,63 @@ public class MenuFactory {
 
             if(isSymbol(p,Symbol.LARGE_EXTENDED_BOLUS))
                 return new Menu(MenuType.EXTENDED_BOLUS_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_MULTIWAVE))
+                return new Menu(MenuType.MULTIWAVE_BOLUS_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_TBR))
+                return new Menu(MenuType.TBR_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_MY_DATA))
+                return new Menu(MenuType.MY_DATA_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_BASAL))
+                return new Menu(MenuType.BASAL_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_ALARM_SETTINGS))
+                return new Menu(MenuType.ALARM_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_CALENDAR))
+                return new Menu(MenuType.DATE_AND_TIME_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_PUMP_SETTINGS))
+                return new Menu(MenuType.PUMP_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_THERAPIE_SETTINGS))
+                return new Menu(MenuType.THERAPIE_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_BLUETOOTH_SETTINGS))
+                return new Menu(MenuType.BLUETOOTH_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_MENU_SETTINGS))
+                return new Menu(MenuType.MENU_SETTINGS_MENU);
+        }
+        else if(tokens[2].size()==2)
+        {
+            Pattern p1 = tokens[2].get(0).getPattern();
+            Pattern p2 = tokens[2].get(1).getPattern();
+
+            if(isSymbol(p1,Symbol.LARGE_BASAL))
+            {
+                if(p2 instanceof NumberPattern)
+                {
+                    int num = ((NumberPattern)p2).getNumber();
+                    switch(num)
+                    {
+                        case 1:
+                            return new Menu(MenuType.BASAL_1_MENU);
+                        case 2:
+                            return new Menu(MenuType.BASAL_2_MENU);
+                        case 3:
+                            return new Menu(MenuType.BASAL_3_MENU);
+                        case 4:
+                            return new Menu(MenuType.BASAL_4_MENU);
+                        case 5:
+                            return new Menu(MenuType.BASAL_5_MENU);
+                    }
+                }
+            }
+            return null;
         }
         else if(tokens[0].size()>1)
         {

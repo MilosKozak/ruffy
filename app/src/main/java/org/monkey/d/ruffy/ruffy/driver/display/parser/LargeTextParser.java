@@ -565,6 +565,39 @@ public class LargeTextParser {
                 "█████ █ █   █",
                 "      ███████"
         });
+        symbols.put(Symbol.LARGE_MY_DATA, new String[]{
+                "       ████   ",
+                "      ██████  ",
+                "     ████████ ",
+                "     ██    ██ ",
+                "            █ ",
+                "███████     █ ",
+                "█     █    █  ",
+                "█ ███ █ ███   ",
+                "█     █       ",
+                "█ ███ █ ████  ",
+                "█     █ █████ ",
+                "█     █ ██████",
+                "███████ ██████"
+        });
+        symbols.put(Symbol.LARGE_ALARM_SETTINGS, new String[]{
+                "      █          ",
+                "     █ █         ",
+                "     ███         ",
+                "    █ █ █        ",
+                "   █   █ █       ",
+                "   █  █ ██       ",
+                "   █   █ █       ",
+                "   █  █ █        ",
+                "  █    █  ███████",
+                "  █   █ █ █     █",
+                " █     █  █    ██",
+                "█████████ █   █ █",
+                "     ███  ██ █  █",
+                "      █   █ █   █",
+                "          ███████"
+
+        });
     }
 
     private static LinkedList<Pattern> pattern = new LinkedList<>();
@@ -595,9 +628,6 @@ public class LargeTextParser {
     public static Token findToken(byte[][] display, int which, int x) {
         for(Pattern p : pattern)
         {
-            if(which == 1 && x == 75 && p instanceof SymbolPattern && ((SymbolPattern)p).getSymbol()==Symbol.LARGE_UNITS_PER_HOUR)
-                Log.v("t","tt");
-
             Token t = p.match(display, which, x);
             if (t != null)
                 return t;

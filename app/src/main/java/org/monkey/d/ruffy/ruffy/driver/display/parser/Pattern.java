@@ -57,7 +57,7 @@ public abstract class Pattern {
                         cs = ((short)(cs << s));
                         compare = (byte) (cs >> 8);
                     }
-                    if(display[which+r][x+c] != compare)
+                    if(x+c >= 96 || display[which+r][x+c] != compare)
                         run = false;
                 }
             }
