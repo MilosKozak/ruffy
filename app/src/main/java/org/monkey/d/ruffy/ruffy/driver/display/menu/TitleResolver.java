@@ -14,6 +14,8 @@ class TitleResolver {
             return Title.IMMEDIATE_BOLUS;
         if(title.equalsIgnoreCase("bolus duration"))
             return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info"))
+            return Title.QUICK_INFO;
 
         //FIXME add Translations
         return null;

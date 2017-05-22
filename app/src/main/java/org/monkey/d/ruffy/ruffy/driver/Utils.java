@@ -44,7 +44,7 @@ public class Utils {
         xi[0] = 0x79;													//Set flags for IV
 
         for(int i=0;i<nonce.length;i++)								//Copy nonce
-            xi[i+1] = nonce[i];										//TODO: check endianness
+            xi[i+1] = nonce[i];
 
         xi[14] = 0;														//Length is zero
         xi[15] = 0;

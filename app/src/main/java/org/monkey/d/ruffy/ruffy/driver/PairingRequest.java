@@ -43,14 +43,12 @@ class PairingRequest extends BroadcastReceiver {
                                     m.invoke(device);
                                     handler.log("Success to start bond.");
                                 } catch (Exception e) {
-                                    // TODO Auto-generated catch block
                                     e.printStackTrace();
                                 }
                                 try {
                                     device.getClass().getMethod("setPairingConfirmation", boolean.class).invoke(device, true);
                                     handler.log( "Success to setPairingConfirmation.");
                                 } catch (Exception e) {
-                                    // TODO Auto-generated catch block
                                     e.printStackTrace();
                                 }
                             }catch(Exception e)

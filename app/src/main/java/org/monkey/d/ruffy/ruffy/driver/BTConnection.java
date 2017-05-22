@@ -179,11 +179,7 @@ public class BTConnection {
                     try {
                         int bytes = currentInput.read(buffer);
                         handler.log("read "+bytes+": "+Utils.bufferString(buffer,bytes));
-
-                        //FIXME temp
                         handler.handleRawData(buffer,bytes);
-                        //FIXME deesacape
-                        //FIXME but into handler
                     } catch (Exception e) {
                         //e.printStackTrace();
                         //do not fail here as we maybe just closed the socket..

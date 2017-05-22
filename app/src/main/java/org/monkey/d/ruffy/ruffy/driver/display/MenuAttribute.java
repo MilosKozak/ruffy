@@ -16,5 +16,5 @@ public enum MenuAttribute {
     LOCK_STATE,
     MULTIWAVE_BOLUS,
     BOLUS_TYPE,
-    TIME,
+    TIME, REMAINING_INSULIN,
 }

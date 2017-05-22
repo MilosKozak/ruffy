@@ -105,11 +105,66 @@ public class MenuFactory {
                         return makeBolusDuration(tokens);
                     case IMMEDIATE_BOLUS:
                         return makeImmediateBolus(tokens);
+                    case QUICK_INFO:
+                        return makeQuickInfo(tokens);
                 }
                 Pattern p = tokens[1].get(0).getPattern();
             }
         }
         return null;
+    }
+
+    private static Menu makeQuickInfo(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BOLUS_DURATION);
+        LinkedList<Pattern> number = new LinkedList<>();
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.LARGE_AMPULE_FULL)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern || isSymbol(p,Symbol.LARGE_DOT))
+                    {
+                        number.add(p);
+                    }
+                    else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='u')
+                    {
+                        stage++;
+                    }
+                    else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        double doubleNumber = 0d;
+        String d = "";
+        for(Pattern p : number)
+        {
+            if(p instanceof NumberPattern)
+            {
+                d+=""+((NumberPattern)p).getNumber();
+            } else if(isSymbol(p,Symbol.LARGE_DOT)) {
+                d += ".";
+            } else {
+                return null;//violation!
+            }
+        }
+        try { doubleNumber = Double.parseDouble(d);}
+        catch (Exception e){return null;}//violation, there must something parseable
+
+        m.setAttribute(MenuAttribute.REMAINING_INSULIN,new Double(doubleNumber));
+        //FIXME 4th line
+
+        return m;
     }
 
     private static String parseString(LinkedList<Token> tokens) {
