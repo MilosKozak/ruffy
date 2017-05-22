@@ -3,9 +3,12 @@ package org.monkey.d.ruffy.ruffy.driver.display;
 import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.parser.LargeTextParser;
+import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuFactory;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.SmallTextParser;
 
 import java.util.LinkedList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by fishermen21 on 20.05.17.
@@ -13,71 +16,82 @@ import java.util.LinkedList;
 
 public class DisplayParser {
     private static boolean busy = false;
+    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
 
-    public static Menu findMenu(byte[][] pixels) {
+    public static void findMenu(final byte[][] pixels, final DisplayParserHandler handler) {
         if(busy)
         {
             Log.v("Tokens","skipping frame, busy…");
-            return null;
+            return;
         }
         busy = true;
 
-        long t1 = System.currentTimeMillis();
+        scheduler.execute(new Runnable() {
+            @Override
+            public void run() {
+                long t1 = System.currentTimeMillis();
 
-        try {
-            byte[][] display = new byte[4][96];
-            for(int i = 0; i < 4;i++)
-                for(int c = 0;c < 96;c++)
-                    display[i][c]=pixels[i][95-c];
+                try {
+                    byte[][] display = new byte[4][96];
+                    for(int i = 0; i < 4;i++)
+                        for(int c = 0;c < 96;c++)
+                            display[i][c]=pixels[i][95-c];
 
-            Log.v("Tokens", "----------------------------------");
-            //print(display,"analyze");
-            LinkedList<Token> tokens = new LinkedList<>();
-            for(int i = 0; i< 4;i++)
-            {
-                for(int x = 0; x < 92;)//no token is supposed to be smaller then 5 columns
-                {
-                    Token t = null;
-
-                    t = LargeTextParser.findToken(display,i,x);
-                    if(t==null)
+                    Log.v("Tokens", "----------------------------------");
+                    //print(display,"analyze");
+                    LinkedList<Token>[] tokens = new LinkedList[]{
+                            new LinkedList<Token>(),
+                            new LinkedList<Token>(),
+                            new LinkedList<Token>(),
+                            new LinkedList<Token>()};
+                    int toks = 0;
+                    for(int i = 0; i< 4;i++)
                     {
-                        t = SmallTextParser.findToken(display, i, x);
-                    }
+                        for(int x = 0; x < 92;)//no token is supposed to be smaller then 5 columns
+                        {
+                            Token t = null;
 
-                    if (t != null) {
-                        tokens.add(t);
-                        x += t.getWidth()-1;
-                    } else {
-                        x++;
+                            t = LargeTextParser.findToken(display,i,x);
+                            if(t==null)
+                            {
+                                t = SmallTextParser.findToken(display, i, x);
+                            }
+
+                            if (t != null) {
+                                tokens[i].add(t);
+                                toks++;
+                                x += t.getWidth()-1;
+                            } else {
+                                x++;
+                            }
+                        }
+
                     }
+                    Log.v("Tokens",toks+" found");
+
+                    long s = 0;
+                    for(int i = 0; i< 4;i++) {
+                        for (int x = 0; x < 96; x++) {
+                            s+=display[i][x];
+                        }
+                    }
+                    if(s!=0)
+                    {
+                        print(display,"not empty");
+                    }
+                    Menu menu = MenuFactory.get(tokens);
+                    if(menu != null)
+                        handler.menuFound(menu);
+                    else
+                        handler.noMenuFound();
+                }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
+                finally {
+                    Log.v("Tokens",(((double)(System.currentTimeMillis()-t1))/1000d)+" secs needed for frame");
+                    busy=false;
                 }
 
             }
-            if(tokens.size()>0)
-            {
-                for(Token t : tokens)
-                {
-                    Log.v("Tokens",t+" found");
-                }
-            }
-            long s = 0;
-            for(int i = 0; i< 4;i++) {
-                for (int x = 0; x < 96; x++) {
-                    s+=display[i][x];
-                }
-            }
-            if(s>0)
-            {
-                print(display,"not empty");
-            }
-            return null;
-        }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
-        finally {
-            Log.v("Tokens",(((double)(System.currentTimeMillis()-t1))/1000d)+" secs needed for frame");
-            busy=false;
-        }
-        return null;
+        });
     }
 
     private static String[] makeStrings(boolean[][][] pixels) {

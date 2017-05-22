@@ -6,7 +6,7 @@ import org.monkey.d.ruffy.ruffy.driver.display.Symbol;
  * Created by fishermen21 on 21.05.17.
  */
 
-class SymbolPattern extends Pattern {
+public class SymbolPattern extends Pattern {
 
     private final Symbol symbol;
     public SymbolPattern(Symbol s, String[] patternString, int blocksize) {

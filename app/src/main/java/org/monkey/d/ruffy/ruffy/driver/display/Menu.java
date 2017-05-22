@@ -10,22 +10,31 @@ import java.util.Objects;
  * Created by fishermen21 on 20.05.17.
  */
 
-public abstract class Menu {
-    public abstract String getName();
+public class Menu {
+    private MenuType type;
+    private Map<MenuAttribute,Object> attributes = new HashMap<>();
 
-    private Map<String,Object> attributes = new HashMap<>();
-    public void setAttribute(String key, Object value)
+    public Menu(MenuType type)
+    {
+        this.type = type;
+    }
+
+    public void setAttribute(MenuAttribute key, Object value)
     {
         attributes.put(key,value);
     }
 
-    public List<String> attributes()
+    public List<MenuAttribute> attributes()
     {
-        return new LinkedList<String>(attributes.keySet());
+        return new LinkedList<MenuAttribute>(attributes.keySet());
     }
 
-    public Object getAttribute(String key)
+    public Object getAttribute(MenuAttribute key)
     {
         return attributes.get(key);
+    }
+
+    public MenuType getType() {
+        return type;
     }
 }

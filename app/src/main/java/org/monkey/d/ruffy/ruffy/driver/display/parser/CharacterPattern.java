@@ -4,7 +4,7 @@ package org.monkey.d.ruffy.ruffy.driver.display.parser;
  * Created by fishermen21 on 21.05.17.
  */
 
-class CharacterPattern extends Pattern {
+public class CharacterPattern extends Pattern {
     private final char character;
 
     public CharacterPattern(char c, String[] patternString, int blocksize) {
@@ -15,5 +15,9 @@ class CharacterPattern extends Pattern {
     @Override
     public String toString() {
         return "Character("+character+")";
+    }
+
+    public char getCharacter() {
+        return character;
     }
 }

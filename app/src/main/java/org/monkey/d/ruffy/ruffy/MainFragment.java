@@ -30,7 +30,9 @@ import org.monkey.d.ruffy.ruffy.driver.PacketHandler;
 import org.monkey.d.ruffy.ruffy.driver.Protokoll;
 import org.monkey.d.ruffy.ruffy.driver.PumpData;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
+import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
+import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
 import org.monkey.d.ruffy.ruffy.driver.Display;
 
@@ -60,6 +62,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private int upRunning = 0;
+    private int downRunning = 0;
+
+    private boolean rtModeRunning = false;
+    private long lastRtMessageSent = 0;
+
+    private final Object rtSequenceSemaphore = new Object();
+    private short rtSequence = 0;
+
+    private int modeErrorCount = 0;
+    private int step = 0;
+
     private Runnable upThread = new Runnable()
     {
         @Override
@@ -87,7 +100,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
-    private int downRunning = 0;
+
     private Runnable downThread = new Runnable()
     {
         @Override
@@ -115,10 +128,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
+
     private void sleep(long millis)
     {
         try{Thread.sleep(millis);}catch(Exception e){/*ignore*/}
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -299,7 +314,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    AppHandler rtAppHandler = new AppHandler() {
+    private AppHandler rtAppHandler = new AppHandler() {
         @Override
         public void log(String s) {
             appendLog(s);
@@ -365,7 +380,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
-    PacketHandler rtPacketHandler = new PacketHandler(){
+    private PacketHandler rtPacketHandler = new PacketHandler(){
         @Override
         public void sendImidiateAcknowledge(byte sequenceNumber) {
             Protokoll.sendAck(sequenceNumber,btConn);
@@ -424,32 +439,37 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     };
 
-    CompleteDisplayHandler displayCompletHandle = new CompleteDisplayHandler() {
+    private CompleteDisplayHandler displayCompletHandle = new CompleteDisplayHandler() {
         @Override
         public void handleCompleteFrame(byte[][] display) {
-            appendLog("got display");
+            DisplayParser.findMenu(display, new DisplayParserHandler(){
 
-            final Menu menu = DisplayParser.findMenu(display);
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(menu!=null)
-                        {
-                            String ats = "";
-                            for(String k : menu.attributes())
+                @Override
+                public void menuFound(final Menu menu) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String s = "";
+                            for(MenuAttribute ma : menu.attributes())
                             {
-                                ats+="\n"+k+": "+menu.getAttribute(k);
+                                s+="\n"+ma+": "+menu.getAttribute(ma);
                             }
-                            frameCounter.setText("found menu: "+menu.getName()+ ats);
+                            frameCounter.setText("display found: "+menu.getType()+s);
                         }
-                        else
-                        {
-                            frameCounter.setText("menu not recognized");
-                        }
-                    }
-                });
+                    });
+                }
 
+                @Override
+                public void noMenuFound()
+                {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            frameCounter.setText("no display found");
+                        }
+                    });
+                }
+            });
         }
     };
     @Override
@@ -494,13 +514,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private boolean rtModeRunning = false;
-    private long lastRtMessageSent = 0;
-
-    private final Object rtSequenceSemaphore = new Object();
-    private short rtSequence = 0;
-
-
     private void stopRT()
     {
         rtModeRunning = false;
@@ -544,10 +557,4 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }.start();
     }
-    private int modeErrorCount = 0;
-
-    int step = 0;
-
-
-
 }

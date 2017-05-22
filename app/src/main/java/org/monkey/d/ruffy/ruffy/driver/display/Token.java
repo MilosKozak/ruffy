@@ -25,4 +25,16 @@ public class Token {
     public String toString() {
         return pattern+" at ["+block+" / "+column+"]";
     }
+
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public int getBlock() {
+        return block;
+    }
+
+    public int getColumn() {
+        return column;
+    }
 }

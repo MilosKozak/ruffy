@@ -279,7 +279,6 @@ public class LargeTextParser {
                 " ███████████████"
         });
         symbols.put(Symbol.LARGE_PERCENT, new String[]{
-                "         ",
                 " ██    ██",
                 "████  ██ ",
                 "████  ██ ",
@@ -294,7 +293,6 @@ public class LargeTextParser {
                 " ██  ████",
                 " ██  ████",
                 "██    ██ ",
-                "         "
         });
         symbols.put(Symbol.LARGE_UNITS_PER_HOUR, new String[]{
                 "██  ██    ██ ██    ",
@@ -385,6 +383,39 @@ public class LargeTextParser {
                 "██            ██",
                 "██            ██",
                 "██            ██"
+        });
+        symbols.put(Symbol.LARGE_BOLUS, new String[]{
+                "   ██████      ",
+                "   ██████      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "   ██  ██      ",
+                "█████  ████████",
+                "█████  ████████"
+        });
+        symbols.put(Symbol.LARGE_MULTIWAVE_BOLUS, new String[]{
+                "██████         ",
+                "██████         ",
+                "██  ██         ",
+                "██  ██         ",
+                "██  ██         ",
+                "██  ██         ",
+                "██  ██ ██ ██ ██",
+                "██  ██ ██ ██ ██",
+                "██             ",
+                "██           ██",
+                "██           ██",
+                "██             ",
+                "██           ██",
+                "██           ██"
         });
         symbols.put(Symbol.LARGE_STOP, new String[]{
                 "    ████████    ",

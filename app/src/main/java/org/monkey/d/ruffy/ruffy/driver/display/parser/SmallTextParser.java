@@ -458,6 +458,16 @@ public class SmallTextParser {
                 "  ███  ",
                 "   █   "
         });
+        symbols.put(Symbol.UP, new String[]{
+                "   █   ",
+                "  ███  ",
+                " █████ ",
+                "███████",
+                "  ███  ",
+                "  ███  ",
+                "  ███  "
+
+        });
         symbols.put(Symbol.SUM, new String[]{
                 "██████",
                 "█    █",
