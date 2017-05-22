@@ -15,6 +15,8 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by SandraK82 on 15.05.17.
@@ -80,7 +82,8 @@ public class BTConnection {
         connectReciever = new ConnectReciever(handler);
         activity.registerReceiver(connectReciever, filter);
 
-        listen.start();
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
+        scheduler.execute(listen);
     }
 
     public void stopDiscoverable() {

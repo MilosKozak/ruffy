@@ -14,16 +14,12 @@ public class Start extends FragmentActivity {
 
         setContentView(R.layout.activity_start);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.container,new StartFragment()).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.container,new MainFragment()).commit();
 
         SharedPreferences prefs = getSharedPreferences("pumpdata", MODE_PRIVATE);
         boolean paired = prefs.getBoolean("paired", false);
         if (!paired) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
-        }
-        else
-        {
-            getSupportFragmentManager().beginTransaction().replace(R.id.container,new MainFragment()).addToBackStack("Start").commit();
         }
 
     }

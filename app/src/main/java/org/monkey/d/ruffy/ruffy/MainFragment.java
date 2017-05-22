@@ -35,6 +35,8 @@ import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
 import org.monkey.d.ruffy.ruffy.driver.Display;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -51,12 +53,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private PumpData pumpData;
     private TextView frameCounter;
 
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 3 );
+
     public MainFragment() {
 
     }
 
     private int upRunning = 0;
-    private Thread upThread = new Thread()
+    private Runnable upThread = new Runnable()
     {
         @Override
         public void run() {
@@ -84,7 +88,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     };
     private int downRunning = 0;
-    private Thread downThread = new Thread()
+    private Runnable downThread = new Runnable()
     {
         @Override
         public void run() {
@@ -187,7 +191,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     case MotionEvent.ACTION_DOWN:
                         if(upRunning==0) {
                             upRunning = 1;
-                            upThread.start();
+                            scheduler.execute(upThread);
                         }
                     break;
 
@@ -208,7 +212,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     case MotionEvent.ACTION_DOWN:
                         if(downRunning==0) {
                             downRunning = 1;
-                            downThread.start();
+                            scheduler.execute(downThread);
                         }
                         break;
 
@@ -224,7 +228,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     boolean synRun= true;
-    Thread synThread = new Thread(){
+    Runnable synThread = new Runnable(){
         @Override
         public void run() {
             while(synRun)
@@ -243,8 +247,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Override
         public void deviceConnected() {
             appendLog("connected to pump");
-            synRun=true;
-            synThread.start();
+            if(synRun==false) {
+                synRun = true;
+                scheduler.execute(synThread);
+            }
         }
 
         @Override
@@ -252,6 +258,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             appendLog(s);
             if(s.equals("got error in read") && step < 200)
             {
+                synRun=false;
                 btConn.connect(pumpData,4);
             }
         }

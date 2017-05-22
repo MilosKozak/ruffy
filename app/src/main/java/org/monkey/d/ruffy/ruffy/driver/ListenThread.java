@@ -9,7 +9,7 @@ import java.io.IOException;
  * Created by fishermen21 on 15.05.17.
  */
 
-class ListenThread extends Thread {
+class ListenThread implements Runnable {
     private final BluetoothServerSocket srvSock;
 
     public ListenThread(BluetoothServerSocket srvSock) {
