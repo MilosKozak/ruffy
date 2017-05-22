@@ -185,8 +185,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 switch(event.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        upRunning=1;
-                        upThread.start();
+                        if(upRunning==0) {
+                            upRunning = 1;
+                            upThread.start();
+                        }
                     break;
 
                     case MotionEvent.ACTION_UP:
@@ -204,8 +206,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 switch(event.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        downRunning=1;
-                        downThread.start();
+                        if(downRunning==0) {
+                            downRunning = 1;
+                            downThread.start();
+                        }
                         break;
 
                     case MotionEvent.ACTION_UP:
