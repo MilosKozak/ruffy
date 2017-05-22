@@ -19,11 +19,521 @@ import java.util.LinkedList;
 
 public class MenuFactory {
     public static Menu get(LinkedList<Token>[] tokens) {
-        Token first = tokens[0].getFirst();
-        if(first != null && first.getPattern() instanceof SymbolPattern && ((SymbolPattern)first.getPattern()).getSymbol()== Symbol.CLOCK)
+        if(tokens[0].getFirst() != null && tokens[0].getFirst().getPattern() instanceof SymbolPattern && ((SymbolPattern)tokens[0].getFirst().getPattern()).getSymbol()== Symbol.CLOCK)
             return makeMainMenu(tokens);
 
+        if(tokens[2].size()==1)
+        {
+            Pattern p = tokens[2].get(0).getPattern();
+
+            if(isSymbol(p,Symbol.LARGE_STOP))
+                return new Menu(MenuType.STOP_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_BOLUS))
+                return new Menu(MenuType.BOLUS_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_EXTENDED_BOLUS))
+                return new Menu(MenuType.EXTENDED_BOLUS_MENU);
+        }
+        else if(tokens[0].size()>1)
+        {
+            String title = parseString(tokens[0]);
+
+            Title t = TitleResolver.resolve(title);
+            if(t!=null) {
+                switch (t) {
+                    case BOLUS_AMOUNT:
+                        return makeBolusEnter(tokens);
+                    case BOLUS_DURATION:
+                        return makeBolusDuration(tokens);
+                    case IMMEDIATE_BOLUS:
+                        return makeImmediateBolus(tokens);
+                }
+                Pattern p = tokens[1].get(0).getPattern();
+            }
+        }
         return null;
+    }
+
+    private static String parseString(LinkedList<Token> tokens) {
+        String s = "";
+        Token last =null;
+        for(Token t : tokens)
+        {
+            Pattern p = t.getPattern();
+
+            if(last!=null)
+            {
+                int x = last.getColumn()+last.getWidth()+1+3;
+                if(x < t.getColumn())
+                {
+                    s+=" ";
+                }
+            }
+            if(p instanceof CharacterPattern)
+            {
+                s += ((CharacterPattern)p).getCharacter();
+            }
+            else if(isSymbol(p,Symbol.DOT))
+            {
+                s+=".";
+            }
+            else if(isSymbol(p,Symbol.SEPERATOR))
+            {
+                s+=":";
+            }
+            else if(isSymbol(p,Symbol.DIVIDE))
+            {
+                s+="/";
+            }
+            else if(isSymbol(p,Symbol.PARANTHESIS_LEFT))
+            {
+                s+="(";
+            }
+            else if(isSymbol(p,Symbol.PARANTHESIS_RIGHT))
+            {
+                s+=")";
+            }
+            else
+            {
+                return null;
+            }
+            last = t;
+        }
+        return s;
+    }
+
+    private static Menu makeBolusDuration(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BOLUS_DURATION);
+        LinkedList<Integer> time = new LinkedList<>();
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.LARGE_ARROW)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                    if (p instanceof NumberPattern) {
+                        time.add(((NumberPattern) p).getNumber());
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 3:
+                    if (isSymbol(p, Symbol.LARGE_SEPERATOR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+            }
+        }
+        if(time.size()==4)
+        {
+            int minute1 = time.removeLast();
+            int minute10 = time.removeLast();
+            int hour1 = time.removeLast();
+            int hour10 = time.removeLast();
+            m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1,(minute10*10)+minute1));
+        }
+        else if(time.size()==0)
+        {
+            m.setAttribute(MenuAttribute.RUNTIME,new MenuBlink());
+        }
+        else
+            return null;
+
+        LinkedList<Pattern> number = new LinkedList<>();
+        LinkedList<Pattern> number2 = new LinkedList<>();
+        Symbol sym1 = null;
+        Symbol sym2 = null;
+        stage = 0;
+        while (tokens[3].size()>0) {
+            Token t = tokens[3].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.EXTENDED_BOLUS)) {
+                        sym1 = Symbol.EXTENDED_BOLUS;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.MULTIWAVE)) {
+                        sym1 = Symbol.MULTIWAVE;
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                    if (p instanceof NumberPattern || isSymbol(p, Symbol.DOT)) {
+                        number.add(p);
+                    } else if (p instanceof CharacterPattern && ((CharacterPattern) p).getCharacter() == 'U') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 2:
+                    if (isSymbol(p, Symbol.BOLUS)) {
+                        sym2 = Symbol.BOLUS;
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 3:
+                    if (p instanceof NumberPattern || isSymbol(p,Symbol.DOT)) {
+                        number2.add(p);
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+            }
+        }
+        double doubleNumber = 0d;
+        String d = "";
+        for(Pattern p : number)
+        {
+            if(p instanceof NumberPattern)
+            {
+                d+=""+((NumberPattern)p).getNumber();
+            } else if(isSymbol(p,Symbol.DOT)) {
+                d += ".";
+            } else {
+                return null;//violation!
+            }
+        }
+        try { doubleNumber = Double.parseDouble(d);}
+        catch (Exception e){return null;}//violation, there must something parseable
+
+        if(sym1 == Symbol.EXTENDED_BOLUS)
+            m.setAttribute(MenuAttribute.BOLUS,new Double(doubleNumber));
+        else if(sym1 == Symbol.MULTIWAVE) {
+            m.setAttribute(MenuAttribute.BOLUS, new Double(doubleNumber));
+            doubleNumber = 0d;
+            d = "";
+            for (Pattern p : number2) {
+                if (p instanceof NumberPattern) {
+                    d += "" + ((NumberPattern) p).getNumber();
+                } else if (isSymbol(p, Symbol.DOT)) {
+                    d += ".";
+                } else {
+                    return null;//violation!
+                }
+            }
+            try {
+                doubleNumber = Double.parseDouble(d);
+            } catch (Exception e) {
+                return null;
+            }//violation, there must something parseable
+
+            m.setAttribute(MenuAttribute.MULTIWAVE_BOLUS, new Double(doubleNumber));
+        }
+        return m;
+    }
+
+    private static Menu makeImmediateBolus(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.IMMEDIATE_BOLUS);
+        LinkedList<Pattern> number = new LinkedList<>();
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.LARGE_MULTIWAVE_BOLUS)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                    if (p instanceof NumberPattern) {
+                        number.add(p);
+                    } else if(isSymbol(p,Symbol.LARGE_DOT)) {
+                        number.add(p);
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='u') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+
+        double doubleNumber = 0d;
+        String d = "";
+
+        if(number.size()==0)
+        {
+            m.setAttribute(MenuAttribute.MULTIWAVE_BOLUS,new MenuBlink());
+        }
+        else {
+            for (Pattern p : number) {
+                if (p instanceof NumberPattern) {
+                    d += "" + ((NumberPattern) p).getNumber();
+                } else if (isSymbol(p, Symbol.LARGE_DOT)) {
+                    d += ".";
+                } else {
+                    return null;//violation!
+                }
+            }
+            try {
+                doubleNumber = Double.parseDouble(d);
+            } catch (Exception e) {
+                return null;
+            }//violation, there must something parseable
+
+            m.setAttribute(MenuAttribute.MULTIWAVE_BOLUS, new Double(doubleNumber));
+        }
+
+        LinkedList<Integer> time = new LinkedList<>();
+        number.clear();
+        stage = 0;
+        while (tokens[3].size() > 0) {
+            Token t = tokens[3].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.ARROW)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                    if (p instanceof NumberPattern) {
+                        time.add(((NumberPattern) p).getNumber());
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 3:
+                    if (isSymbol(p, Symbol.SEPERATOR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 6:
+                    if (isSymbol(p, Symbol.MULTIWAVE)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 7:
+                    if (p instanceof NumberPattern || isSymbol(p,Symbol.DOT)) {
+                        number.add(p);
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 8:
+                    return null;
+            }
+        }
+        if (time.size() == 4) {
+            int minute1 = time.removeLast();
+            int minute10 = time.removeLast();
+            int hour1 = time.removeLast();
+            int hour10 = time.removeLast();
+            m.setAttribute(MenuAttribute.RUNTIME, new MenuTime((hour10 * 10) + hour1, (minute10 * 10) + minute1));
+        }
+        else
+            return null;
+
+        if(number.size()>0)
+        {
+            d="";
+            for (Pattern p : number) {
+                if (p instanceof NumberPattern) {
+                    d += "" + ((NumberPattern) p).getNumber();
+                } else if (isSymbol(p, Symbol.DOT)) {
+                    d += ".";
+                } else {
+                    return null;//violation!
+                }
+            }
+            try {
+                doubleNumber = Double.parseDouble(d);
+            } catch (Exception e) {
+                return null;
+            }//violation, there must something parseable
+
+            m.setAttribute(MenuAttribute.BOLUS, new Double(doubleNumber));
+        }
+        else
+            return null;
+        return m;
+    }
+
+    private static Menu makeBolusEnter(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BOLUS_ENTER);
+        LinkedList<Pattern> number = new LinkedList<>();
+
+        int stage = 0;
+        Symbol bolus = null;
+
+        //main part
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.LARGE_BOLUS)) {
+                        bolus = Symbol.LARGE_BOLUS;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.LARGE_MULTIWAVE)) {
+                        bolus = Symbol.LARGE_MULTIWAVE;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.LARGE_EXTENDED_BOLUS)) {
+                        bolus = Symbol.LARGE_EXTENDED_BOLUS;
+                        stage++;
+                    } else if(p instanceof NumberPattern) {
+                        number.add(p);
+                        stage++;
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='u') {
+                        stage=2;
+                    }else
+                        return null;
+                    break;
+                case 1:
+                    if (p instanceof NumberPattern) {
+                        number.add(p);
+                    } else if(isSymbol(p,Symbol.LARGE_DOT)) {
+                        number.add(p);
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='u') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+
+        if(bolus!=null)
+            m.setAttribute(MenuAttribute.BOLUS_TYPE,bolus.toString().replace("LARGE_",""));
+        else
+            m.setAttribute(MenuAttribute.BOLUS_TYPE,new MenuBlink());
+
+        double doubleNumber = 0d;
+        String d = "";
+        if(number.size()>0) {
+            for (Pattern p : number) {
+                if (p instanceof NumberPattern) {
+                    d += "" + ((NumberPattern) p).getNumber();
+                } else if (isSymbol(p, Symbol.LARGE_DOT)) {
+                    d += ".";
+                } else {
+                    return null;//violation!
+                }
+            }
+            try {
+                doubleNumber = Double.parseDouble(d);
+            } catch (Exception e) {
+                return null;
+            }//violation, there must something parseable
+
+            m.setAttribute(MenuAttribute.BOLUS, new Double(doubleNumber));
+        } else
+            m.setAttribute(MenuAttribute.BOLUS,new MenuBlink());
+
+        //4th line
+        LinkedList<Integer> time = new LinkedList<>();
+        number.clear();
+        stage = 0;
+        while (tokens[3].size() > 0) {
+            Token t = tokens[3].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.ARROW)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                    if (p instanceof NumberPattern) {
+                        time.add(((NumberPattern) p).getNumber());
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 3:
+                    if (isSymbol(p, Symbol.SEPERATOR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 6:
+                    if (isSymbol(p, Symbol.BOLUS)) {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 7:
+                    if (p instanceof NumberPattern) {
+                        number.add(p);
+                    } else if(isSymbol(p,Symbol.DOT)) {
+                        number.add(p);
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U') {
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 8:
+                    return null;
+            }
+        }
+        if(time.size()>0)
+        {
+            int minute1 = time.removeLast();
+            int minute10 = time.removeLast();
+            int hour1 = time.removeLast();
+            int hour10 = time.removeLast();
+            m.setAttribute(MenuAttribute.RUNTIME, new MenuTime((hour10 * 10) + hour1, (minute10 * 10) + minute1));
+
+            if(number.size() > 0)
+            {
+                doubleNumber = 0d;
+                d = "";
+                for(Pattern p : number)
+                {
+                    if(p instanceof NumberPattern)
+                    {
+                        d+=""+((NumberPattern)p).getNumber();
+                    } else if(isSymbol(p,Symbol.DOT)) {
+                        d += ".";
+                    } else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U'){
+                        //irgnore
+                    } else {
+                        return null;//violation!
+                    }
+                }
+                try { doubleNumber = Double.parseDouble(d);}
+                catch (Exception e){return null;}//violation, there must something parseable
+
+                m.setAttribute(MenuAttribute.MULTIWAVE_BOLUS, new Double(doubleNumber));
+            }
+        }
+        else
+        {
+            m.setAttribute(MenuAttribute.RUNTIME, new MenuTime(0,0));
+            m.setAttribute(MenuAttribute.MULTIWAVE_BOLUS, new Double(0));
+        }
+        return m;
     }
 
     private static Menu makeMainMenu(LinkedList<Token>[] tokens) {
@@ -272,6 +782,20 @@ public class MenuFactory {
                         } else
                             return null;//
                         break;
+                    }
+                    else
+                    {
+                        if (isSymbol(p, Symbol.LOW_BAT)) {
+                            lowBattery = true;
+                        } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
+                            lowInsulin= true;
+                        } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
+                            lockState=2;
+                        } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
+                            lockState=2;
+                        } else {
+                            return null;
+                        }
                     }
                     break;
                 case 1:

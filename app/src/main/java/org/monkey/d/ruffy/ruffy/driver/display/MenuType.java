@@ -6,4 +6,11 @@ package org.monkey.d.ruffy.ruffy.driver.display;
 
 public enum MenuType {
     MAIN_MENU,
+    STOP_MENU,
+    BOLUS_MENU,
+    BOLUS_ENTER,
+    EXTENDED_BOLUS_MENU,
+    BOLUS_DURATION,
+    MULTIWAVE_BOLUS_MENU,
+    IMMEDIATE_BOLUS,
 }
