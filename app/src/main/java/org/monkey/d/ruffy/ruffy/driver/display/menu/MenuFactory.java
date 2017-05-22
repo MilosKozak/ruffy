@@ -750,6 +750,10 @@ public class MenuFactory {
             {
                 tadd += 12;
             }
+            else if(timeC.get(0)=='A' && timeC.get(1)=='M' && hour10 == 1 && hour1 == 2)
+            {
+                tadd -= 12;
+            }
         }
         m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+tadd+hour1,(minute10*10)+minute1));
 
