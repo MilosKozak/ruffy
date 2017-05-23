@@ -43,3 +43,21 @@ Why?
 But Why?
 
 * Because you have not read or understood the other answers :(  
+
+How do I build it?
+
+* Download a 2.3 Version of Androidtudio
+* Set it up with the wizard
+* clone this project from github
+* open it with android studio
+* connect your (hopefully compatible) phone
+* press the run button on top 
+
+How do I know that my bluetooth Stack is wrong?
+
+* start the pairing, lay the pump next to the phone in pairing mode
+* if the pump does not find your phone (shows it as selectable device in the screen) then it wont work!
+
+Why the name?
+
+* I watched One piece, the anime about the pirate Monkey D. Ruffy while starting the project :D  
