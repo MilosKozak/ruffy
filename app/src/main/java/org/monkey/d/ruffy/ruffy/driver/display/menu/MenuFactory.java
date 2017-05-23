@@ -5,7 +5,6 @@ import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuType;
 import org.monkey.d.ruffy.ruffy.driver.display.Symbol;
 import org.monkey.d.ruffy.ruffy.driver.display.Token;
-import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuTime;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.CharacterPattern;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.NumberPattern;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.Pattern;
@@ -137,7 +136,9 @@ public class MenuFactory {
                     case TBR_DATA:
                         return makeTBRData(tokens);
                     case TBR_SET:
-                        return makeTBR(tokens);
+                        return makeTBRSet(tokens);
+                    case TBR_DURATION:
+                        return makeTBRDuration(tokens);
                     case BASAL_TOTAL:
                         return makeBasalTotal(tokens);
                 }
@@ -165,9 +166,164 @@ public class MenuFactory {
         return m;
     }
 
-    private static Menu makeTBR(LinkedList<Token>[] tokens) {
-        Menu m = new Menu(MenuType.TBR);
-        //FIXME
+    private static Menu makeTBRSet(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_SET);
+        int stage = 0;
+        LinkedList<NumberPattern> number = new LinkedList<>();
+        while(tokens[1].size()>0)
+        {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_BASAL))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                    {
+                        number.add((NumberPattern)p);
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_PERCENT))
+                    {
+                        stage++;
+                    }
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(number.size()>0)
+        {
+            String n = "";
+            while(number.size()>0)
+            {
+                n += number.removeFirst().getNumber();
+            }
+            try{
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_RATE,d);
+            }catch(Exception e){e.printStackTrace();return null;}
+        } else if(number.size()==0)
+            m.setAttribute(MenuAttribute.BASAL_RATE, new MenuBlink());
+        else
+            return null;
+
+        if(tokens[3].size()>0) {
+            stage = 0;
+            number.clear();
+            while (tokens[3].size() > 0) {
+                Pattern p = tokens[3].removeFirst().getPattern();
+                switch (stage) {
+                    case 0:
+                        if (isSymbol(p, Symbol.ARROW))
+                            stage++;
+                        else
+                            return null;
+                        break;
+                    case 1:
+                        if (p instanceof NumberPattern)
+                            number.add((NumberPattern) p);
+                        else if (isSymbol(p, Symbol.SEPERATOR))
+                        {}
+                        else return null;
+                        break;
+                    case 2:
+                        return null;
+                }
+            }
+            if (number.size() == 4) {
+                int hour10 = number.removeFirst().getNumber();
+                int hour1 = number.removeFirst().getNumber();
+                int minute10 = number.removeFirst().getNumber();
+                int minute1 = number.removeFirst().getNumber();
+                m.setAttribute(MenuAttribute.RUNTIME, new MenuTime((hour10 * 10) + hour1, (minute10 * 10) + minute1));
+            } else return null;
+        }
+        else m.setAttribute(MenuAttribute.RUNTIME,new MenuTime(0,0));
+        return m;
+    }
+
+    private static Menu makeTBRDuration(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_DURATION);
+        int stage = 0;
+        LinkedList<NumberPattern> number = new LinkedList<>();
+        while(tokens[1].size()>0)
+        {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_ARROW))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                    {
+                        number.add((NumberPattern)p);
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_PERCENT))
+                    {
+                        stage++;
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_SEPERATOR))
+                    {
+                    }
+                    else return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(number.size()==4)
+        {
+            int hour10 = number.removeFirst().getNumber();
+            int hour1 = number.removeFirst().getNumber();
+            int minute10 = number.removeFirst().getNumber();
+            int minute1 = number.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1,(minute10*10)+minute1));
+        } else if(number.size()==0) m.setAttribute(MenuAttribute.RUNTIME,new MenuBlink());
+        else return null;
+
+        stage = 0;
+        number.clear();
+        while(tokens[3].size()>0)
+        {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.BASAL))
+                        stage++;
+                    else return null;
+                    break;
+                case 1:
+                    if(p instanceof  NumberPattern)
+                        number.add((NumberPattern)p);
+                    else if(isSymbol(p,Symbol.PERCENT))
+                        stage++;
+                    else return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(number.size()>0)
+        {
+            String n = "";
+            while(number.size()>0)
+            {
+                n += number.removeFirst().getNumber();
+            }
+            try{
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_RATE,d);
+            }catch(Exception e){e.printStackTrace();return null;}
+        }
         return m;
     }
 
@@ -279,11 +435,11 @@ public class MenuFactory {
             {
                 s+="/";
             }
-            else if(isSymbol(p,Symbol.PARANTHESIS_LEFT))
+            else if(isSymbol(p,Symbol.BRACKET_LEFT))
             {
                 s+="(";
             }
-            else if(isSymbol(p,Symbol.PARANTHESIS_RIGHT))
+            else if(isSymbol(p,Symbol.BRACKET_RIGHT))
             {
                 s+=")";
             }

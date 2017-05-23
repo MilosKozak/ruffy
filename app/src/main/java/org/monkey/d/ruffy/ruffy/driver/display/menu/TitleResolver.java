@@ -26,6 +26,8 @@ class TitleResolver {
             return Title.TBR_DATA;
         if(title.equalsIgnoreCase("tbr percentage"))
             return Title.TBR_SET;
+        if(title.equalsIgnoreCase("tbr duration"))
+            return Title.TBR_DURATION;
         if(title.equalsIgnoreCase("basal rate total"))
             return Title.BASAL_TOTAL;
 
