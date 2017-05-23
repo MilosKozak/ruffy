@@ -59,11 +59,13 @@ public class PumpDisplayView extends SurfaceView implements DisplayUpdater {
     public void update(boolean[][] pixel, int which)
     {
         int w = getWidth();
-        float x = ((float)w)/96f;
+        float xf = ((float)w)/96f;
         int h = getHeight();
-        float y = ((float)h) / 32f;
+        float yf = ((float)h) / 32f;
 
-        Canvas tempCanvas = surfaceHolder.lockCanvas(new Rect(0,(int)(y*(which*8)),(int)(x*96),(int)(y*((which+1)*8))));
+        int x = (int)(Math.floor(xf));
+        int y = (int)(Math.floor(yf));
+        Canvas tempCanvas = surfaceHolder.lockCanvas(new Rect(0,y*(which*8),x*96,y*((which+1)*8)));
 
         if(tempCanvas==null)
             return;
