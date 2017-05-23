@@ -28,9 +28,11 @@ public class MenuFactory {
                     if(isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_STOP))
                         return makeStopMenu(tokens);
                 }
-                else if(isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_BASAL))
+                else
                 {
-                    return makeBasalSet(tokens);
+                    for(Token t:tokens[0])
+                        if(isSymbol(t.getPattern(),Symbol.MINUS))
+                            return makeBasalSet(tokens);
 
                 }
                 return makeMainMenu(tokens);
