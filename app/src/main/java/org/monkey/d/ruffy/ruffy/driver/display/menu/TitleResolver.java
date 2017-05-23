@@ -16,6 +16,18 @@ class TitleResolver {
             return Title.BOLUS_DURATION;
         if(title.equalsIgnoreCase("quick info"))
             return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolus data"))
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("error data"))
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("daily totals"))
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("tbr data"))
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("tbr percentage"))
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("basal rate total"))
+            return Title.BASAL_TOTAL;
 
         //FIXME add Translations
         return null;

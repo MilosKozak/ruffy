@@ -19,8 +19,26 @@ import java.util.LinkedList;
 
 public class MenuFactory {
     public static Menu get(LinkedList<Token>[] tokens) {
-        if(tokens[0].getFirst() != null && tokens[0].getFirst().getPattern() instanceof SymbolPattern && ((SymbolPattern)tokens[0].getFirst().getPattern()).getSymbol()== Symbol.CLOCK)
-            return makeMainMenu(tokens);
+        if(tokens[0].size()>0)
+        {
+            Pattern p = tokens[0].getFirst().getPattern();
+            if(isSymbol(p,Symbol.CLOCK))
+            {
+                if(tokens[1].size()==1)
+                {
+                    if(isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_STOP))
+                        return makeStopMenu(tokens);
+                }
+                else if(isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_BASAL))
+                {
+                    return makeBasalSet(tokens);
+
+                }
+                return makeMainMenu(tokens);
+            }
+        }
+
+
 
         if(tokens[2].size()==1)
         {
@@ -64,6 +82,9 @@ public class MenuFactory {
 
             if(isSymbol(p,Symbol.LARGE_MENU_SETTINGS))
                 return new Menu(MenuType.MENU_SETTINGS_MENU);
+
+            if(isSymbol(p,Symbol.LARGE_CHECK))
+                return new Menu(MenuType.START_MENU);
         }
         else if(tokens[2].size()==2)
         {
@@ -107,11 +128,71 @@ public class MenuFactory {
                         return makeImmediateBolus(tokens);
                     case QUICK_INFO:
                         return makeQuickInfo(tokens);
+                    case BOLUS_DATA:
+                        return makeBolusData(tokens);
+                    case DAILY_TOTALS:
+                        return makeDailyData(tokens);
+                    case ERROR_DATA:
+                        return makeErrorData(tokens);
+                    case TBR_DATA:
+                        return makeTBRData(tokens);
+                    case TBR_SET:
+                        return makeTBR(tokens);
+                    case BASAL_TOTAL:
+                        return makeBasalTotal(tokens);
                 }
                 Pattern p = tokens[1].get(0).getPattern();
             }
         }
         return null;
+    }
+
+    private static Menu makeBasalSet(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BASAL_SET);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeBasalTotal(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BASAL_TOTAL);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeStopMenu(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.STOP);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeTBR(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeTBRData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeErrorData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.ERROR_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeDailyData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.DAILY_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeBolusData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BOLUS_DATA);
+        //FIXME
+        return m;
     }
 
     private static Menu makeQuickInfo(LinkedList<Token>[] tokens) {

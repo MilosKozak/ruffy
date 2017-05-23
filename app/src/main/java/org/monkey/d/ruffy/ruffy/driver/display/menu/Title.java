@@ -7,5 +7,11 @@ package org.monkey.d.ruffy.ruffy.driver.display.menu;
 enum Title {
     BOLUS_AMOUNT,
     IMMEDIATE_BOLUS,
-    BOLUS_DURATION, QUICK_INFO,
+    BOLUS_DURATION,
+    QUICK_INFO,
+    BOLUS_DATA,
+    ERROR_DATA,
+    DAILY_TOTALS,
+    TBR_DATA,
+    TBR_SET, BASAL_TOTAL;
 }
