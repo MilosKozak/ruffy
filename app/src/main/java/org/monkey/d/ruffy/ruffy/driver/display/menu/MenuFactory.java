@@ -115,7 +115,7 @@ public class MenuFactory {
     }
 
     private static Menu makeQuickInfo(LinkedList<Token>[] tokens) {
-        Menu m = new Menu(MenuType.BOLUS_DURATION);
+        Menu m = new Menu(MenuType.QUICK_INFO);
         LinkedList<Pattern> number = new LinkedList<>();
 
         int stage = 0;
@@ -750,6 +750,10 @@ public class MenuFactory {
             {
                 tadd += 12;
             }
+            else if(timeC.get(0)=='A' && timeC.get(1)=='M' && hour10 == 1 && hour1 == 2)
+            {
+                tadd -= 12;
+            }
         }
         m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+tadd+hour1,(minute10*10)+minute1));
 
@@ -883,31 +887,23 @@ public class MenuFactory {
             Pattern p = t.getPattern();
             switch (stage) {
                 case 0:
-                    if (hasRunning) {
-                        if (p instanceof NumberPattern) {
-                            number.add(p);
-                        } else if (isSymbol(p, Symbol.DOT)) {
-                            number.add(p);
-                        } else if (isSymbol(p, Symbol.UNITS_PER_HOUR)) {
-                            number.add(p);
-                            stage++;
-                        } else
-                            return null;//
-                        break;
-                    }
-                    else
-                    {
-                        if (isSymbol(p, Symbol.LOW_BAT)) {
-                            lowBattery = true;
-                        } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
-                            lowInsulin= true;
-                        } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
-                            lockState=2;
-                        } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
-                            lockState=2;
-                        } else {
-                            return null;
-                        }
+                    if (p instanceof NumberPattern) {
+                        number.add(p);
+                    } else if (isSymbol(p, Symbol.DOT)) {
+                        number.add(p);
+                    } else if (isSymbol(p, Symbol.UNITS_PER_HOUR)) {
+                        number.add(p);
+                        stage++;
+                    } else if (isSymbol(p, Symbol.LOW_BAT)) {
+                        lowBattery = true;
+                    } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
+                        lowInsulin= true;
+                    } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
+                        lockState=2;
+                    } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
+                        lockState=2;
+                    } else {
+                        return null;
                     }
                     break;
                 case 1:
@@ -936,38 +932,28 @@ public class MenuFactory {
 
         m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));
 
-        if(hasRunning)
-        {
-            if(number.size()>0) {
-                doubleNUmber = 0d;
-                d = "";
-                for (Pattern p : number) {
-                    if (p instanceof NumberPattern) {
-                        d += "" + ((NumberPattern) p).getNumber();
-                    } else if (isSymbol(p, Symbol.DOT)) {
-                        d += ".";
-                    } else if (isSymbol(p, Symbol.UNITS_PER_HOUR)) {
-                        //irgnore
-                    } else {
-                        return null;//violation!
-                    }
+        if(number.size()>0) {
+            doubleNUmber = 0d;
+            d = "";
+            for (Pattern p : number) {
+                if (p instanceof NumberPattern) {
+                    d += "" + ((NumberPattern) p).getNumber();
+                } else if (isSymbol(p, Symbol.DOT)) {
+                    d += ".";
+                } else if (isSymbol(p, Symbol.UNITS_PER_HOUR)) {
+                    //irgnore
+                } else {
+                    return null;//violation!
                 }
-                try {
-                    doubleNUmber = Double.parseDouble(d);
-                } catch (Exception e) {
-                    return null;
-                }//violation, there must something parseable
-                m.setAttribute(MenuAttribute.BASAL_RATE, doubleNUmber);
             }
-            else
-            {
+            try {
+                doubleNUmber = Double.parseDouble(d);
+            } catch (Exception e) {
                 return null;
-            }
+            }//violation, there must something parseable
+            m.setAttribute(MenuAttribute.BASAL_RATE, doubleNUmber);
         }
-        else if(number.size()>0)
-        {
-            return null;
-        }
+
         return m;
     }
 
