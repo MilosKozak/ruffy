@@ -75,13 +75,13 @@ public class PumpData {
         for (int i = 0; i < nonceTx.length; i++)
             nonceTx[i] = 0;
         SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        prefs.edit().putString("nonceTx",Utils.bufferString(nonceTx,nonceTx.length)).apply();
+        prefs.edit().putString("nonceTx",Utils.byteArrayToHexString(nonceTx,nonceTx.length)).apply();
     }
 
     public void incrementNonceTx() {
         Utils.incrementArray(nonceTx);
         SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
-        prefs.edit().putString("nonceTx",Utils.bufferString(nonceTx,nonceTx.length)).apply();
+        prefs.edit().putString("nonceTx",Utils.byteArrayToHexString(nonceTx,nonceTx.length)).apply();
     }
 
     public Activity getActivity() {
@@ -103,7 +103,7 @@ public class PumpData {
 
         SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("pd",Utils.bufferString(key_pd_de,key_pd_de.length));
+        editor.putString("pd",Utils.byteArrayToHexString(key_pd_de,key_pd_de.length));
         editor.apply();
     }
     public void setAndSaveToPumpKey(byte[] key_dp, Object tf) throws InvalidKeyException {
@@ -113,7 +113,7 @@ public class PumpData {
         SharedPreferences prefs = getActivity().getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("dp",Utils.bufferString(key_dp_de,key_dp_de.length));
+        editor.putString("dp",Utils.byteArrayToHexString(key_dp_de,key_dp_de.length));
         editor.apply();
 
     }
