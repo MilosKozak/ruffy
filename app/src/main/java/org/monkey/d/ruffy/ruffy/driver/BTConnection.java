@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,14 +27,6 @@ public class BTConnection {
     private ListenThread listen;
 
     private BluetoothSocket currentConnection;
-
-    /*private byte[] nonceRx = new byte[13];
-    private byte[] nonceTx = new byte[13];
-
-    private byte address;
-
-    public Object pump_tf;
-    public Object driver_tf;*/
 
     public int seqNo;
     private InputStream currentInput;
@@ -178,7 +169,7 @@ public class BTConnection {
                 while (true) {
                     try {
                         int bytes = currentInput.read(buffer);
-                        handler.log("read "+bytes+": "+Utils.bufferString(buffer,bytes));
+                        handler.log("read "+bytes+": "+Utils.byteArrayToHexString(buffer,bytes));
                         handler.handleRawData(buffer,bytes);
                     } catch (Exception e) {
                         //e.printStackTrace();
@@ -247,7 +238,7 @@ public class BTConnection {
         }
         try {
             currentOutput.write(ro);
-            handler.log("wrote "+ro.length+" bytes: "+Utils.bufferString(ro,ro.length));
+            handler.log("wrote "+ro.length+" bytes: "+Utils.byteArrayToHexString(ro,ro.length));
         }catch(Exception e)
         {
             //e.printStackTrace();

@@ -5,7 +5,6 @@ import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuType;
 import org.monkey.d.ruffy.ruffy.driver.display.Symbol;
 import org.monkey.d.ruffy.ruffy.driver.display.Token;
-import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuTime;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.CharacterPattern;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.NumberPattern;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.Pattern;
@@ -19,51 +18,119 @@ import java.util.LinkedList;
 
 public class MenuFactory {
     public static Menu get(LinkedList<Token>[] tokens) {
-        if(tokens[0].getFirst() != null && tokens[0].getFirst().getPattern() instanceof SymbolPattern && ((SymbolPattern)tokens[0].getFirst().getPattern()).getSymbol()== Symbol.CLOCK)
-            return makeMainMenu(tokens);
+        if(tokens[0].size()>0)
+        {
+            Pattern p = tokens[0].getFirst().getPattern();
+            if(isSymbol(p,Symbol.CLOCK))
+            {
+                if(tokens[1].size()==1)
+                {
+                    if(isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_STOP))
+                        return makeStopMenu(tokens);
+                }
+                else
+                {
+                    for(Token t:tokens[0])
+                        if(isSymbol(t.getPattern(),Symbol.MINUS))
+                            return makeBasalSet(tokens);
+
+                }
+                return makeMainMenu(tokens);
+            }
+        }
+
+
 
         if(tokens[2].size()==1)
         {
             Pattern p = tokens[2].get(0).getPattern();
 
+            String s0 = parseString(tokens[0],true);
+            String s1 = parseString(tokens[1],true);
+
             if(isSymbol(p,Symbol.LARGE_STOP))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.STOP_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_BOLUS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.BOLUS_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_EXTENDED_BOLUS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.EXTENDED_BOLUS_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_MULTIWAVE))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.MULTIWAVE_BOLUS_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_TBR))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.TBR_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_MY_DATA))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.MY_DATA_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_BASAL))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.BASAL_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_ALARM_SETTINGS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.ALARM_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_CALENDAR))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.DATE_AND_TIME_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_PUMP_SETTINGS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.PUMP_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_THERAPIE_SETTINGS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.THERAPIE_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_BLUETOOTH_SETTINGS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.BLUETOOTH_MENU);
+            }
 
             if(isSymbol(p,Symbol.LARGE_MENU_SETTINGS))
+            {
+                tokens[2].removeFirst();
                 return new Menu(MenuType.MENU_SETTINGS_MENU);
+            }
+
+            if(isSymbol(p,Symbol.LARGE_CHECK))
+            {
+                tokens[2].removeFirst();
+                return new Menu(MenuType.START_MENU);
+            }
         }
         else if(tokens[2].size()==2)
         {
@@ -94,10 +161,12 @@ public class MenuFactory {
         }
         else if(tokens[0].size()>1)
         {
-            String title = parseString(tokens[0]);
+            String title = parseString(tokens[0],false);
 
             Title t = TitleResolver.resolve(title);
             if(t!=null) {
+                //resolved so we can consume
+                parseString(tokens[0],true);
                 switch (t) {
                     case BOLUS_AMOUNT:
                         return makeBolusEnter(tokens);
@@ -107,11 +176,228 @@ public class MenuFactory {
                         return makeImmediateBolus(tokens);
                     case QUICK_INFO:
                         return makeQuickInfo(tokens);
+                    case BOLUS_DATA:
+                        return makeBolusData(tokens);
+                    case DAILY_TOTALS:
+                        return makeDailyData(tokens);
+                    case ERROR_DATA:
+                        return makeErrorData(tokens);
+                    case TBR_DATA:
+                        return makeTBRData(tokens);
+                    case TBR_SET:
+                        return makeTBRSet(tokens);
+                    case TBR_DURATION:
+                        return makeTBRDuration(tokens);
+                    case BASAL_TOTAL:
+                        return makeBasalTotal(tokens);
                 }
                 Pattern p = tokens[1].get(0).getPattern();
             }
         }
         return null;
+    }
+
+    private static Menu makeBasalSet(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BASAL_SET);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeBasalTotal(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BASAL_TOTAL);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeStopMenu(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.STOP);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeTBRSet(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_SET);
+        int stage = 0;
+        LinkedList<NumberPattern> number = new LinkedList<>();
+        while(tokens[1].size()>0)
+        {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_BASAL))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                    {
+                        number.add((NumberPattern)p);
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_PERCENT))
+                    {
+                        stage++;
+                    }
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(number.size()>0)
+        {
+            String n = "";
+            while(number.size()>0)
+            {
+                n += number.removeFirst().getNumber();
+            }
+            try{
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_RATE,d);
+            }catch(Exception e){e.printStackTrace();return null;}
+        } else if(number.size()==0)
+            m.setAttribute(MenuAttribute.BASAL_RATE, new MenuBlink());
+        else
+            return null;
+
+        if(tokens[3].size()>0) {
+            stage = 0;
+            number.clear();
+            while (tokens[3].size() > 0) {
+                Pattern p = tokens[3].removeFirst().getPattern();
+                switch (stage) {
+                    case 0:
+                        if (isSymbol(p, Symbol.ARROW))
+                            stage++;
+                        else
+                            return null;
+                        break;
+                    case 1:
+                        if (p instanceof NumberPattern)
+                            number.add((NumberPattern) p);
+                        else if (isSymbol(p, Symbol.SEPERATOR))
+                        {}
+                        else return null;
+                        break;
+                    case 2:
+                        return null;
+                }
+            }
+            if (number.size() == 4) {
+                int hour10 = number.removeFirst().getNumber();
+                int hour1 = number.removeFirst().getNumber();
+                int minute10 = number.removeFirst().getNumber();
+                int minute1 = number.removeFirst().getNumber();
+                m.setAttribute(MenuAttribute.RUNTIME, new MenuTime((hour10 * 10) + hour1, (minute10 * 10) + minute1));
+            } else return null;
+        }
+        else m.setAttribute(MenuAttribute.RUNTIME,new MenuTime(0,0));
+        return m;
+    }
+
+    private static Menu makeTBRDuration(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_DURATION);
+        int stage = 0;
+        LinkedList<NumberPattern> number = new LinkedList<>();
+        while(tokens[1].size()>0)
+        {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_ARROW))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                    {
+                        number.add((NumberPattern)p);
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_PERCENT))
+                    {
+                        stage++;
+                    }
+                    else if (isSymbol(p,Symbol.LARGE_SEPERATOR))
+                    {
+                    }
+                    else return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(number.size()==4)
+        {
+            int hour10 = number.removeFirst().getNumber();
+            int hour1 = number.removeFirst().getNumber();
+            int minute10 = number.removeFirst().getNumber();
+            int minute1 = number.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1,(minute10*10)+minute1));
+        } else if(number.size()==0) m.setAttribute(MenuAttribute.RUNTIME,new MenuBlink());
+        else return null;
+
+        stage = 0;
+        number.clear();
+        while(tokens[3].size()>0)
+        {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.BASAL))
+                        stage++;
+                    else return null;
+                    break;
+                case 1:
+                    if(p instanceof  NumberPattern)
+                        number.add((NumberPattern)p);
+                    else if(isSymbol(p,Symbol.PERCENT))
+                        stage++;
+                    else return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(number.size()>0)
+        {
+            String n = "";
+            while(number.size()>0)
+            {
+                n += number.removeFirst().getNumber();
+            }
+            try{
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_RATE,d);
+            }catch(Exception e){e.printStackTrace();return null;}
+        }
+        return m;
+    }
+
+    private static Menu makeTBRData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.TBR_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeErrorData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.ERROR_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeDailyData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.DAILY_DATA);
+        //FIXME
+        return m;
+    }
+
+    private static Menu makeBolusData(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.BOLUS_DATA);
+        //FIXME
+        return m;
     }
 
     private static Menu makeQuickInfo(LinkedList<Token>[] tokens) {
@@ -167,12 +453,15 @@ public class MenuFactory {
         return m;
     }
 
-    private static String parseString(LinkedList<Token> tokens) {
+    private static String parseString(LinkedList<Token> tokens,boolean consume) {
         String s = "";
         Token last =null;
-        for(Token t : tokens)
+        for(Token t : new LinkedList<>(tokens))
         {
             Pattern p = t.getPattern();
+
+            if(consume)
+                tokens.removeFirst();
 
             if(last!=null)
             {
@@ -198,13 +487,17 @@ public class MenuFactory {
             {
                 s+="/";
             }
-            else if(isSymbol(p,Symbol.PARANTHESIS_LEFT))
+            else if(isSymbol(p,Symbol.BRACKET_LEFT))
             {
                 s+="(";
             }
-            else if(isSymbol(p,Symbol.PARANTHESIS_RIGHT))
+            else if(isSymbol(p,Symbol.BRACKET_RIGHT))
             {
                 s+=")";
+            }
+            else if(isSymbol(p,Symbol.MINUS))
+            {
+                s+="-";
             }
             else
             {
@@ -873,7 +1166,7 @@ public class MenuFactory {
         }
 
         if(tokens[2].size()==1 && tokens[2].get(0).getPattern() instanceof NumberPattern)
-            m.setAttribute(MenuAttribute.BASAL_SELECTED,new Integer(((NumberPattern)tokens[2].get(0).getPattern()).getNumber()));
+            m.setAttribute(MenuAttribute.BASAL_SELECTED,new Integer(((NumberPattern)tokens[2].removeFirst().getPattern()).getNumber()));
         else
             return null;
 

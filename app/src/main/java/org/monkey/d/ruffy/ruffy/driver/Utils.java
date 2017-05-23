@@ -231,7 +231,7 @@ public class Utils {
         return carry;
     }
 
-    public static String bufferString(byte[] buffer, int bytes) {
+    public static String byteArrayToHexString(byte[] buffer, int bytes) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bytes; i++) {
             sb.append(String.format("%02X ", buffer[i]));

@@ -531,7 +531,7 @@ public class SmallTextParser {
                 "█  █  █",
                 "███████"
         });
-        symbols.put(Symbol.PARANTHESIS_LEFT, new String[]{
+        symbols.put(Symbol.BRACKET_LEFT, new String[]{
                 "   █ ",
                 "  █  ",
                 " █   ",
@@ -541,7 +541,7 @@ public class SmallTextParser {
                 "   █ ",
                 "     "
         });
-        symbols.put(Symbol.PARANTHESIS_RIGHT, new String[]{
+        symbols.put(Symbol.BRACKET_RIGHT, new String[]{
                 " █   ",
                 "  █  ",
                 "   █ ",
@@ -549,6 +549,30 @@ public class SmallTextParser {
                 "   █ ",
                 "  █  ",
                 " █   ",
+                "     "
+        });
+        symbols.put(Symbol.PERCENT, new String[]{
+                "██   ",
+                "██  █",
+                "   █ ",
+                "  █  ",
+                " █   ",
+                "█  ██",
+                "   ██"
+        });
+        symbols.put(Symbol.BASAL, new String[]{
+                "  ████  ",
+                "  █  ███",
+                "███  █ █",
+                "█ █  █ █",
+                "█ █  █ █",
+                "█ █  █ █",
+                "█ █  █ █"
+        });
+        symbols.put(Symbol.MINUS, new String[]{
+                "     ",
+                "     ",
+                "█████",
                 "     "
         });
     }
