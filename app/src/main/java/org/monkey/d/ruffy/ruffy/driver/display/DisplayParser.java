@@ -84,6 +84,11 @@ public class DisplayParser {
                         handler.menuFound(menu);
                     else
                         handler.noMenuFound();
+
+                    int nct = 0;
+                    for(int i=0;i<4;i++)nct+=tokens[i].size();
+                    if(nct>0 && menu!= null)
+                        Log.v("tokens",nct+" toks not consumed in "+menu.getType());
                 }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
                 finally {
                     Log.v("Tokens",(((double)(System.currentTimeMillis()-t1))/1000d)+" secs needed for frame");
