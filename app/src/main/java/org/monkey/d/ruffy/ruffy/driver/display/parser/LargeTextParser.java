@@ -598,6 +598,19 @@ public class LargeTextParser {
                 "          ███████"
 
         });
+        symbols.put(Symbol.LARGE_CHECK, new String[]{
+                "            ███",
+                "           ███ ",
+                "          ███  ",
+                "         ███   ",
+                "███     ███    ",
+                " ███   ███     ",
+                "  ███ ███      ",
+                "   █████       ",
+                "    ███        ",
+                "     █         "
+
+        });
     }
 
     private static LinkedList<Pattern> pattern = new LinkedList<>();
