@@ -53,6 +53,6 @@ public enum Symbol {
     LARGE_BASAL,
     LARGE_MY_DATA,
     LARGE_ALARM_SETTINGS,
-    LARGE_CHECK,
+    LARGE_CHECK, MINUS,
 
 }

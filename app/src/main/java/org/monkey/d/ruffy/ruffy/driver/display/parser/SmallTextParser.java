@@ -569,6 +569,12 @@ public class SmallTextParser {
                 "█ █  █ █",
                 "█ █  █ █"
         });
+        symbols.put(Symbol.MINUS, new String[]{
+                "     ",
+                "     ",
+                "█████",
+                "     "
+        });
     }
 
     private static LinkedList<Pattern> pattern = new LinkedList<>();
