@@ -80,6 +80,8 @@ public class DisplayParser {
                         print(display,"not empty");
                     }
                     Menu menu = MenuFactory.get(tokens);
+
+                    menu.setAttribute(MenuAttribute.DEBUG_TIMING,(((double)(System.currentTimeMillis()-t1))/1000d));
                     if(menu != null)
                         handler.menuFound(menu);
                     else
