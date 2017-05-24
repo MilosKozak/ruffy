@@ -1507,7 +1507,9 @@ public class MenuFactory {
         catch (Exception e){return null;}//violation, there must something parseable
 
         m.setAttribute(MenuAttribute.REMAINING_INSULIN,new Double(doubleNumber));
+
         //FIXME 4th line
+        tokens[3].clear();
 
         return m;
     }
