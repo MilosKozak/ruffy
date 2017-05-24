@@ -219,6 +219,8 @@ public class MenuFactory {
                 case 1:
                     if(isSymbol(p,Symbol.MINUS))
                         stage++;
+                    else if(isSymbol(p,Symbol.SEPERATOR))
+                        from.add(p);
                     else if(p instanceof CharacterPattern)
                         from.add(p);
                     else if(p instanceof NumberPattern)
@@ -231,9 +233,12 @@ public class MenuFactory {
                         to.add(p);
                     else if(p instanceof NumberPattern)
                         to.add(p);
+                    else if(isSymbol(p,Symbol.SEPERATOR))
+                        to.add(p);
                     else
                         return null;
                     break;
+
                 default:
                     return null;
             }
@@ -245,12 +250,18 @@ public class MenuFactory {
                 int f1 = ((NumberPattern) from.removeFirst()).getNumber();
                 int a = 0;
                 if (from.size() > 0) {
-                    char c0 = ((CharacterPattern) from.removeFirst()).getCharacter();
-                    char c1 = ((CharacterPattern) from.removeFirst()).getCharacter();
-                    if (c0 == 'P' && c1 == 'M')
-                        a += 12;
-                    else if (c0 == 'A' && c1 == 'M' && f10 == 1 && f1 == 2)
-                        a -= 12;
+                    if(from.getFirst() instanceof CharacterPattern) {
+                        char c0 = ((CharacterPattern) from.removeFirst()).getCharacter();
+                        char c1 = ((CharacterPattern) from.removeFirst()).getCharacter();
+                        if (c0 == 'P' && c1 == 'M' && !(f10 == 1 && f1 == 2))
+                            a += 12;
+                        else if (c0 == 'A' && c1 == 'M' && f10 == 1 && f1 == 2)
+                            a -= 12;
+                    } else if(isSymbol(from.getFirst(),Symbol.SEPERATOR))
+                    {}//ignore
+                    else
+                        return null;
+
                 }
                 m.setAttribute(MenuAttribute.BASAL_START, new MenuTime((f10 * 10) + f1 + a, 0));
 
@@ -258,12 +269,17 @@ public class MenuFactory {
                 int t1 = ((NumberPattern) to.removeFirst()).getNumber();
                 a = 0;
                 if (to.size() > 0) {
-                    char c0 = ((CharacterPattern) to.removeFirst()).getCharacter();
-                    char c1 = ((CharacterPattern) to.removeFirst()).getCharacter();
-                    if (c0 == 'P' && c1 == 'M')
-                        a += 12;
-                    else if (c0 == 'A' && c1 == 'M' && f10 == 1 && f1 == 2)
-                        a -= 12;
+                    if(to.getFirst() instanceof CharacterPattern) {
+                        char c0 = ((CharacterPattern) to.removeFirst()).getCharacter();
+                        char c1 = ((CharacterPattern) to.removeFirst()).getCharacter();
+                        if (c0 == 'P' && c1 == 'M' && !(t10==1 && t1 == 2))
+                            a += 12;
+                        else if (c0 == 'A' && c1 == 'M' && t10 == 1 && t1 == 2)
+                            a -= 12;
+                    } else if(isSymbol(to.getFirst(),Symbol.SEPERATOR))
+                    {}//ignore
+                    else
+                        return null;
                 }
                 m.setAttribute(MenuAttribute.BASAL_END, new MenuTime((t10 * 10) + t1 + a, 0));
             }catch(Exception e)
@@ -321,6 +337,10 @@ public class MenuFactory {
                 e.printStackTrace();
                 return null;
             }
+        }
+        else
+        {
+            m.setAttribute(MenuAttribute.BASAL_RATE,new MenuBlink());
         }
         if(tokens[2].size()==1 && tokens[2].get(0).getPattern() instanceof NumberPattern)
         {
@@ -2078,7 +2098,7 @@ public class MenuFactory {
         int tadd = 0;
         if(timeC.size()>0)
         {
-            if(timeC.get(0)=='P' && timeC.get(1)=='M')
+            if(timeC.get(0)=='P' && timeC.get(1)=='M' && !(hour10==1 && hour1 == 2))
             {
                 tadd += 12;
             }
