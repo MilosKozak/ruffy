@@ -25,6 +25,6 @@ public class MenuTime {
 
     @Override
     public String toString() {
-        return hour+":"+minute;
+        return hour+":"+String.format("%2d",minute);
     }
 }
