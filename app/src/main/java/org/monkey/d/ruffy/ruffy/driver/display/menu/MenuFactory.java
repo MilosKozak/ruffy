@@ -204,13 +204,214 @@ public class MenuFactory {
 
     private static Menu makeBasalSet(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.BASAL_SET);
-        //FIXME
+        LinkedList<Pattern> from = new LinkedList<>();
+        LinkedList<Pattern> to = new LinkedList<>();
+        int stage = 0;
+        while(tokens[0].size()>0) {
+            Pattern p = tokens[0].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.CLOCK))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(isSymbol(p,Symbol.MINUS))
+                        stage++;
+                    else if(p instanceof CharacterPattern)
+                        from.add(p);
+                    else if(p instanceof NumberPattern)
+                        from.add(p);
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof CharacterPattern)
+                        to.add(p);
+                    else if(p instanceof NumberPattern)
+                        to.add(p);
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(from.size()>0 && to.size()>0)
+        {
+            try {
+                int f10 = ((NumberPattern) from.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) from.removeFirst()).getNumber();
+                int a = 0;
+                if (from.size() > 0) {
+                    char c0 = ((CharacterPattern) from.removeFirst()).getCharacter();
+                    char c1 = ((CharacterPattern) from.removeFirst()).getCharacter();
+                    if (c0 == 'P' && c1 == 'M')
+                        a += 12;
+                    else if (c0 == 'A' && c1 == 'M' && f10 == 1 && f1 == 2)
+                        a -= 12;
+                }
+                m.setAttribute(MenuAttribute.BASAL_START, new MenuTime((f10 * 10) + f1 + a, 0));
+
+                int t10 = ((NumberPattern) to.removeFirst()).getNumber();
+                int t1 = ((NumberPattern) to.removeFirst()).getNumber();
+                a = 0;
+                if (to.size() > 0) {
+                    char c0 = ((CharacterPattern) to.removeFirst()).getCharacter();
+                    char c1 = ((CharacterPattern) to.removeFirst()).getCharacter();
+                    if (c0 == 'P' && c1 == 'M')
+                        a += 12;
+                    else if (c0 == 'A' && c1 == 'M' && f10 == 1 && f1 == 2)
+                        a -= 12;
+                }
+                m.setAttribute(MenuAttribute.BASAL_END, new MenuTime((t10 * 10) + t1 + a, 0));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
+
+        stage = 0;
+        LinkedList<Pattern> basal = new LinkedList<>();
+        while(tokens[1].size()>0) {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_BASAL))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(isSymbol(p,Symbol.LARGE_UNITS_PER_HOUR))
+                        stage++;
+                    else if(isSymbol(p,Symbol.LARGE_DOT))
+                        basal.add(p);
+                    else if(p instanceof NumberPattern)
+                        basal.add(p);
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(basal.size()>0)
+        {
+            try
+            {
+                String n = "";
+                for(Pattern p: basal)
+                {
+                    if(p instanceof NumberPattern)
+                        n+=((NumberPattern)p).getNumber();
+                    else if(isSymbol(p,Symbol.LARGE_DOT))
+                        n+=".";
+                    else
+                        return null;
+                }
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_RATE,d);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        if(tokens[2].size()==1 && tokens[2].get(0).getPattern() instanceof NumberPattern)
+        {
+            m.setAttribute(MenuAttribute.BASAL_SELECTED,((NumberPattern)tokens[2].removeFirst().getPattern()).getNumber());
+        }
+        else
+            return null;
         return m;
     }
 
     private static Menu makeBasalTotal(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.BASAL_TOTAL);
-        //FIXME
+        LinkedList<Pattern> basal = new LinkedList<>();
+
+        int stage = 0;
+        while(tokens[1].size()>0) {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_BASAL_SET))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        basal.add(p);
+                    else if (isSymbol(p,Symbol.LARGE_DOT))
+                        basal.add(p);
+                    else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='u')
+                        stage++;
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(basal.size()>0)
+        {
+            try {
+                String n = "";
+                for (Pattern p : basal)
+                    if (p instanceof NumberPattern)
+                        n += ((NumberPattern) p).getNumber();
+                    else if (isSymbol(p, Symbol.LARGE_DOT))
+                        n += ".";
+                    else
+                        return null;
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BASAL_TOTAL,d);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
+
+        if(tokens[2].size()==1 && tokens[2].get(0).getPattern() instanceof NumberPattern)
+        {
+            m.setAttribute(MenuAttribute.BASAL_SELECTED,((NumberPattern)tokens[2].removeFirst().getPattern()).getNumber());
+        }
+        else
+        {
+            return null;
+        }
+
+        stage = 0;
+        while(tokens[3].size()>0)
+        {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch(stage)
+            {
+                case 0:
+                    if(isSymbol(p,Symbol.CHECK))
+                    {
+                        String s = parseString(tokens[3],true);
+                        if(s!=null)
+                            stage++;
+                        else
+                            return null;
+                    }
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
         return m;
     }
 

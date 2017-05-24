@@ -24,5 +24,8 @@ public enum MenuAttribute {
     ERROR, //int errorcode
     WARNING, //int errorcode
     MESSAGE, //string errormessage
-    DAILY_TOTAL,//double units
+    DAILY_TOTAL, //double units
+    BASAL_TOTAL, //double total basal
+    BASAL_START, //time MenuTime the basalrate starts
+    BASAL_END, // time MenuTime the basalrate ends
 }
