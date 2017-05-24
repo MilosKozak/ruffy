@@ -7,6 +7,7 @@ package org.monkey.d.ruffy.ruffy.driver.display.menu;
 public enum BolusType {
     NORMAL,
     EXTENDED,
+    MULTIWAVE,
     MULTIWAVE_BOLUS,
     MULTIWAVE_EXTENDED,
 }
