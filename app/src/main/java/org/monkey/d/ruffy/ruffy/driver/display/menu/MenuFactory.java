@@ -43,9 +43,14 @@ public class MenuFactory {
 
         if(tokens[2].size()==1)
         {
+            String s0 = parseString(tokens[0],true);
             Pattern p = tokens[2].get(0).getPattern();
 
-            String s0 = parseString(tokens[0],true);
+            if(p instanceof NumberPattern && isSymbol(tokens[1].get(0).getPattern(),Symbol.LARGE_BASAL_SET))
+            {
+                return makeBasalTotal(tokens);
+            }
+
             String s1 = parseString(tokens[1],true);
 
             if(isSymbol(p,Symbol.LARGE_STOP))
@@ -134,14 +139,16 @@ public class MenuFactory {
         }
         else if(tokens[2].size()==2)
         {
-            Pattern p1 = tokens[2].get(0).getPattern();
-            Pattern p2 = tokens[2].get(1).getPattern();
+            Pattern p1 = tokens[2].removeFirst().getPattern();
+            Pattern p2 = tokens[2].removeFirst().getPattern();
 
             if(isSymbol(p1,Symbol.LARGE_BASAL))
             {
                 if(p2 instanceof NumberPattern)
                 {
                     int num = ((NumberPattern)p2).getNumber();
+                    parseString(tokens[0],true);
+                    parseString(tokens[1],true);
                     switch(num)
                     {
                         case 1:
@@ -188,8 +195,6 @@ public class MenuFactory {
                         return makeTBRSet(tokens);
                     case TBR_DURATION:
                         return makeTBRDuration(tokens);
-                    case BASAL_TOTAL:
-                        return makeBasalTotal(tokens);
                 }
                 Pattern p = tokens[1].get(0).getPattern();
             }

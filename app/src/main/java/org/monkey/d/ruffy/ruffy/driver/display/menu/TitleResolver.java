@@ -30,8 +30,6 @@ class TitleResolver {
             return Title.TBR_SET;
         if(title.equalsIgnoreCase("tbr duration"))
             return Title.TBR_DURATION;
-        if(title.equalsIgnoreCase("basal rate total"))
-            return Title.BASAL_TOTAL;
 
         /**german titles**/
         if(title.equalsIgnoreCase("bolus-menge"))
@@ -54,8 +52,6 @@ class TitleResolver {
             return Title.TBR_SET;
         if(title.equalsIgnoreCase("tbr dauer"))
             return Title.TBR_DURATION;
-        if(title.equalsIgnoreCase("basalrate gesammt"))
-            return Title.BASAL_TOTAL;
 
         //FIXME add Translations
         return null;
