@@ -55,42 +55,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_horizontal">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <Button
                     android:id="@+id/pumpMenu"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Menu" />
+                    android:text="\u2398" />
 
                 <Button
                     android:id="@+id/pumpCheck"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="OK" />
+                    android:text="\u2713" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <Button
                     android:id="@+id/pumpUp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="up" />
+                    android:text="\u21E7" />
 
                 <Button
                     android:id="@+id/pumpDown"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="down" />
+                    android:text="\u21E9" />
             </LinearLayout>
         </LinearLayout>
 
