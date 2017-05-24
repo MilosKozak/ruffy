@@ -211,7 +211,128 @@ public class MenuFactory {
 
     private static Menu makeStopMenu(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.STOP);
-        //FIXME
+        if(!isSymbol(tokens[1].removeFirst().getPattern(),Symbol.LARGE_STOP))
+            return null;
+        int stage = 0;
+        LinkedList<Pattern> clock = new LinkedList<>();
+        LinkedList<Pattern> date = new LinkedList<>();
+        while(tokens[0].size()>0) {
+            Pattern p = tokens[0].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.CLOCK))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        clock.add(p);
+                    else if(p instanceof CharacterPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR))
+                    {}
+                    else if(isSymbol(p,Symbol.CALENDAR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        date.add(p);
+                    else if (isSymbol(p, Symbol.DIVIDE))
+                        date .add(p);
+                    else if (isSymbol(p, Symbol.DOT))
+                        date .add(p);
+                    else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(clock.size()>=4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int timeadd = 0;
+                if (clock.size() == 2) {
+                    CharacterPattern p0 = (CharacterPattern) clock.removeFirst();
+                    CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
+                    if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
+                        timeadd-=12;
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                        timeadd+=12;
+                }
+                m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else
+            return null;
+        if(date.size()==5) {
+            try {
+                int f10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) date.removeFirst()).getNumber();
+                boolean divide = isSymbol(date.removeFirst(),Symbol.DIVIDE);
+                int s10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int s1 = ((NumberPattern) date.removeFirst()).getNumber();
+                if(divide)
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                else
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
+
+        stage = 0;
+        boolean lowInsulin = false;
+        boolean lowBattery= false;
+        int lockState = 0;
+        while(tokens[3].size()>0) {
+            Token t = tokens[3].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.LOW_BAT)) {
+                        lowBattery = true;
+                    } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
+                        lowInsulin= true;
+                    } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
+                        lockState=2;
+                    } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
+                        lockState=2;
+                    } else {
+                        return null;
+                    }
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(lowBattery)
+            m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(true));
+        else
+            m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(false));
+        if(lowInsulin)
+            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(true));
+        else
+            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(false));
+
+        m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));
+
         return m;
     }
 
@@ -378,25 +499,737 @@ public class MenuFactory {
 
     private static Menu makeTBRData(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.TBR_DATA);
-        //FIXME
+        int stage = 0;
+        LinkedList<NumberPattern> percent = new LinkedList<>();
+        LinkedList<NumberPattern> cr = new LinkedList<>();
+        LinkedList<NumberPattern> tr = new LinkedList<>();
+
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.UP))
+                        stage++;
+                    else if (isSymbol(p, Symbol.DOWN))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        percent.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.PERCENT))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        cr.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DIVIDE))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 3:
+                    if(p instanceof NumberPattern)
+                        tr.add((NumberPattern) p);
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(percent.size()>0)
+        {
+            try
+            {
+                String n = "";
+                for(NumberPattern p : percent)
+                {
+                    n+=p.getNumber();
+                }
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.TBR,d);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        if(cr.size()==2 && tr.size() == 2)
+        {
+            int c = cr.removeFirst().getNumber()*10;
+            c+=cr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.CURRENT_RECORD,new Integer(c));
+            int t = tr.removeFirst().getNumber()*10;
+            t+=tr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.TOTAL_RECORD,new Integer(t));
+        }
+        else
+            return null;
+
+        LinkedList<Pattern> clock = new LinkedList<>();
+        stage = 0;
+        while(tokens[2].size()>0) {
+            Pattern p = tokens[2].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.ARROW))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if (p instanceof NumberPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR)) {
+                    } else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(clock.size()==4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else
+            return null;
+
+        clock.clear();
+        LinkedList<Pattern> date = new LinkedList<>();
+        stage = 0;
+        while(tokens[3].size()>0) {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.CLOCK))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        clock.add(p);
+                    else if(p instanceof CharacterPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR))
+                    {}
+                    else if(isSymbol(p,Symbol.CALENDAR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        date.add(p);
+                    else if (isSymbol(p, Symbol.DIVIDE))
+                        date .add(p);
+                    else if (isSymbol(p, Symbol.DOT))
+                        date .add(p);
+                    else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(clock.size()>=4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int timeadd = 0;
+                if (clock.size() == 2) {
+                    CharacterPattern p0 = (CharacterPattern) clock.removeFirst();
+                    CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
+                    if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
+                        timeadd-=12;
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                        timeadd+=12;
+                }
+                m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else
+            return null;
+        if(date.size()==5) {
+            try {
+                int f10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) date.removeFirst()).getNumber();
+                boolean divide = isSymbol(date.removeFirst(),Symbol.DIVIDE);
+                int s10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int s1 = ((NumberPattern) date.removeFirst()).getNumber();
+                if(divide)
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                else
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
         return m;
     }
 
     private static Menu makeErrorData(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.ERROR_DATA);
-        //FIXME
+        boolean error = false;
+        boolean warning = false;
+        int code = 0;
+        LinkedList<NumberPattern> cr = new LinkedList<>();
+        LinkedList<NumberPattern> tr = new LinkedList<>();
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.WARNING)) {
+                        warning=true;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.ERROR)) {
+                        error=true;
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof CharacterPattern && ((((CharacterPattern)p).getCharacter()=='W' && warning) ||
+                            (((CharacterPattern)p).getCharacter()=='E' && error)))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                    {
+                        code = ((NumberPattern) p).getNumber();
+                        stage++;
+                    }
+                    else
+                        return null;
+                    break;
+                case 3:
+                    if(p instanceof NumberPattern)
+                        cr.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DIVIDE))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 4:
+                    if(p instanceof NumberPattern)
+                        tr.add((NumberPattern) p);
+                    else
+                        return null;
+                    break;
+                case 5:
+                    return null;
+            }
+        }
+        if(error)
+            m.setAttribute(MenuAttribute.ERROR,new Integer(code));
+        else if(warning)
+            m.setAttribute(MenuAttribute.WARNING,new Integer(code));
+        else
+            return null;
+
+        if(cr.size()==2 && tr.size() == 2)
+        {
+            int c = cr.removeFirst().getNumber()*10;
+            c+=cr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.CURRENT_RECORD,new Integer(c));
+            int t = tr.removeFirst().getNumber()*10;
+            t+=tr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.TOTAL_RECORD,new Integer(t));
+        }
+        else
+            return null;
+
+        String message = parseString(tokens[2],true);
+        if(message!=null)
+            m.setAttribute(MenuAttribute.MESSAGE,message);
+        else
+            return null;
+
+        LinkedList<Pattern> clock = new LinkedList<>();
+        LinkedList<Pattern> date = new LinkedList<>();
+        stage = 0;
+        while(tokens[3].size()>0) {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.CLOCK))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        clock.add(p);
+                    else if(p instanceof CharacterPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR))
+                    {}
+                    else if(isSymbol(p,Symbol.CALENDAR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        date.add(p);
+                    else if (isSymbol(p, Symbol.DIVIDE))
+                        date .add(p);
+                    else if (isSymbol(p, Symbol.DOT))
+                        date .add(p);
+                    else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(clock.size()>=4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int timeadd = 0;
+                if (clock.size() == 2) {
+                    CharacterPattern p0 = (CharacterPattern) clock.removeFirst();
+                    CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
+                    if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
+                        timeadd-=12;
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                        timeadd+=12;
+                }
+                m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else
+            return null;
+        if(date.size()==5) {
+            try {
+                int f10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) date.removeFirst()).getNumber();
+                boolean divide = isSymbol(date.removeFirst(),Symbol.DIVIDE);
+                int s10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int s1 = ((NumberPattern) date.removeFirst()).getNumber();
+                if(divide)
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                else
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
         return m;
     }
 
     private static Menu makeDailyData(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.DAILY_DATA);
-        //FIXME
+
+        LinkedList<NumberPattern> cr = new LinkedList<>();
+        LinkedList<NumberPattern> tr = new LinkedList<>();
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if(p instanceof NumberPattern)
+                        cr.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DIVIDE))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        tr.add((NumberPattern) p);
+                    else
+                        return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(cr.size()==2 && tr.size() == 2)
+        {
+            int c = cr.removeFirst().getNumber()*10;
+            c+=cr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.CURRENT_RECORD,new Integer(c));
+            int t = tr.removeFirst().getNumber()*10;
+            t+=tr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.TOTAL_RECORD,new Integer(t));
+        }
+        else
+            return null;
+
+        LinkedList<Pattern> sum = new LinkedList<>();
+        stage = 0;
+        while (tokens[2].size()>0) {
+            Token t = tokens[2].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.SUM))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        sum.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DOT))
+                        sum.add(p);
+                    else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U')
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+
+        if(sum.size()>0)
+        {
+            try
+            {
+                String n = "";
+                for(Pattern p : sum)
+                {
+                    if(p instanceof NumberPattern)
+                        n+=((NumberPattern)p).getNumber();
+                    else if(isSymbol(p,Symbol.DOT))
+                        n+=".";
+                    else
+                        return null;
+                }
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.DAILY_TOTAL,d);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        LinkedList<Pattern> date = new LinkedList<>();
+        stage = 0;
+        while(tokens[3].size()>0) {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.CALENDAR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        date.add(p);
+                    else if (isSymbol(p, Symbol.DIVIDE))
+                        date .add(p);
+                    else if (isSymbol(p, Symbol.DOT))
+                        date .add(p);
+                    else
+                        return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(date.size()==5) {
+            try {
+                int f10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) date.removeFirst()).getNumber();
+                boolean divide = isSymbol(date.removeFirst(),Symbol.DIVIDE);
+                int s10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int s1 = ((NumberPattern) date.removeFirst()).getNumber();
+                if(divide)
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                else
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
         return m;
     }
 
     private static Menu makeBolusData(LinkedList<Token>[] tokens) {
         Menu m = new Menu(MenuType.BOLUS_DATA);
-        //FIXME
+        LinkedList<Pattern> bolus = new LinkedList<>();
+        LinkedList<NumberPattern> cr = new LinkedList<>();
+        LinkedList<NumberPattern> tr = new LinkedList<>();
+        BolusType bt = null;
+
+        int stage = 0;
+        while (tokens[1].size()>0) {
+            Token t = tokens[1].removeFirst();
+            Pattern p = t.getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.BOLUS)) {
+                        bt = BolusType.NORMAL;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.EXTENDED_BOLUS)) {
+                        bt = BolusType.EXTENDED;
+                        stage++;
+                    } else if (isSymbol(p, Symbol.MULTIWAVE)) {
+                        bt = BolusType.MULTIWAVE;
+                        stage++;
+                    } else
+                        return null;
+                    break;
+                case 1:
+                    if(isSymbol(p,Symbol.DOT))
+                        bolus.add(p);
+                    else if(p instanceof NumberPattern)
+                        bolus.add(p);
+                    else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U')
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        cr.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DIVIDE))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 3:
+                    if(p instanceof NumberPattern)
+                        tr.add((NumberPattern) p);
+                    else if(isSymbol(p,Symbol.DIVIDE))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 4:
+                    return null;
+            }
+        }
+        if(bt!=null)
+        {
+            m.setAttribute(MenuAttribute.BOLUS_TYPE,bt);
+
+            try
+            {
+                String n = "";
+                for(Pattern p: bolus)
+                {
+                    if(p instanceof NumberPattern)
+                        n+=((NumberPattern)p).getNumber();
+                    else if(isSymbol(p,Symbol.DOT))
+                        n+=".";
+                    else
+                        return null;
+                }
+                double d = Double.parseDouble(n);
+                m.setAttribute(MenuAttribute.BOLUS,d);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
+        if(cr.size()==2 && tr.size() == 2)
+        {
+            int c = cr.removeFirst().getNumber()*10;
+            c+=cr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.CURRENT_RECORD,new Integer(c));
+            int t = tr.removeFirst().getNumber()*10;
+            t+=tr.removeFirst().getNumber();
+            m.setAttribute(MenuAttribute.TOTAL_RECORD,new Integer(t));
+        }
+        else
+            return null;
+
+        LinkedList<Pattern> clock = new LinkedList<>();
+        stage = 0;
+        while(tokens[2].size()>0) {
+            Pattern p = tokens[2].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.ARROW))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        clock.add(p);
+                    else if(p instanceof CharacterPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR))
+                    {}
+                    else
+                        return null;
+                    break;
+                case 2:
+                    return null;
+            }
+        }
+        if(clock.size()>=4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int timeadd = 0;
+                if (clock.size() == 2) {
+                    CharacterPattern p0 = (CharacterPattern) clock.removeFirst();
+                    CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
+                    if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
+                        timeadd-=12;
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                        timeadd+=12;
+                }
+                m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else if(bt != BolusType.NORMAL)//we need a runtime if not normal/quick bolus
+            return null;
+
+        clock.clear();
+        LinkedList<Pattern> date = new LinkedList<>();
+        stage = 0;
+        while(tokens[3].size()>0) {
+            Pattern p = tokens[3].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if (isSymbol(p, Symbol.CLOCK))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof NumberPattern)
+                        clock.add(p);
+                    else if(p instanceof CharacterPattern)
+                        clock.add(p);
+                    else if (isSymbol(p, Symbol.SEPERATOR))
+                    {}
+                    else if(isSymbol(p,Symbol.CALENDAR))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                        date.add(p);
+                    else if (isSymbol(p, Symbol.DIVIDE))
+                        date .add(p);
+                    else if (isSymbol(p, Symbol.DOT))
+                        date .add(p);
+                    else
+                        return null;
+                    break;
+                case 3:
+                    return null;
+            }
+        }
+        if(clock.size()>=4) {
+            try {
+                int hour10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int hour1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute10 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int minute1 = ((NumberPattern) clock.removeFirst()).getNumber();
+                int timeadd = 0;
+                if (clock.size() == 2) {
+                    CharacterPattern p0 = (CharacterPattern) clock.removeFirst();
+                    CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
+                    if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
+                        timeadd-=12;
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                        timeadd+=12;
+                }
+                m.setAttribute(MenuAttribute.TIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+        else
+            return null;
+        if(date.size()==5) {
+            try {
+                int f10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int f1 = ((NumberPattern) date.removeFirst()).getNumber();
+                boolean divide = isSymbol(date.removeFirst(),Symbol.DIVIDE);
+                int s10 = ((NumberPattern) date.removeFirst()).getNumber();
+                int s1 = ((NumberPattern) date.removeFirst()).getNumber();
+                if(divide)
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                else
+                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        else
+            return null;
+
         return m;
     }
 
@@ -1147,8 +1980,8 @@ public class MenuFactory {
         if(bt != null)
         {
             //running bolus
-            m.setAttribute(MenuAttribute.BOLUS,bt+" bolus running");
-            m.setAttribute(MenuAttribute.BOLUS_REMAINING,doubleNUmber+" bolus remaining");
+            m.setAttribute(MenuAttribute.BOLUS_TYPE,bt);
+            m.setAttribute(MenuAttribute.BOLUS_REMAINING,doubleNUmber);
         }
         else
         {
