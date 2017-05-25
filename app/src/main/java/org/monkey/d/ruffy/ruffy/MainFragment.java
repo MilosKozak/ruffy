@@ -54,6 +54,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Button connect;
     private PumpData pumpData;
     private TextView frameCounter;
+    private TextView versionNameView;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 3 );
 
@@ -138,6 +139,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
+        versionNameView = (TextView) v.findViewById(R.id.versionName);
+        versionNameView.setText(BuildConfig.VERSION_NAME);
+
         connect = (Button) v.findViewById(R.id.main_connect);
         connect.setOnClickListener(this);
 

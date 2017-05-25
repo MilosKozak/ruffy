@@ -1,5 +1,35 @@
 apply plugin: 'com.android.application'
 
+def generateVersionName = { ->
+
+    StringBuilder stringBuilder = new StringBuilder();
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--always'
+            standardOutput = stdout
+        }
+        stringBuilder.append(stdout.toString().trim())
+
+        stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+            standardOutput = stdout
+        }
+        String branch = stdout.toString().trim()
+        if (!branch.equals("master")) {
+            stringBuilder.append('-')
+            stringBuilder.append(branch)
+        }
+
+    } catch (ignored) {
+        return "NoGitSystemAvailable";
+    }
+    stringBuilder.append('-')
+    stringBuilder.append((new Date()).format('yyyy.MM.dd'))
+    return stringBuilder.toString()
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -8,7 +38,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName generateVersionName()
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
