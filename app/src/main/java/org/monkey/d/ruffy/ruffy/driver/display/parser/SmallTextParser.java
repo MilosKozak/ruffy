@@ -440,6 +440,15 @@ public class SmallTextParser {
                 "█          ██ ███",
                 "█████████████    "
         });
+        symbols.put(Symbol.LOW_INSULIN_ALT, new String[]{
+                "█████████████    ",
+                "█  █  █  █  █ ███",
+                "█  █  █  █  ███ █",
+                "█             █ █",
+                "█           ███ █",
+                "█           █ ███",
+                "█████████████    "
+        });
         symbols.put(Symbol.CALENDAR, new String[]{
                 "███████",
                 "█     █",

@@ -13,6 +13,7 @@ public enum Symbol {
     WARNING,
     DIVIDE,
     LOW_INSULIN,
+    LOW_INSULIN_ALT,
     CALENDAR,
     SEPERATOR,
     ARROW,

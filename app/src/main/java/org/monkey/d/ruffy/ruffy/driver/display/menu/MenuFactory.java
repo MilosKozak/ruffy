@@ -537,6 +537,8 @@ public class MenuFactory {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
                         lowInsulin= true;
+                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
+                        lowInsulin= true;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
@@ -2258,6 +2260,8 @@ public class MenuFactory {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
                         lowInsulin= true;
+                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
+                        lowInsulin= true;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
@@ -2272,6 +2276,8 @@ public class MenuFactory {
                     if (isSymbol(p, Symbol.LOW_BAT)) {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
+                        lowInsulin= true;
+                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
                         lowInsulin= true;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
