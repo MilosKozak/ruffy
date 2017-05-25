@@ -602,6 +602,15 @@ public class SmallTextParser {
                 "█████",
                 "     "
         });
+        symbols.put(Symbol.WARANTY, new String[]{
+                " ███ █  ",
+                "  ██  █ ",
+                " █ █   █",
+                "█      █",
+                "█   █ █ ",
+                " █  ██  ",
+                "  █ ███ "
+        });
     }
 
     private static LinkedList<Pattern> pattern = new LinkedList<>();

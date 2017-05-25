@@ -28,5 +28,6 @@ public enum MenuAttribute {
     BASAL_TOTAL, //double total basal
     BASAL_START, //time MenuTime the basalrate starts
     BASAL_END, // time MenuTime the basalrate ends
-    DEBUG_TIMING,//double with timing infos
+    DEBUG_TIMING, //double with timing infos
+    WARANTY, //boolean true if out of waranty
 }

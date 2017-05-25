@@ -526,6 +526,7 @@ public class MenuFactory {
         stage = 0;
         boolean lowInsulin = false;
         boolean lowBattery= false;
+        boolean waranty= true;
         int lockState = 0;
         while(tokens[3].size()>0) {
             Token t = tokens[3].removeFirst();
@@ -540,6 +541,8 @@ public class MenuFactory {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
                         lockState=2;
+                    } else if (isSymbol(p, Symbol.WARANTY)) {
+                        waranty = false;
                     } else {
                         return null;
                     }
@@ -556,6 +559,7 @@ public class MenuFactory {
             m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(true));
         else
             m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(false));
+        m.setAttribute(MenuAttribute.WARANTY,new Boolean(waranty));
 
         m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));
 
@@ -2235,6 +2239,8 @@ public class MenuFactory {
         number.clear();
         boolean lowInsulin = false;
         boolean lowBattery= false;
+        boolean waranty = true;
+
         int lockState = 0;
         while(tokens[3].size()>0) {
             Token t = tokens[3].removeFirst();
@@ -2256,6 +2262,8 @@ public class MenuFactory {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
                         lockState=2;
+                    } else if (isSymbol(p, Symbol.WARANTY)) {
+                        waranty = false;
                     } else {
                         return null;
                     }
@@ -2269,6 +2277,8 @@ public class MenuFactory {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
                         lockState=2;
+                    } else if (isSymbol(p, Symbol.WARANTY)) {
+                        waranty = false;
                     } else {
                         return null;
                     }
@@ -2283,6 +2293,7 @@ public class MenuFactory {
             m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(true));
         else
             m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(false));
+        m.setAttribute(MenuAttribute.WARANTY,new Boolean(waranty));
 
         m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));
 

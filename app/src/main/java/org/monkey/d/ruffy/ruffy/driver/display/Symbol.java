@@ -30,7 +30,9 @@ public enum Symbol {
     EXTENDED_BOLUS,
     PERCENT,
     BASAL,
-
+    MINUS,
+    WARANTY,
+    
     LARGE_DOT,
     LARGE_SEPERATOR,
     LARGE_WARNING,
@@ -53,6 +55,6 @@ public enum Symbol {
     LARGE_BASAL,
     LARGE_MY_DATA,
     LARGE_ALARM_SETTINGS,
-    LARGE_CHECK, MINUS,
+    LARGE_CHECK,
 
 }
