@@ -440,7 +440,7 @@ public class SmallTextParser {
                 "█          ██ ███",
                 "█████████████    "
         });
-        symbols.put(Symbol.LOW_INSULIN_ALT, new String[]{
+        symbols.put(Symbol.NO_INSULIN, new String[]{
                 "█████████████    ",
                 "█  █  █  █  █ ███",
                 "█  █  █  █  ███ █",

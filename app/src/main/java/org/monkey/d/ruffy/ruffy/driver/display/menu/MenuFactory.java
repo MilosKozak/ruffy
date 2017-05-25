@@ -524,7 +524,7 @@ public class MenuFactory {
             return null;
 
         stage = 0;
-        boolean lowInsulin = false;
+        int lowInsulin = 0;
         boolean lowBattery= false;
         boolean waranty= true;
         int lockState = 0;
@@ -536,9 +536,9 @@ public class MenuFactory {
                     if (isSymbol(p, Symbol.LOW_BAT)) {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
-                        lowInsulin= true;
-                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
-                        lowInsulin= true;
+                        lowInsulin= 1;
+                    } else if (isSymbol(p, Symbol.NO_INSULIN)) {
+                        lowInsulin= 2;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
@@ -557,10 +557,9 @@ public class MenuFactory {
             m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(true));
         else
             m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(false));
-        if(lowInsulin)
-            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(true));
-        else
-            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(false));
+
+        m.setAttribute(MenuAttribute.INSULIN_STATE,lowInsulin);
+
         m.setAttribute(MenuAttribute.WARANTY,new Boolean(waranty));
 
         m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));
@@ -2239,7 +2238,7 @@ public class MenuFactory {
 
         stage = 0;
         number.clear();
-        boolean lowInsulin = false;
+        int lowInsulin = 0;
         boolean lowBattery= false;
         boolean waranty = true;
 
@@ -2259,9 +2258,9 @@ public class MenuFactory {
                     } else if (isSymbol(p, Symbol.LOW_BAT)) {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
-                        lowInsulin= true;
-                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
-                        lowInsulin= true;
+                        lowInsulin= 1;
+                    } else if (isSymbol(p, Symbol.NO_INSULIN)) {
+                        lowInsulin= 2;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
@@ -2276,9 +2275,9 @@ public class MenuFactory {
                     if (isSymbol(p, Symbol.LOW_BAT)) {
                         lowBattery = true;
                     } else if (isSymbol(p, Symbol.LOW_INSULIN)) {
-                        lowInsulin= true;
-                    } else if (isSymbol(p, Symbol.LOW_INSULIN_ALT)) {
-                        lowInsulin= true;
+                        lowInsulin = 1;
+                    } else if (isSymbol(p, Symbol.NO_INSULIN)) {
+                        lowInsulin= 2;
                     } else if (isSymbol(p, Symbol.LOCK_CLOSED)) {
                         lockState=2;
                     } else if (isSymbol(p, Symbol.LOCK_OPENED)) {
@@ -2295,10 +2294,8 @@ public class MenuFactory {
             m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(true));
         else
             m.setAttribute(MenuAttribute.LOW_BATTERY,new Boolean(false));
-        if(lowInsulin)
-            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(true));
-        else
-            m.setAttribute(MenuAttribute.LOW_INSULIN,new Boolean(false));
+
+        m.setAttribute(MenuAttribute.INSULIN_STATE,lowInsulin);
         m.setAttribute(MenuAttribute.WARANTY,new Boolean(waranty));
 
         m.setAttribute(MenuAttribute.LOCK_STATE,new Integer(lockState));

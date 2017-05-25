@@ -12,7 +12,7 @@ public enum MenuAttribute {
     BASAL_RATE,//double units/h
     BASAL_SELECTED,//int selected basal profile
     LOW_BATTERY,//boolean low battery warning
-    LOW_INSULIN,//boolean low insulin warning
+    INSULIN_STATE,//int insulin warning 0 == no warning, 1== low, 2 == empty
     LOCK_STATE,//int keylock state 0==no lock, 1==unlocked, 2==locked
     MULTIWAVE_BOLUS,//double immediate bolus on multiwave
     BOLUS_TYPE,//BolusType, only history uses MULTIWAVE
