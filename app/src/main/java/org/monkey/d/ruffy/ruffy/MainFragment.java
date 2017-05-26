@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -245,9 +246,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.fragment_main, container, false);
-        versionNameView = (TextView) v.findViewById(R.id.versionName);
-        versionNameView.setText(BuildConfig.VERSION_NAME);
-
+        
+        try {
+            versionNameView = (TextView) v.findViewById(R.id.versionName);
+            versionNameView.setText(getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+        } catch (PackageManager.NameNotFoundException e) {}
+        
         connect = (Button) v.findViewById(R.id.main_connect);
         connect.setOnClickListener(this);
 
