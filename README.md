@@ -5,8 +5,8 @@ Gum Gum to the pump!
 This is not even alpha Software!
 
 USE IT AT YOUR OWN RISK!
-I AM NOT RESPOSIBLE FOR ANY DAMAGES ON YOUR PHONE, PUMP, HEALTH OR WHAT EVER GETS DAMAGED IF YOU USE THIS SOFTWARE!
-DONT USE IT WHILE PUMP IS ATTACHED TO YOUR BODY!
+I AM NOT RESPONSIBLE FOR ANY DAMAGES ON YOUR PHONE, PUMP, HEALTH OR WHAT EVER GETS DAMAGED IF YOU USE THIS SOFTWARE!
+DON'T USE IT WHILE PUMP IS ATTACHED TO YOUR BODY!
 USE IT AT YOUR OWN RISK!
 
 Neither this project or me or anybody who has worked on this project is affiliated, or endorsed, by ROCHE or any of its national or international subsidiaries!
@@ -28,10 +28,10 @@ What is ready:
 * structurally parse the informations on screen (not all screens)
 * remote control the pump via buttons
 
-What are the requierements:
+What are the requirements:
 
 * Android below 4.2
-* Lineage 7+ with latest night
+* Lineage 7+ with latest nightly
 
 What must I change to use another Android version?
 
@@ -47,7 +47,7 @@ But Why?
 
 How do I build it?
 
-* Download a 2.3 Version of Androidtudio
+* Download a 2.3 Version of Android-Studio
 * Set it up with the wizard
 * clone this project from github
 * open it with android studio
