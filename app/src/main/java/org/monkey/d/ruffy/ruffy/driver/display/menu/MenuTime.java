@@ -15,6 +15,12 @@ public class MenuTime {
         this.minute = minute;
     }
 
+    public MenuTime(String value) {
+        String[] p = value.split(":");
+        hour = Integer.parseInt(p[0]);
+        minute = Integer.parseInt(p[1]);
+    }
+
     public int getHour() {
         return hour;
     }

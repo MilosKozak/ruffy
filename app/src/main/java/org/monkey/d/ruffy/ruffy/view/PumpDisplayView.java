@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -56,7 +55,7 @@ public class PumpDisplayView extends SurfaceView implements DisplayUpdater {
     }
 
     @Override
-    public void update(boolean[][] pixel, int which)
+    public void update(byte[] pixel, int which)
     {
         int w = getWidth();
         float xf = ((float)w)/96f;
@@ -72,10 +71,9 @@ public class PumpDisplayView extends SurfaceView implements DisplayUpdater {
 
         tempCanvas.drawColor(Color.WHITE);
 
-        for(int r = 0; r < 8; r++)
-            for(int c = 0; c < 96; c++)
-
-                if(pixel[r][c])
+        for(int c = 0; c < 96; c++)
+            for(int r = 0; r < 8; r++)
+                if((pixel[95-c] & (1<<r))!=0)
                     tempCanvas.drawRect(x*c,y*((which*8)+r),x*(c+1),y*((which*8)+r+1),black);
 
         surfaceHolder.unlockCanvasAndPost(tempCanvas);

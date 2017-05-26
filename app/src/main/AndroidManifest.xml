@@ -24,6 +24,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        <service
+            android:name="org.monkey.d.ruffy.ruffy.driver.Ruffy"
+            android:description="@string/ruffy_service_desc"
+            android:directBootAware="false"
+            android:enabled="true"
+            android:isolatedProcess="false"
+            android:label="@string/ruffy_service_name"
+            android:process="org.monkey.d.ruffy.ruffy.driver.Ruffy">
 
+        </service>
+    </application>
 </manifest>
