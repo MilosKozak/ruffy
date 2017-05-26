@@ -54,6 +54,13 @@ How do I build it?
 * connect your (hopefully compatible) phone
 * press the run button on top 
 
+How do I build it directly from my device?
+
+* Look at : http://www.android-ide.com/tutorial_androidstudio.html
+* Download AIDE
+* clone this project from github
+* Build
+
 How do I know that my bluetooth Stack is wrong?
 
 * start the pairing, lay the pump next to the phone in pairing mode
