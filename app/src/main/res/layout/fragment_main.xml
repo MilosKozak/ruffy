@@ -103,4 +103,9 @@
             android:textSize="10sp"
             tools:text="no frame recieved" />
     </LinearLayout>
+    <TextView
+        android:id="@+id/versionName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"/>
 </LinearLayout>
