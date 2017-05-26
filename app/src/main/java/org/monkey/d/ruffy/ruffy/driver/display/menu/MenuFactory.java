@@ -510,9 +510,9 @@ public class MenuFactory {
                 int s10 = ((NumberPattern) date.removeFirst()).getNumber();
                 int s1 = ((NumberPattern) date.removeFirst()).getNumber();
                 if(divide)
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((s10*10)+s1,(f10*10)+f1));
                 else
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((f10*10)+f1,(s10*10)+s1));
 
             }catch(Exception e)
             {
@@ -912,9 +912,9 @@ public class MenuFactory {
                 int s10 = ((NumberPattern) date.removeFirst()).getNumber();
                 int s1 = ((NumberPattern) date.removeFirst()).getNumber();
                 if(divide)
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((s10*10)+s1,(f10*10)+f1));
                 else
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((f10*10)+f1,(s10*10)+s1));
 
             }catch(Exception e)
             {
@@ -1080,9 +1080,9 @@ public class MenuFactory {
                 int s10 = ((NumberPattern) date.removeFirst()).getNumber();
                 int s1 = ((NumberPattern) date.removeFirst()).getNumber();
                 if(divide)
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((s10*10)+s1,(f10*10)+f1));
                 else
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((f10*10)+f1,(s10*10)+s1));
 
             }catch(Exception e)
             {
@@ -1218,9 +1218,9 @@ public class MenuFactory {
                 int s10 = ((NumberPattern) date.removeFirst()).getNumber();
                 int s1 = ((NumberPattern) date.removeFirst()).getNumber();
                 if(divide)
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((s10*10)+s1,(f10*10)+f1));
                 else
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((f10*10)+f1,(s10*10)+s1));
 
             }catch(Exception e)
             {
@@ -1448,9 +1448,9 @@ public class MenuFactory {
                 int s10 = ((NumberPattern) date.removeFirst()).getNumber();
                 int s1 = ((NumberPattern) date.removeFirst()).getNumber();
                 if(divide)
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((s10*10)+s1,(f10*10)+f1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((s10*10)+s1,(f10*10)+f1));
                 else
-                    m.setAttribute(MenuAttribute.DATE, new MenuDATE((f10*10)+f1,(s10*10)+s1));
+                    m.setAttribute(MenuAttribute.DATE, new MenuDate((f10*10)+f1,(s10*10)+s1));
 
             }catch(Exception e)
             {
@@ -2329,4 +2329,4 @@ public class MenuFactory {
     private static boolean isSymbol(Pattern p, Symbol symbol) {
         return (p instanceof SymbolPattern) && ((SymbolPattern) p).getSymbol() == symbol;
     }
-    }
+}

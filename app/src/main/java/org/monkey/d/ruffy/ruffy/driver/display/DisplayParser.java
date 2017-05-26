@@ -7,8 +7,6 @@ import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuFactory;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.SmallTextParser;
 
 import java.util.LinkedList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Created by fishermen21 on 20.05.17.
@@ -16,7 +14,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class DisplayParser {
     private static boolean busy = false;
-    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
 
     public static void findMenu(final byte[][] pixels, final DisplayParserHandler handler) {
         if(busy)
@@ -26,79 +23,74 @@ public class DisplayParser {
         }
         busy = true;
 
-        scheduler.execute(new Runnable() {
-            @Override
-            public void run() {
-                long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
 
-                try {
-                    byte[][] display = new byte[4][96];
-                    for(int i = 0; i < 4;i++)
-                        for(int c = 0;c < 96;c++)
-                            display[i][c]=pixels[i][95-c];
+        try {
+            byte[][] display = new byte[4][96];
+            for(int i = 0; i < 4;i++)
+                for(int c = 0;c < 96;c++)
+                    display[i][c]=pixels[i][95-c];
 
-                    Log.v("Tokens", "----------------------------------");
-                    //print(display,"analyze");
-                    LinkedList<Token>[] tokens = new LinkedList[]{
-                            new LinkedList<Token>(),
-                            new LinkedList<Token>(),
-                            new LinkedList<Token>(),
-                            new LinkedList<Token>()};
-                    int toks = 0;
-                    for(int i = 0; i< 4;i++)
+            LinkedList<Token>[] tokens = new LinkedList[]{
+                    new LinkedList<Token>(),
+                    new LinkedList<Token>(),
+                    new LinkedList<Token>(),
+                    new LinkedList<Token>()};
+            int toks = 0;
+
+            for(int i = 0; i< 4;i++)
+            {
+
+                for(int x = 0; x < 92;)//no token is supposed to be smaller then 5 columns
+                {
+                    Token t = null;
+
+                    t = LargeTextParser.findToken(display,i,x);
+
+                    if(t==null)
                     {
-                        for(int x = 0; x < 92;)//no token is supposed to be smaller then 5 columns
-                        {
-                            Token t = null;
-
-                            t = LargeTextParser.findToken(display,i,x);
-                            if(t==null)
-                            {
-                                t = SmallTextParser.findToken(display, i, x);
-                            }
-
-                            if (t != null) {
-                                tokens[i].add(t);
-                                toks++;
-                                x += t.getWidth()-1;
-                            } else {
-                                x++;
-                            }
-                        }
-
+                        t = SmallTextParser.findToken(display, i, x);
                     }
-                    Log.v("Tokens",toks+" found");
 
-                    long s = 0;
-                    for(int i = 0; i< 4;i++) {
-                        for (int x = 0; x < 96; x++) {
-                            s+=display[i][x];
-                        }
+                    if (t != null) {
+                        tokens[i].add(t);
+                        toks++;
+                        x += t.getWidth()-1;
+                    } else {
+                        x++;
                     }
-                    if(s!=0)
-                    {
-                        print(display,"not empty");
-                    }
-                    Menu menu = MenuFactory.get(tokens);
-
-                    menu.setAttribute(MenuAttribute.DEBUG_TIMING,(((double)(System.currentTimeMillis()-t1))/1000d));
-                    if(menu != null)
-                        handler.menuFound(menu);
-                    else
-                        handler.noMenuFound();
-
-                    int nct = 0;
-                    for(int i=0;i<4;i++)nct+=tokens[i].size();
-                    if(nct>0 && menu!= null)
-                        Log.v("tokens",nct+" toks not consumed in "+menu.getType());
-                }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
-                finally {
-                    Log.v("Tokens",(((double)(System.currentTimeMillis()-t1))/1000d)+" secs needed for frame");
-                    busy=false;
                 }
-
             }
-        });
+
+            long s = 0;
+            for(int i = 0; i< 4;i++) {
+                for (int x = 0; x < 96; x++) {
+                    s+=display[i][x];
+                }
+            }
+            if(s!=0)
+            {
+                print(display,"not empty");
+            }
+
+            Menu menu = MenuFactory.get(tokens);
+
+            if(menu != null) {
+                Log.v("tokens", " needed " + ((((double) (System.currentTimeMillis() - t1)) / 1000d)) + " for parsing " + (menu != null ? menu.getType() : "no menu"));
+                menu.setAttribute(MenuAttribute.DEBUG_TIMING, (((double) (System.currentTimeMillis() - t1)) / 1000d));
+                handler.menuFound(menu);
+            }
+            else
+                handler.noMenuFound();
+
+            int nct = 0;
+            for(int i=0;i<4;i++)nct+=tokens[i].size();
+            if(nct>0 && menu!= null)
+                Log.v("tokens",nct+" toks not consumed in "+menu.getType());
+        }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
+        finally {
+            busy=false;
+        }
     }
 
     private static String[] makeStrings(boolean[][][] pixels) {
@@ -115,46 +107,7 @@ public class DisplayParser {
         return display;
     }
 
-    public static boolean match(String[] display, String[] symbol, int startx, int starty) {
-        for(int y = starty; y < 32 && y < starty+symbol.length;y++)
-        {
-            try {
-                int l = Math.min(display[y].length(), startx + symbol[y - starty].length());
-                if(l>0 && startx+l<display[y].length()) {
-                    String c = display[y].substring(startx, l);
-                    if (!c.equals(symbol[y - starty])) {
-                        return false;
-                    }
-                }
-                else
-                {
-                    //Log.d("display","wtf?!?!");
-                }
-            }catch(Exception e)
-            {e.printStackTrace();}
-        }
-        //Debug
-        for(int y = starty;y<starty+symbol.length;y++)
-        {
-            String ds = display[y];
-            int s = startx;
-            String before = "";
-            if(s>1)
-                 before = ds.substring(0,startx-1);
-            String after = "";
-            s=startx+symbol[y-starty].length();
-            if(ds.length()>s)
-                after = ds.substring(startx+symbol[y-starty].length());
-            String sym = "|";
-            for(int x = 0; x < symbol[y-starty].length()-1;x++)
-                sym+="+";
-            sym+="|";
-            display[y]=before+sym+after;
-        }
-        return true;
-    }
-
-    public static void print(byte[][] display, String text) {
+  public static void print(byte[][] display, String text) {
         Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
         Log.d("DisplayParser",text);
 

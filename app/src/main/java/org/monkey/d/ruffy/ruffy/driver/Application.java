@@ -222,12 +222,6 @@ public class Application {
         sendData(payload, true, btConn);
     }
 
-    public static byte NO_KEY				=(byte)0x00;
-    public static byte MENU					=(byte)0x03;
-    public static byte CHECK				=(byte)0x0C;
-    public static byte UP					=(byte)0x30;
-    public static byte DOWN					=(byte)0xC0;
-
     public static short rtSendKey(byte key, boolean changed,short rtSeq, BTConnection btConn)
     {
         ByteBuffer payload = ByteBuffer.allocate(8);

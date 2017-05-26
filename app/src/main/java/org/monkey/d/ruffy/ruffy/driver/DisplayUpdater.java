@@ -7,5 +7,5 @@ package org.monkey.d.ruffy.ruffy.driver;
 public interface DisplayUpdater {
     void clear();
 
-    void update(boolean[][] quarter, int which);
+    void update(byte[] quarter, int which);
 }
