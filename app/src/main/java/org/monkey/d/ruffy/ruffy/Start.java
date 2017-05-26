@@ -21,7 +21,6 @@ public class Start extends FragmentActivity {
         if (!paired) {
             getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
         }
-
     }
 
     @Override

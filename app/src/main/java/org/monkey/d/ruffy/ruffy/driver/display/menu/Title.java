@@ -14,6 +14,5 @@ enum Title {
     DAILY_TOTALS,
     TBR_DATA,
     TBR_SET,
-    BASAL_TOTAL,
     TBR_DURATION,
 }

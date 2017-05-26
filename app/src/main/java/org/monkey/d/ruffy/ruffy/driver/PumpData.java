@@ -1,7 +1,9 @@
 package org.monkey.d.ruffy.ruffy.driver;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.RemoteException;
 
 import java.security.InvalidKeyException;
 
@@ -16,14 +18,14 @@ public class PumpData {
     private Object driver_tf;
     private byte address;
     private byte[] nonceTx;
-    private Activity activity;
+    private Context activity;
 
-    public PumpData(Activity activity) {
+    public PumpData(Context activity) {
         this.activity = activity;
         this.nonceTx = new byte[13];
     }
 
-    public static PumpData loadPump(Activity activity,LogHandler handler) {
+    public static PumpData loadPump(Context activity, IRTHandler handler) {
         PumpData data = new PumpData(activity);
         
         SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
@@ -31,7 +33,11 @@ public class PumpData {
         String pd = prefs.getString("pd",null);
         data.pumpMac = prefs.getString("device",null);
 
-        handler.log("Loading data of Pump "+data.pumpMac);
+        try {
+            handler.log("Loading data of Pump "+data.pumpMac);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         if(data.pumpMac != null)
         {
@@ -45,7 +51,11 @@ public class PumpData {
             } catch(Exception e)
             {
                 e.printStackTrace();
-                handler.fail("unable to load keys!");
+                try {
+                    handler.fail("unable to load keys!");
+                } catch (RemoteException e1) {
+                    e1.printStackTrace();
+                }
                 return null;
             }
         }
@@ -84,7 +94,7 @@ public class PumpData {
         prefs.edit().putString("nonceTx",Utils.byteArrayToHexString(nonceTx,nonceTx.length)).apply();
     }
 
-    public Activity getActivity() {
+    public Context getActivity() {
         return activity;
     }
 

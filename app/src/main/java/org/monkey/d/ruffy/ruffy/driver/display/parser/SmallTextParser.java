@@ -119,6 +119,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('Ä', new String[]{
+                "█   █",
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█████",
+                "█   █",
+                "█   █"
+        });
         letters.put('B', new String[]{
                 "████ ",
                 "█   █",
@@ -236,6 +245,15 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('Ö', new String[]{
+                "█   █",
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
         letters.put('P', new String[]{
                 "████ ",
                 "█   █",
@@ -284,6 +302,15 @@ public class SmallTextParser {
         letters.put('U', new String[]{
                 "█   █",
                 "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('Ü', new String[]{
+                "█   █",
+                "     ",
                 "█   █",
                 "█   █",
                 "█   █",
@@ -411,6 +438,15 @@ public class SmallTextParser {
                 "█          ████ █",
                 "█          ████ █",
                 "█          ██ ███",
+                "█████████████    "
+        });
+        symbols.put(Symbol.NO_INSULIN, new String[]{
+                "█████████████    ",
+                "█  █  █  █  █ ███",
+                "█  █  █  █  ███ █",
+                "█             █ █",
+                "█           ███ █",
+                "█           █ ███",
                 "█████████████    "
         });
         symbols.put(Symbol.CALENDAR, new String[]{
@@ -574,6 +610,15 @@ public class SmallTextParser {
                 "     ",
                 "█████",
                 "     "
+        });
+        symbols.put(Symbol.WARANTY, new String[]{
+                " ███ █  ",
+                "  ██  █ ",
+                " █ █   █",
+                "█      █",
+                "█   █ █ ",
+                " █  ██  ",
+                "  █ ███ "
         });
     }
 
