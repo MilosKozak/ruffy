@@ -1851,8 +1851,8 @@ public class MenuFactory {
         LinkedList<Pattern> number = new LinkedList<>();
 
         int stage = 0;
-        Symbol bolus = null;
 
+        BolusType bt = null;
         //main part
         while (tokens[1].size()>0) {
             Token t = tokens[1].removeFirst();
@@ -1860,13 +1860,13 @@ public class MenuFactory {
             switch (stage) {
                 case 0:
                     if (isSymbol(p, Symbol.LARGE_BOLUS)) {
-                        bolus = Symbol.LARGE_BOLUS;
+                        bt = BolusType.NORMAL;
                         stage++;
                     } else if (isSymbol(p, Symbol.LARGE_MULTIWAVE)) {
-                        bolus = Symbol.LARGE_MULTIWAVE;
+                        bt = BolusType.MULTIWAVE;
                         stage++;
                     } else if (isSymbol(p, Symbol.LARGE_EXTENDED_BOLUS)) {
-                        bolus = Symbol.LARGE_EXTENDED_BOLUS;
+                        bt = BolusType.EXTENDED;
                         stage++;
                     } else if(p instanceof NumberPattern) {
                         number.add(p);
@@ -1891,8 +1891,8 @@ public class MenuFactory {
             }
         }
 
-        if(bolus!=null)
-            m.setAttribute(MenuAttribute.BOLUS_TYPE,bolus.toString().replace("LARGE_",""));
+        if(bt!=null)
+            m.setAttribute(MenuAttribute.BOLUS_TYPE,bt);
         else
             m.setAttribute(MenuAttribute.BOLUS_TYPE,new MenuBlink());
 

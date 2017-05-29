@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import org.monkey.d.ruffy.ruffy.driver.display.menu.BolusType;
 import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuBlink;
 import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuDate;
 import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuTime;
@@ -48,6 +49,8 @@ public class Menu implements Parcelable{
                     o = new MenuTime(value);
                 } else if (MenuBlink.class.toString().equals(clas)) {
                     o = new MenuBlink();
+                } else if (BolusType.class.toString().equals(clas)) {
+                    o = BolusType.valueOf(value);
                 }
 
                 if (o != null) {
@@ -94,12 +97,11 @@ public class Menu implements Parcelable{
         {
             try
             {
+                dest.writeString(a.toString());
+                Object o = attributes.get(a);
 
-            dest.writeString(a.toString());
-            Object o = attributes.get(a);
-
-            dest.writeString(o.getClass().toString());
-            dest.writeString(o.toString());
+                dest.writeString(o.getClass().toString());
+                dest.writeString(o.toString());
             }catch(Exception e)
             {
                 Log.v("MenuOut","error in write",e);
