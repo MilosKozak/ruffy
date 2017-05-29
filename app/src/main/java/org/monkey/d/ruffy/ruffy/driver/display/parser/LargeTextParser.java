@@ -193,6 +193,23 @@ public class LargeTextParser {
     private static Map<Character, String[]> letters = new HashMap<Character, String[]>();
 
     static {
+        letters.put('E', new String[]{
+                "████████",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "████████",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "████████"
+        });
         letters.put('W', new String[]{
                 "██      ██",
                 "██      ██",
@@ -609,6 +626,24 @@ public class LargeTextParser {
                 "   █████       ",
                 "    ███        ",
                 "     █         "
+
+        });
+        symbols.put(Symbol.LARGE_ERROR, new String[]{
+                "     █████     ",
+                "   █████████   ",
+                "  ███████████  ",
+                " ███ █████ ███ ",
+                " ██   ███   ██ ",
+                "████   █   ████",
+                "█████     █████",
+                "██████   ██████",
+                "█████     █████",
+                "████   █   ████",
+                " ██   ███   ██ ",
+                " ███ █████ ███ ",
+                "  ███████████  ",
+                "   █████████   ",
+                "     █████     "
 
         });
     }

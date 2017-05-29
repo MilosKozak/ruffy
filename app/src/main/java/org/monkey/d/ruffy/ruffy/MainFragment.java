@@ -25,6 +25,8 @@ import android.widget.TextView;
 import org.monkey.d.ruffy.ruffy.driver.IRTHandler.Stub;
 import org.monkey.d.ruffy.ruffy.driver.IRuffyService;
 import org.monkey.d.ruffy.ruffy.driver.Ruffy;
+import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
+import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
@@ -190,11 +192,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             displayView.clear();
         }
 
+        //TODO just for debug marker byte[][] display = new byte[4][];
         @Override
         public void rtUpdateDisplay(byte[] quarter, int which) throws RemoteException {
 
             displayView.update(quarter,which);
 
+            //TODO just for debug marker display[which] = quarter;
             if (connectLog.getVisibility() != View.GONE)
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -226,6 +230,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void run() {
                     frameCounter.setText("no display found");
+/*                    DisplayParser.findMenu(display, new DisplayParserHandler() {
+                        @Override
+                        public void menuFound(Menu menu) {
+
+                        }
+
+                        @Override
+                        public void noMenuFound() {
+
+                        }
+                    });*///TODO just for debug marker
                 }
             });
         }

@@ -51,6 +51,8 @@ public class Menu implements Parcelable{
                     o = new MenuBlink();
                 } else if (BolusType.class.toString().equals(clas)) {
                     o = BolusType.valueOf(value);
+                } else if (String.class.toString().equals(clas)) {
+                    o = new String(value);
                 }
 
                 if (o != null) {

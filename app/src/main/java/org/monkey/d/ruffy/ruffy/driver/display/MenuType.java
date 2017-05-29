@@ -38,4 +38,5 @@ public enum MenuType {
     START_MENU,
     BASAL_TOTAL,
     BASAL_SET,
+    WARNING_OR_ERROR,
 }

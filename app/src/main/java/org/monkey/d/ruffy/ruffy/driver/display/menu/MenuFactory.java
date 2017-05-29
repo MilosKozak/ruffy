@@ -199,7 +199,102 @@ public class MenuFactory {
                 Pattern p = tokens[1].get(0).getPattern();
             }
         }
+        if(tokens[0].size()>0 && tokens[3].size()>0) {
+            String m = parseString(tokens[0], false);
+            Token t30 = tokens[3].getFirst();
+
+            if(isSymbol(t30.getPattern(),Symbol.CHECK) && m.length()>0)
+                return makeWarning(tokens);
+        }
         return null;
+    }
+
+    private static Menu makeWarning(LinkedList<Token>[] tokens) {
+        Menu m = new Menu(MenuType.WARNING_OR_ERROR);
+        String message = parseString(tokens[0],true);
+        m.setAttribute(MenuAttribute.MESSAGE,message);
+        int stage = 0;
+        int warning = 0;
+        int type = 0;
+        while(tokens[1].size()>0) {
+            Pattern p = tokens[1].removeFirst().getPattern();
+            switch (stage) {
+                case 0:
+                    if(isSymbol(p,Symbol.LARGE_WARNING))
+                    {
+                        type = 1;
+                        stage++;
+                    }
+                    else if(isSymbol(p,Symbol.LARGE_ERROR))
+                    {
+                        type = 2;
+                        stage++;
+                    }
+                    else
+                        return null;
+                    break;
+                case 1:
+                    if(p instanceof CharacterPattern)
+                    {
+                        char w = ((CharacterPattern)p).getCharacter();
+                        if(type == 1 && w == 'W')
+                        {
+                            stage++;
+                        }
+                        else if(type == 2 && w == 'E')
+                        {
+                            stage++;
+                        }
+                        else
+                            return null;
+                    }
+                    else
+                        return null;
+                    break;
+                case 2:
+                    if(p instanceof NumberPattern)
+                    {
+                        warning = ((NumberPattern)p).getNumber();
+                        stage++;
+                    }
+                    else return null;
+                    break;
+                case 3:
+                    if(p instanceof NumberPattern) {
+                        warning *= 10;
+                        warning += ((NumberPattern) p).getNumber();
+                        stage++;
+                    }
+                    else if(isSymbol(p,Symbol.LARGE_STOP))
+                        stage+=2;
+                    else
+                        return null;
+                    break;
+                case 4:
+                    if(isSymbol(p,Symbol.LARGE_STOP))
+                        stage++;
+                    else
+                        return null;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        if(type == 1) {
+            m.setAttribute(MenuAttribute.WARNING, warning);
+        }
+        else if(type == 2) {
+            m.setAttribute(MenuAttribute.ERROR, warning);
+        } else {
+            m.setAttribute(MenuAttribute.ERROR_OR_WARNING, warning);
+        }
+
+        if(isSymbol(tokens[3].getFirst().getPattern(),Symbol.CHECK))
+        {
+            tokens[3].removeFirst();
+            parseString(tokens[3],true);//ignore result
+        }
+        return m;
     }
 
     private static Menu makeBasalSet(LinkedList<Token>[] tokens) {
