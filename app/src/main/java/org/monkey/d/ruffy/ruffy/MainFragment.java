@@ -277,7 +277,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 new AlertDialog.Builder(getContext()).setTitle("remove bonding?").setMessage("Really delete bonding informations with pump?").setPositiveButton("YES", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        resetPairing();//FIXME
+                        resetPairing();
                         getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
                     }
                 }).setNegativeButton("NO",null).show();
