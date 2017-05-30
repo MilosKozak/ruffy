@@ -281,6 +281,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('Ñ', new String[]{
+                " █  █",
+                "█ ██ ",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█  ██",
+                "█   █"
+        });
         letters.put('O', new String[]{
                 " ███ ",
                 "█   █",
