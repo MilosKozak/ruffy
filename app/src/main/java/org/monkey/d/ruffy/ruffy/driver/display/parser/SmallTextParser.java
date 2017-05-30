@@ -164,6 +164,24 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('É', new String[]{
+                "   █ ",
+                "  █  ",
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████"
+        });
+        letters.put('Ê', new String[]{
+                "  █  ",
+                " █ █ ",
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████"
+        });
         letters.put('F', new String[]{
                 "█████",
                 "█    ",
@@ -199,6 +217,15 @@ public class SmallTextParser {
                 "  █  ",
                 "  █  ",
                 " ███ "
+        });
+        letters.put('J', new String[]{
+                "  ███",
+                "   █ ",
+                "   █ ",
+                "   █ ",
+                "   █ ",
+                "█  █ ",
+                " ██  "
         });
         letters.put('K', new String[]{
                 "█   █",
