@@ -128,6 +128,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('Á', new String[]{
+                "   █ ",
+                "  █  ",
+                " ███ ",
+                "█   █",
+                "█████",
+                "█   █",
+                "█   █"
+        });
         letters.put('B', new String[]{
                 "████ ",
                 "█   █",
@@ -218,6 +227,15 @@ public class SmallTextParser {
                 "  █  ",
                 " ███ "
         });
+        letters.put('i', new String[]{
+                " █ ",
+                "   ",
+                "██ ",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
         letters.put('J', new String[]{
                 "  ███",
                 "   █ ",
@@ -263,6 +281,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('Ñ', new String[]{
+                " █  █",
+                "█ ██ ",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█  ██",
+                "█   █"
+        });
         letters.put('O', new String[]{
                 " ███ ",
                 "█   █",
@@ -276,6 +303,15 @@ public class SmallTextParser {
                 "█   █",
                 " ███ ",
                 "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('ó', new String[]{
+                "   █ ",
+                "  █  ",
+                " ███ ",
                 "█   █",
                 "█   █",
                 "█   █",
@@ -338,6 +374,15 @@ public class SmallTextParser {
         letters.put('Ü', new String[]{
                 "█   █",
                 "     ",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('ú', new String[]{
+                "   █ ",
+                "  █  ",
                 "█   █",
                 "█   █",
                 "█   █",

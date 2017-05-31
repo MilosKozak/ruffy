@@ -75,6 +75,29 @@ class TitleResolver {
         if(title.equalsIgnoreCase("durée du dbt"))
             return Title.TBR_DURATION;
 
+
+        /**spanish titles**/
+        if(title.equalsIgnoreCase("cantidad de bolo"))
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolo inmediato"))
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("duración de bolo"))
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info"))
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("datos de bolo"))
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("datos de error"))
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("totales diarios"))
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("datos de dbt"))
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("porcentaje dbt"))
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("duración de dbt"))
+            return Title.TBR_DURATION;
+
         //FIXME add Translations
         return null;
     }
