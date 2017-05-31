@@ -2,6 +2,7 @@
 Gum Gum to the pump!
 [![Join the chat at https://gitter.im/monkey-r/Lobby](https://badges.gitter.im/monkey-r/Lobby.svg)](https://gitter.im/monkey-r/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+![Ruffy Log](https://cdn.rawgit.com/monkey-r/ruffy/master/ruffy-logo.svg "Ruffy Logo")
 This is not even alpha Software!
 
 USE IT AT YOUR OWN RISK!
