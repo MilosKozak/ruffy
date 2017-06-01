@@ -187,7 +187,27 @@ class TitleResolver {
         if(title.equalsIgnoreCase("czas trwania tdp")) //TBR 2
             return Title.TBR_DURATION;
 
-
+        /**cz titles**/
+        if(title.equalsIgnoreCase("množství bolusu")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("okamžitý bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("trvání bolusu")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("údaje bolusů")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("údaje chyb")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("celk. den. dávky")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("údaje dbd")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("procento dbd")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("trvání dbd")) //TBR 2
+            return Title.TBR_DURATION;
 
 
 
