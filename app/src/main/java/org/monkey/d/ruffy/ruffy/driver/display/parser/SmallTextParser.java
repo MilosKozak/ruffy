@@ -155,6 +155,15 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('ć', new String[]{
+                "   █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                "█    ",
+                "█    ",
+                " ████"
+        });
         letters.put('D', new String[]{
                 "███  ",
                 "█  █ ",
@@ -350,6 +359,15 @@ public class SmallTextParser {
                 "█    ",
                 " ███ ",
                 "    █",
+                "    █",
+                "████ "
+        });
+        letters.put('ś', new String[]{
+                "   █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                " ███ ",
                 "    █",
                 "████ "
         });
