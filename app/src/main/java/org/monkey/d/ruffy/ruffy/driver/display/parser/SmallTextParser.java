@@ -137,6 +137,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('á', new String[]{
+                "   █ ",
+                "  █  ",
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█████",
+                "█   █"
+        });
         letters.put('B', new String[]{
                 "████ ",
                 "█   █",
@@ -200,6 +209,15 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('ę', new String[]{
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████",
+                "  █  ",
+                "  ██ "
+        });
         letters.put('F', new String[]{
                 "█████",
                 "█    ",
@@ -245,6 +263,25 @@ public class SmallTextParser {
                 " █ ",
                 "███"
         });
+        letters.put('í', new String[]{
+                "  █",
+                " █ ",
+                "███",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
+        letters.put('İ', new String[]{
+                " █ ",
+                "   ",
+                "███",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
+
         letters.put('J', new String[]{
                 "  ███",
                 "   █ ",
@@ -271,6 +308,15 @@ public class SmallTextParser {
                 "█    ",
                 "█    ",
                 "█████"
+        });
+        letters.put('ł', new String[]{
+                " █   ",
+                " █   ",
+                " █ █ ",
+                " ██  ",
+                "██   ",
+                " █   ",
+                " ████"
         });
         letters.put('M', new String[]{
                 "█   █",
@@ -325,6 +371,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █",
                 " ███ "
+        });
+        letters.put('ø', new String[]{
+                "     █",
+                "  ███ ",
+                " █ █ █",
+                " █ █ █",
+                " █ █ █",
+                "  ███ ",
+                " █    "
         });
         letters.put('P', new String[]{
                 "████ ",
@@ -407,6 +462,15 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('ů', new String[]{
+                "  █  ",
+                " █ █ ",
+                "█ █ █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
         letters.put('V', new String[]{
                 "█   █",
                 "█   █",
@@ -443,6 +507,15 @@ public class SmallTextParser {
                 "  █  ",
                 "  █  "
         });
+        letters.put('ý', new String[]{
+                "   █ ",
+                "█ █ █",
+                "█   █",
+                " █ █ ",
+                "  █  ",
+                "  █  ",
+                "  █  "
+        });
         letters.put('Z', new String[]{
                 "█████",
                 "    █",
@@ -452,7 +525,26 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('ź', new String[]{
+                "  █  ",
+                "█████",
+                "    █",
+                "  ██ ",
+                " █   ",
+                "█    ",
+                "█████"
+        });
+        letters.put('ž', new String[]{
+                " █ █ ",
+                "  █  ",
+                "█████",
+                "   █ ",
+                "  █  ",
+                " █   ",
+                "█████"
+        });
     }
+
 
     private static Map<Symbol, String[]> symbols = new HashMap<Symbol, String[]>();
 

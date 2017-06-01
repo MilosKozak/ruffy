@@ -143,8 +143,93 @@ class TitleResolver {
         if(title.equalsIgnoreCase("tbd-duur")) //TBR 2
             return Title.TBR_DURATION;
 
+        /**norwegian titles**/
+        if(title.equalsIgnoreCase("bolusmengde")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("umiddelbar bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("bolusvarighet")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolusdata")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("feildata")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("døgnmengde")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("mbd-data")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("mbd-prosent")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("mbd-varighet")) //TBR 2
+            return Title.TBR_DURATION;
 
+        /**polish titles**/
+        if(title.equalsIgnoreCase("wielkość bolusa")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolus natychm.")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("cz. trw. bolusa")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("dane bolusa")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("dane błędu")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("dzien. d. całk.")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("dane tdp")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("procent tdp")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("czas trwania tdp")) //TBR 2
+            return Title.TBR_DURATION;
 
+        /**cz titles**/
+        if(title.equalsIgnoreCase("množství bolusu")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("okamžitý bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("trvání bolusu")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("údaje bolusů")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("údaje chyb")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("celk. den. dávky")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("údaje dbd")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("procento dbd")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("trvání dbd")) //TBR 2
+            return Title.TBR_DURATION;
+
+        /**finnish titles**/
+        if(title.equalsIgnoreCase("bolus mİktari")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("hemen bolus uygl")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("bolus süresİ")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolus verİlerİ")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("hata verİlerİ")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("günlük toplam")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("gbh verİlerİ")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("gbh yüzdesİ")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("gbh süresİ")) //TBR 2
+            return Title.TBR_DURATION;
 
         //FIXME add Translations
         return null;
