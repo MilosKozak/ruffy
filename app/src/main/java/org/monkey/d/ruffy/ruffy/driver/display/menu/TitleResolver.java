@@ -366,6 +366,29 @@ class TitleResolver {
             return Title.TBR_DURATION;
 
 
+        /**russian titles**/
+        if(title.equalsIgnoreCase("OбъEм бOлюCа")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("пPямOй бOлюC")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("пPOдOлж. бOлюCа")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("даHHыE O бOлюCE")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("даHHыE Oб O иб.")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("CуTOчHыE дOзы")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("даHHыE O BбC")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("пPOцEHT BбC")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("пPOдOлжиT. BбC")) //TBR 2
+            return Title.TBR_DURATION;
+
+
         //FIXME add Translations
         return null;
     }
