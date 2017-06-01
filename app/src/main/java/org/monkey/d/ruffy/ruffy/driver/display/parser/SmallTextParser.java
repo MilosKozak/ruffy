@@ -400,6 +400,16 @@ public class SmallTextParser {
                 "  ███ ",
                 " █    "
         });
+        letters.put('ő', new String[]{
+                " █  █",
+                "█  █ ",
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+
         letters.put('P', new String[]{
                 "████ ",
                 "█   █",
