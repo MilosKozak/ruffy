@@ -343,6 +343,29 @@ class TitleResolver {
         if(title.equalsIgnoreCase("trvanie dbd")) //TBR 2
             return Title.TBR_DURATION;
 
+        /**portugues titles**/
+        if(title.equalsIgnoreCase("volume do bolus")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolus imediato")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("duraÇão do bolus")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("dados de bolus")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("dados de erros")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("totais diários")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("dados dbt")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("dbt percentagem")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("dbt duraÇão")) //TBR 2
+            return Title.TBR_DURATION;
+
+
         //FIXME add Translations
         return null;
     }
