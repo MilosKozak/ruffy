@@ -200,6 +200,15 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('ę', new String[]{
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████",
+                "  █  ",
+                "  ██ "
+        });
         letters.put('F', new String[]{
                 "█████",
                 "█    ",
@@ -271,6 +280,15 @@ public class SmallTextParser {
                 "█    ",
                 "█    ",
                 "█████"
+        });
+        letters.put('ł', new String[]{
+                " █   ",
+                " █   ",
+                " █ █ ",
+                " ██  ",
+                "██   ",
+                " █   ",
+                " ████"
         });
         letters.put('M', new String[]{
                 "█   █",
@@ -462,7 +480,18 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('ź', new String[]{
+                "  █  ",
+                "█████",
+                "    █",
+                "  ██ ",
+                " █   ",
+                "█    ",
+                "█████"
+        });
+
     }
+
 
     private static Map<Symbol, String[]> symbols = new HashMap<Symbol, String[]>();
 
