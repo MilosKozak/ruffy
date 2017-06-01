@@ -155,6 +155,16 @@ public class SmallTextParser {
                 "█████",
                 "█   █"
         });
+        letters.put('æ', new String[]{
+                " ████",
+                "█ █  ",
+                "█ █  ",
+                "████ ",
+                "█ █  ",
+                "█ █  ",
+                "█ ███"
+        });
+
         letters.put('B', new String[]{
                 "████ ",
                 "█   █",
