@@ -98,6 +98,54 @@ class TitleResolver {
         if(title.equalsIgnoreCase("duración de dbt"))
             return Title.TBR_DURATION;
 
+
+        /**italian titles**/
+        if(title.equalsIgnoreCase("quantita bolo")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolo immediato")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("tempo erogazione")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("memoria boli")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("memoria allarmi")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("totali giornata")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("memoria pbt")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("percentuale pbt")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("durata pbt")) //TBR 2
+            return Title.TBR_DURATION;
+
+        /**dutch titles**/
+        if(title.equalsIgnoreCase("bolushoeveelheid")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("directe bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("bolusduur")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolusgegevens")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("foutengegevens")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("dagtotalen")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("tbd-gegevens")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("tbd-percentage")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("tbd-duur")) //TBR 2
+            return Title.TBR_DURATION;
+
+
+
+
         //FIXME add Translations
         return null;
     }
