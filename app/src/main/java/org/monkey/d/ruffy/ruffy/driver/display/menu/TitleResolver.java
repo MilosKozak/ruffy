@@ -209,7 +209,27 @@ class TitleResolver {
         if(title.equalsIgnoreCase("trvání dbd")) //TBR 2
             return Title.TBR_DURATION;
 
-
+        /**finnish titles**/
+        if(title.equalsIgnoreCase("boluksen määrä")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("nopea bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("boluksen kesto")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolustiedot")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("hälytystiedot")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("päiv. kok.annos")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("tba - tiedot")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("tba - prosentti")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("tba - kesto")) //TBR 2
+            return Title.TBR_DURATION;
 
         //FIXME add Translations
         return null;
