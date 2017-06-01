@@ -272,6 +272,15 @@ public class SmallTextParser {
                 " █ ",
                 "███"
         });
+        letters.put('İ', new String[]{
+                " █ ",
+                "   ",
+                "███",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
 
         letters.put('J', new String[]{
                 "  ███",

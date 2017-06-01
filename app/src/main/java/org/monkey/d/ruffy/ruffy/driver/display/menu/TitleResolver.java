@@ -210,25 +210,25 @@ class TitleResolver {
             return Title.TBR_DURATION;
 
         /**finnish titles**/
-        if(title.equalsIgnoreCase("boluksen määrä")) //multiwave 1
+        if(title.equalsIgnoreCase("bolus mİktari")) //multiwave 1
             return Title.BOLUS_AMOUNT;
-        if(title.equalsIgnoreCase("nopea bolus")) //multiwave 2
+        if(title.equalsIgnoreCase("hemen bolus uygl")) //multiwave 2
             return Title.IMMEDIATE_BOLUS;
-        if(title.equalsIgnoreCase("boluksen kesto")) //multiwave 3
+        if(title.equalsIgnoreCase("bolus süresİ")) //multiwave 3
             return Title.BOLUS_DURATION;
         if(title.equalsIgnoreCase("quick info")) //check1
             return Title.QUICK_INFO;
-        if(title.equalsIgnoreCase("bolustiedot")) //check2, mydata 1
+        if(title.equalsIgnoreCase("bolus verİlerİ")) //check2, mydata 1
             return Title.BOLUS_DATA;
-        if(title.equalsIgnoreCase("hälytystiedot")) //mydata 2
+        if(title.equalsIgnoreCase("hata verİlerİ")) //mydata 2
             return Title.ERROR_DATA;
-        if(title.equalsIgnoreCase("päiv. kok.annos")) //mydata 3
+        if(title.equalsIgnoreCase("günlük toplam")) //mydata 3
             return Title.DAILY_TOTALS;
-        if(title.equalsIgnoreCase("tba - tiedot")) //mydata 4
+        if(title.equalsIgnoreCase("gbh verİlerİ")) //mydata 4
             return Title.TBR_DATA;
-        if(title.equalsIgnoreCase("tba - prosentti")) //TBR 1
+        if(title.equalsIgnoreCase("gbh yüzdesİ")) //TBR 1
             return Title.TBR_SET;
-        if(title.equalsIgnoreCase("tba - kesto")) //TBR 2
+        if(title.equalsIgnoreCase("gbh süresİ")) //TBR 2
             return Title.TBR_DURATION;
 
         //FIXME add Translations
