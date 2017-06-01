@@ -320,6 +320,29 @@ class TitleResolver {
         if(title.equalsIgnoreCase("tbr időtartam")) //TBR 2
             return Title.TBR_DURATION;
 
+
+        /**slovak titles**/
+        if(title.equalsIgnoreCase("množstvo bolusu")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("okamžitý bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("trvanie bolusu")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolusové dáta")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("dáta o chybách")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("súčty dňa")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("dbd dáta")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("percento dbd")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("trvanie dbd")) //TBR 2
+            return Title.TBR_DURATION;
+
         //FIXME add Translations
         return null;
     }

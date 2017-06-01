@@ -192,6 +192,15 @@ public class SmallTextParser {
                 "█    ",
                 " ████"
         });
+        letters.put('č', new String[]{
+                " █ █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                "█    ",
+                "█    ",
+                " ████"
+        });
         letters.put('D', new String[]{
                 "███  ",
                 "█  █ ",
@@ -364,6 +373,16 @@ public class SmallTextParser {
                 "█  ██",
                 "█   █"
         });
+        letters.put('ň', new String[]{
+                " █ █ ",
+                "  █  ",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█  ██",
+                "█   █"
+        });
+
         letters.put('O', new String[]{
                 " ███ ",
                 "█   █",
