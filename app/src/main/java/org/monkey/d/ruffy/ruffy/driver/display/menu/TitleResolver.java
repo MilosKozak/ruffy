@@ -388,6 +388,27 @@ class TitleResolver {
         if(title.equalsIgnoreCase("пPOдOлжиT. BбC")) //TBR 2
             return Title.TBR_DURATION;
 
+        /**croatian titles**/
+        if(title.equalsIgnoreCase("KOLIčINA BOLUSA")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("TRENUTNI BOLUS")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("TRAJANJE BOLUSA")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("PODACI O BOLUSU")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("PODACI O GREšK.")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("UKUPNE DNEV.DOZE")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("PODACI O PBD-u")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("POSTOTAK PBD-a")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("TRAJANJE PBD-a")) //TBR 2
+            return Title.TBR_DURATION;
 
         //FIXME add Translations
         return null;

@@ -119,6 +119,13 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('a', new String[]{
+                " ███ ",
+                "    █",
+                " ████",
+                "█   █",
+                " ████"
+        });
         letters.put('Ä', new String[]{
                 "█   █",
                 " ███ ",
@@ -494,6 +501,16 @@ public class SmallTextParser {
                 "    █",
                 "████ "
         });
+        letters.put('š', new String[]{
+                " █ █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                " ███ ",
+                "    █",
+                "████ "
+        });
+
         letters.put('T', new String[]{
                 "█████",
                 "  █  ",
@@ -511,6 +528,13 @@ public class SmallTextParser {
                 "█   █",
                 "█   █",
                 " ███ "
+        });
+        letters.put('u', new String[]{
+                "█   █",
+                "█   █",
+                "█   █",
+                "█  ██",
+                " ██ █"
         });
         letters.put('Ü', new String[]{
                 "█   █",
