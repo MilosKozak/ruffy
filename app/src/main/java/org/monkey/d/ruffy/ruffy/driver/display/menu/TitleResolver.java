@@ -143,6 +143,28 @@ class TitleResolver {
         if(title.equalsIgnoreCase("tbd-duur")) //TBR 2
             return Title.TBR_DURATION;
 
+        /**norwegian titles**/
+        if(title.equalsIgnoreCase("bolusmengde")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("umiddelbar bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("bolusvarighet")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolusdata")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("feildata")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("døgnmengde")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("mbd-data")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("mbd-prosent")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("mbd-varighet")) //TBR 2
+            return Title.TBR_DURATION;
+
 
 
 
