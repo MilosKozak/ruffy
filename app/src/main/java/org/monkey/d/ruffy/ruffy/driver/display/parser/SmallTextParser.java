@@ -128,6 +128,15 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('ă', new String[]{
+                " █ █ ",
+                "  █  ",
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█████",
+                "█   █"
+        });
         letters.put('Á', new String[]{
                 "   █ ",
                 "  █  ",

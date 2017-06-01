@@ -231,6 +231,28 @@ class TitleResolver {
         if(title.equalsIgnoreCase("gbh süresİ")) //TBR 2
             return Title.TBR_DURATION;
 
+        /**romanian titles**/
+        if(title.equalsIgnoreCase("cantitate bolus")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolus imediat")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("durată bolus")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("date bolus")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("date eroare")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("totaluri zilnice")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("date rbt")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("procent rbt")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("durata rbt")) //TBR 2
+            return Title.TBR_DURATION;
+
         //FIXME add Translations
         return null;
     }
