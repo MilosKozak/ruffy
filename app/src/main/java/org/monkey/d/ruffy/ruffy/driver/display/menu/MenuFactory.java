@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver.display.menu;
 
-import android.util.Log;
-
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuType;
@@ -171,7 +169,7 @@ public class MenuFactory {
         else if(tokens[0].size()>1)
         {
             String title = parseString(tokens[0],false);
-            Log.d("Title", title);
+
             Title t = TitleResolver.resolve(title);
             if(t!=null) {
                 //resolved so we can consume
