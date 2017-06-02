@@ -320,6 +320,119 @@ class TitleResolver {
         if(title.equalsIgnoreCase("tbr időtartam")) //TBR 2
             return Title.TBR_DURATION;
 
+
+        /**slovak titles**/
+        if(title.equalsIgnoreCase("množstvo bolusu")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("okamžitý bolus")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("trvanie bolusu")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("bolusové dáta")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("dáta o chybách")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("súčty dňa")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("dbd dáta")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("percento dbd")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("trvanie dbd")) //TBR 2
+            return Title.TBR_DURATION;
+
+        /**portugues titles**/
+        if(title.equalsIgnoreCase("volume do bolus")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("bolus imediato")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("duraÇão do bolus")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("dados de bolus")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("dados de erros")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("totais diários")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("dados dbt")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("dbt percentagem")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("dbt duraÇão")) //TBR 2
+            return Title.TBR_DURATION;
+
+
+        /**russian titles**/
+        if(title.equalsIgnoreCase("OбъEм бOлюCа")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("пPямOй бOлюC")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("пPOдOлж. бOлюCа")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("даHHыE O бOлюCE")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("даHHыE Oб O иб.")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("CуTOчHыE дOзы")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("даHHыE O BбC")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("пPOцEHT BбC")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("пPOдOлжиT. BбC")) //TBR 2
+            return Title.TBR_DURATION;
+
+        /**croatian titles**/
+        if(title.equalsIgnoreCase("KOLIčINA BOLUSA")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("TRENUTNI BOLUS")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("TRAJANJE BOLUSA")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("PODACI O BOLUSU")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("PODACI O GREšK.")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("UKUPNE DNEV.DOZE")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("PODACI O PBD-u")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("POSTOTAK PBD-a")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("TRAJANJE PBD-a")) //TBR 2
+            return Title.TBR_DURATION;
+
+        /**greek titles**/
+        if(title.equalsIgnoreCase("пOΣOTHTа ΔOΣHΣ")) //multiwave 1
+            return Title.BOLUS_AMOUNT;
+        if(title.equalsIgnoreCase("амEΣH ΔOΣH")) //multiwave 2
+            return Title.IMMEDIATE_BOLUS;
+        if(title.equalsIgnoreCase("ΔIаPKEIа ΔOΣHΣ")) //multiwave 3
+            return Title.BOLUS_DURATION;
+        if(title.equalsIgnoreCase("quick info")) //check1
+            return Title.QUICK_INFO;
+        if(title.equalsIgnoreCase("ΔEΔOмENа ΔOΣEΩN")) //check2, mydata 1
+            return Title.BOLUS_DATA;
+        if(title.equalsIgnoreCase("ΔEΔOм. ΣΦаΛмаTΩN")) //mydata 2
+            return Title.ERROR_DATA;
+        if(title.equalsIgnoreCase("HмEPHΣIO ΣυNOΛO")) //mydata 3
+            return Title.DAILY_TOTALS;
+        if(title.equalsIgnoreCase("ΔEΔOмENа п.B.P.")) //mydata 4
+            return Title.TBR_DATA;
+        if(title.equalsIgnoreCase("пOΣOΣTO п.B.P.")) //TBR 1
+            return Title.TBR_SET;
+        if(title.equalsIgnoreCase("ΔIаPKEIа п.B.P.")) //TBR 2
+            return Title.TBR_DURATION;
+
+
         //FIXME add Translations
         return null;
     }
