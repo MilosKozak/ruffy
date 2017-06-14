@@ -11,18 +11,6 @@
     tools:context="org.monkey.d.ruffy.ruffy.SetupFragment"
     android:orientation="vertical">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Reset!"
-        android:id="@+id/main_reset"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Connect!"
-        android:id="@+id/main_connect"/>
-
     <TextView
         android:id="@+id/main_log"
         style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
@@ -30,11 +18,35 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:background="@color/colorPrimaryDark"
+        android:clickable="true"
+        android:contextClickable="true"
+        android:cursorVisible="true"
+        android:editable="true"
+        android:enabled="true"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
         android:text="Log"
-        android:textSize="10sp"
-        />
+        android:textIsSelectable="true"
+        android:textSize="10sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/main_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset!" />
+
+        <Button
+            android:id="@+id/main_connect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Connect!" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/pumpPanel"
