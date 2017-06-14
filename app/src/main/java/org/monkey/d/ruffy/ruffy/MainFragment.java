@@ -99,7 +99,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 } else {
                     rtSendKey(Ruffy.Key.UP,false);
                 }
-                try{sleep(100);}catch(Exception e){}
+                try{sleep(200);}catch(Exception e){}
             }
             rtSendKey(Ruffy.Key.NO_KEY,true);
         }
