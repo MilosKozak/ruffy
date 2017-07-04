@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
@@ -270,7 +269,7 @@ public class Ruffy extends Service  {
         public void run() {
             while(synRun)
             {
-                Protokoll.sendSyn(btConn);
+                Protocol.sendSyn(btConn);
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -355,7 +354,7 @@ public class Ruffy extends Service  {
     private PacketHandler rtPacketHandler = new PacketHandler(){
         @Override
         public void sendImidiateAcknowledge(byte sequenceNumber) {
-            Protokoll.sendAck(sequenceNumber,btConn);
+            Protocol.sendAck(sequenceNumber,btConn);
         }
 
         @Override
@@ -368,7 +367,7 @@ public class Ruffy extends Service  {
             switch (response)
             {
                 case ID:
-                    Protokoll.sendSyn(btConn);
+                    Protocol.sendSyn(btConn);
                     break;
                 case SYNC:
                     btConn.seqNo = 0x00;

@@ -22,7 +22,7 @@ import org.monkey.d.ruffy.ruffy.driver.BTConnection;
 import org.monkey.d.ruffy.ruffy.driver.BTHandler;
 import org.monkey.d.ruffy.ruffy.driver.Frame;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
-import org.monkey.d.ruffy.ruffy.driver.Protokoll;
+import org.monkey.d.ruffy.ruffy.driver.Protocol;
 import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
 
@@ -202,7 +202,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     btConn.getPumpData().setAndSaveToDeviceKey(key_pd,tf);
                     btConn.getPumpData().setAndSaveToPumpKey(key_dp,tf);
                     btConn.getPumpData().setAndSavePumpMac(pairingDevice.getAddress());
-                    Protokoll.sendIDReq(btConn);
+                    Protocol.sendIDReq(btConn);
                 } catch (Exception e) {
                     e.printStackTrace();
                     appendLog("failed inRX: " + e.getMessage());
@@ -221,7 +221,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     appendLog("Server ID: " + String.format("%X", serverId) + " Device ID: " + deviceId);
 
                     try {
-                        Protokoll.sendSyn(btConn);
+                        Protocol.sendSyn(btConn);
                         appendLog("send Syn!");
                     }catch(Exception e) {
                         e.printStackTrace();
@@ -290,7 +290,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 break;
             case (short) 0xA095:
                 step+=100;
-                Protokoll.sendSyn(btConn);
+                Protocol.sendSyn(btConn);
                 break;
         }
     }

@@ -16,7 +16,7 @@ import java.util.List;
  * Created by fishermen21 on 16.05.17.
  */
 
-public class Protokoll {
+public class Protocol {
     public static void sendSyn(BTConnection btConn)  {
 
         Utils.incrementArray(btConn.getPumpData().getNonceTx());
