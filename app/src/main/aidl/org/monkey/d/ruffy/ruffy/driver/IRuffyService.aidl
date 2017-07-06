@@ -7,8 +7,17 @@ import org.monkey.d.ruffy.ruffy.driver.IRTHandler;
 interface IRuffyService {
 
     void setHandler(IRTHandler handler);
+
+    /** Connect to the pump
+    *
+    * @return 0 if successful, -1 otherwise
+    */
     int doRTConnect();
+
+    /** Disconnect from the pump */
     void doRTDisconnect();
+
+    // TODO what's the meaning of 'changed'?
     void rtSendKey(byte keyCode, boolean changed);
     void resetPairing();
 }
