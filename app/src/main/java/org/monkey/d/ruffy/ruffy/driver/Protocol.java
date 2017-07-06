@@ -7,7 +7,6 @@ import org.monkey.d.ruffy.ruffy.driver.Frame;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;

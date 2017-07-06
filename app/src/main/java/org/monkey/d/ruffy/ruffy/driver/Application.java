@@ -77,7 +77,6 @@ public class Application {
     }
     private static byte[] service_activate = {16, 0, 0x66, (byte)0x90};
     private static byte[] service_deactivate = {16, 0, 0x69, (byte)0x90};
-    private static byte[] service_deactivate_all = {16, 0, 0x6A, (byte)0x90};
 
     public static void sendAppCommand(Command command, BTConnection btConn){
         ByteBuffer payload = null;

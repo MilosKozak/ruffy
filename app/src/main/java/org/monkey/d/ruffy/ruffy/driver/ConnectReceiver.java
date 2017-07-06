@@ -20,7 +20,6 @@ public class ConnectReceiver extends BroadcastReceiver {
     }
 
     public void onReceive(Context context, Intent intent) {
-        BluetoothDevice bd = null;
         for(String k: intent.getExtras().keySet())
         {
             if(k.equals(BluetoothDevice.EXTRA_DEVICE))
@@ -28,7 +27,7 @@ public class ConnectReceiver extends BroadcastReceiver {
                 if(intent.getStringExtra("address")== null)
                 {
 
-                    bd = ((BluetoothDevice)intent.getExtras().get(k));
+                    BluetoothDevice bd = ((BluetoothDevice)intent.getExtras().get(k));
                     String address = bd.getAddress();
                     intent.getExtras().putString("address",address);
                     if (address.substring(0, 8).equals("00:0E:2F")) {

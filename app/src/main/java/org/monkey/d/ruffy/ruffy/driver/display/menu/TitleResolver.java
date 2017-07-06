@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver.display.menu;
 
-import org.monkey.d.ruffy.ruffy.driver.display.MenuType;
-
 /**
  * Created by fishermen21 on 22.05.17.
  */

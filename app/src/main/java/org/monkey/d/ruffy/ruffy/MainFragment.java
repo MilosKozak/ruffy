@@ -25,8 +25,6 @@ import android.widget.TextView;
 import org.monkey.d.ruffy.ruffy.driver.IRTHandler.Stub;
 import org.monkey.d.ruffy.ruffy.driver.IRuffyService;
 import org.monkey.d.ruffy.ruffy.driver.Ruffy;
-import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
-import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
 import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;

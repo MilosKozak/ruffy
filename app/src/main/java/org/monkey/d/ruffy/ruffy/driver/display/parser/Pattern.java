@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver.display.parser;
 
-import android.util.Log;
-
 import org.monkey.d.ruffy.ruffy.driver.display.Token;
 
 /**
