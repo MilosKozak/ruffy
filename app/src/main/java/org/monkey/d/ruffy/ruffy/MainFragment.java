@@ -31,6 +31,10 @@ import org.monkey.d.ruffy.ruffy.view.PumpDisplayView;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
 
 /**
  * A placeholder fragment containing a simple view.
@@ -77,6 +81,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         if (mServiceBound) {
+
+            try {
+                appendLog("Try to disconnect before exit");
+                mBoundService.doRTDisconnect();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
             getActivity().unbindService(mServiceConnection);
             mServiceBound = false;
         }
@@ -97,7 +109,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 } else {
                     rtSendKey(Ruffy.Key.UP,false);
                 }
-                try{sleep(100);}catch(Exception e){}
+                try{sleep(200);}catch(Exception e){}
             }
             rtSendKey(Ruffy.Key.NO_KEY,true);
         }
@@ -128,14 +140,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         try{Thread.sleep(millis);}catch(Exception e){/*ignore*/}
     }
 
-    private void rtSendKey(byte keyCode, boolean changed)
-    {
+    private void rtSendKey(byte keyCode, boolean changed)  {
         try {
-            mBoundService.rtSendKey(keyCode,changed);
-        }catch(RemoteException re)
-        {
-            re.printStackTrace();
-            appendLog("failed keySend: "+re.getMessage());
+            if (mBoundService.isConnected()) {
+                try {
+                    mBoundService.rtSendKey(keyCode, changed);
+                } catch (RemoteException re) {
+                    re.printStackTrace();
+                    appendLog("failed keySend: " + re.getMessage());
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -179,7 +195,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connect.setText("Disconnect");
+                    try {
+                        if (mBoundService.isConnected()) {
+                            connect.setText("Disconnect");
+                        } else {
+                            connect.setText("Connect");
+                        }
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                     connect.setEnabled(true);
                 }
             });
@@ -284,6 +308,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         connectLog = (TextView) v.findViewById(R.id.main_log);
         connectLog.setMovementMethod(new ScrollingMovementMethod());
+        connectLog.setTextIsSelectable(true);
 
         displayLayout= (LinearLayout) v.findViewById(R.id.pumpPanel);
         displayView = (PumpDisplayView) displayLayout.findViewById(R.id.pumpView);
@@ -382,6 +407,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void appendLog(final String message) {
+        String currentDateTime = "NO_DATE";
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
+            currentDateTime = dateFormat.format(new Date()); // Find todays date
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        final String message_time = currentDateTime + " - " + message;
         Log.v("RUFFY_LOG", message);
 
         if(connectLog.getVisibility()!=View.GONE) {
@@ -389,7 +423,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void run() {
                     if (connectLog.getLineCount() < 1000) {
-                        connectLog.append("\n" + message);
+                        connectLog.append("\n" + message_time);
                     } else {
                         connectLog.setText("");
                     }

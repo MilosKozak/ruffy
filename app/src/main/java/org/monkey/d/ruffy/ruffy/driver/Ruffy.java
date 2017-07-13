@@ -43,7 +43,7 @@ public class Ruffy extends Service  {
     private int modeErrorCount = 0;
     private int step = 0;
 
-    private boolean synRun= true;
+    private boolean synRun=false;//With set to false, write process is started at first time
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 3 );
 
     private Display display;
@@ -97,6 +97,16 @@ public class Ruffy extends Service  {
             synRun=false;
             rtModeRunning =false;
         }
+
+        public boolean isConnected()
+        {
+            if (btConn!=null) {
+                return btConn.isConnected();
+            } else {
+                return false;
+            }
+
+        }
     };
 
 
@@ -131,6 +141,7 @@ public class Ruffy extends Service  {
             log("connected to pump");
             if(synRun==false) {
                 synRun = true;
+                log("start synThread");
                 scheduler.execute(synThread);
             }
         }
