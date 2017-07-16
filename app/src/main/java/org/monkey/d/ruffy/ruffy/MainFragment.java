@@ -427,11 +427,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     } else {
                         connectLog.setText("");
                     }
-                    final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
-                    if (scrollAmount > 0)
-                        connectLog.scrollTo(0, scrollAmount);
-                    else
-                        connectLog.scrollTo(0, 0);
+                    // TODO not sure how or why, but I kept getting NPEs with the getLayout call
+                    // here when doing the initial pairing
+                    if (connectLog.getLayout() != null) {
+                        final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
+                        if (scrollAmount > 0)
+                            connectLog.scrollTo(0, scrollAmount);
+                        else
+                            connectLog.scrollTo(0, 0);
+                    }
                 }
             });
         }
