@@ -293,6 +293,10 @@ public class BTConnection {
     }
 
     public boolean isConnected() {
-        return this.currentConnection.isConnected();
+        if (this.currentConnection == null) {
+            return false;
+        } else {
+            return this.currentConnection.isConnected();
+        }
     }
 }
