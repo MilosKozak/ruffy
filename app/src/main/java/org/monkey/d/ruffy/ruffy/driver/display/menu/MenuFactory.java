@@ -116,7 +116,7 @@ public class MenuFactory {
             if(isSymbol(p,Symbol.LARGE_THERAPIE_SETTINGS))
             {
                 tokens[2].removeFirst();
-                return new Menu(MenuType.THERAPIE_MENU);
+                return new Menu(MenuType.THERAPY_MENU);
             }
 
             if(isSymbol(p,Symbol.LARGE_BLUETOOTH_SETTINGS))

@@ -32,7 +32,7 @@ public class BTConnection {
     private InputStream currentInput;
     private OutputStream currentOutput;
     private PairingRequest pairingReciever;
-    private ConnectReciever connectReciever;
+    private ConnectReceiver connectReceiver;
 
     private PumpData pumpData;
 
@@ -70,8 +70,8 @@ public class BTConnection {
         listen = new ListenThread(srvSock);
 
         filter = new IntentFilter("android.bluetooth.device.action.ACL_CONNECTED");
-        connectReciever = new ConnectReciever(handler);
-        activity.registerReceiver(connectReciever, filter);
+        connectReceiver = new ConnectReceiver(handler);
+        activity.registerReceiver(connectReceiver, filter);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
         scheduler.execute(listen);
@@ -163,7 +163,7 @@ public class BTConnection {
                     //return;
                 }
                 try {
-                    pumpData.getActivity().unregisterReceiver(connectReciever);
+                    pumpData.getActivity().unregisterReceiver(connectReceiver);
                 }catch(Exception e){/*ignore*/}
                 try {
                     pumpData.getActivity().unregisterReceiver(pairingReciever);

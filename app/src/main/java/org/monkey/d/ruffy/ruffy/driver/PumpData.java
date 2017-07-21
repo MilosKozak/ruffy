@@ -13,7 +13,6 @@ import java.security.InvalidKeyException;
 
 public class PumpData {
     private String pumpMac;
-    private BTConnection btConn;
     private Object pump_tf;
     private Object driver_tf;
     private byte address;
