@@ -99,7 +99,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 } else {
                     rtSendKey(Ruffy.Key.UP,false);
                 }
-                try{sleep(100);}catch(Exception e){}
+                try{sleep(200);}catch(Exception e){}
             }
             rtSendKey(Ruffy.Key.NO_KEY,true);
         }
@@ -286,6 +286,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         connectLog = (TextView) v.findViewById(R.id.main_log);
         connectLog.setMovementMethod(new ScrollingMovementMethod());
+        connectLog.setTextIsSelectable(true);
 
         displayLayout= (LinearLayout) v.findViewById(R.id.pumpPanel);
         displayView = (PumpDisplayView) displayLayout.findViewById(R.id.pumpView);
