@@ -17,7 +17,8 @@ interface IRuffyService {
     /** Disconnect from the pump */
     void doRTDisconnect();
 
-    // TODO what's the meaning of 'changed'?
+    /*What's the meaning of 'changed'?
+     * changed means if a button state has been changed, like btton pressed is a change and button release another*/
     void rtSendKey(byte keyCode, boolean changed);
     void resetPairing();
 }
