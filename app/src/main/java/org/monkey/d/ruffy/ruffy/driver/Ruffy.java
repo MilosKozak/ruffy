@@ -28,6 +28,7 @@ public class Ruffy extends Service  {
         public static byte CHECK				=(byte)0x0C;
         public static byte UP					=(byte)0x30;
         public static byte DOWN					=(byte)0xC0;
+        public static byte BACK                 =(byte)0x33;
     }
 
     private IRTHandler rtHandler = null;
@@ -83,7 +84,6 @@ public class Ruffy extends Service  {
 
         public void rtSendKey(byte keyCode, boolean changed)
         {
-            //FIXME
             lastRtMessageSent = System.currentTimeMillis();
             synchronized (rtSequenceSemaphore) {
                 rtSequence = Application.rtSendKey(keyCode, changed, rtSequence, btConn);
@@ -167,7 +167,6 @@ public class Ruffy extends Service  {
                 btConn.connect(pumpData,4);
             else
                 Ruffy.this.fail(s);
-
         }
 
         @Override

@@ -96,6 +96,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private int upRunning = 0;
     private int downRunning = 0;
+    private int backRunning = 0;
 
     private Runnable upThread = new Runnable()
     {
@@ -128,6 +129,26 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 else
                 {
                     rtSendKey(Ruffy.Key.DOWN,false);
+                }
+                try{sleep(200);}catch(Exception e){}
+            }
+            rtSendKey(Ruffy.Key.NO_KEY,true);
+        }
+    };
+
+    private Runnable backThread = new Runnable()
+    {
+        @Override
+        public void run() {
+            while(backRunning >0)
+            {
+                if(backRunning==1) {
+                    backRunning++;
+                    rtSendKey(Ruffy.Key.BACK,true);
+                }
+                else
+                {
+                    rtSendKey(Ruffy.Key.BACK,false);
                 }
                 try{sleep(200);}catch(Exception e){}
             }
@@ -343,10 +364,31 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                             upRunning = 1;
                             scheduler.execute(upThread);
                         }
-                    break;
+                        break;
 
                     case MotionEvent.ACTION_UP:
                         upRunning=0;
+                        break;
+                }
+
+                return false;
+            }
+        });
+        Button back = (Button) displayLayout.findViewById(R.id.pumpBack);
+        back.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        if(backRunning==0) {
+                            backRunning = 1;
+                            scheduler.execute(backThread);
+                        }
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        backRunning=0;
                         break;
                 }
 
