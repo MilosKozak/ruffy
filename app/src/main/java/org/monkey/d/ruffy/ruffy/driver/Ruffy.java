@@ -105,10 +105,13 @@ public class Ruffy extends Service  {
             } else {
                 return false;
             }
+        }
 
+        @Override
+        public boolean isBoundToPump() throws RemoteException {
+            return PumpData.isPumpBound(Ruffy.this);
         }
     };
-
 
     @Override
     public void onCreate() {

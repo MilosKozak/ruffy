@@ -24,6 +24,13 @@ public class PumpData {
         this.nonceTx = new byte[13];
     }
 
+    public static boolean isPumpBound(Context activity ) {
+        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
+        if(prefs==null)
+            return false;
+        return prefs.getString("device",null) != null;
+    }
+
     public static PumpData loadPump(Context activity, IRTHandler handler) {
         PumpData data = new PumpData(activity);
         
