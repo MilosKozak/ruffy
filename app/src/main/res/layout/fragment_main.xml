@@ -108,12 +108,24 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="\u21E9" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <Button
                         android:id="@+id/pumpBack"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="BACK" />
+
+                    <Button
+                        android:id="@+id/pumpCopy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="COPY" />
                 </LinearLayout>
             </LinearLayout>
 

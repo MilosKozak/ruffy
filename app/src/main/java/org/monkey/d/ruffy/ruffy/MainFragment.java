@@ -97,6 +97,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private int upRunning = 0;
     private int downRunning = 0;
     private int backRunning = 0;
+    private int copyRunning = 0;
 
     private Runnable upThread = new Runnable()
     {
@@ -129,6 +130,26 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 else
                 {
                     rtSendKey(Ruffy.Key.DOWN,false);
+                }
+                try{sleep(200);}catch(Exception e){}
+            }
+            rtSendKey(Ruffy.Key.NO_KEY,true);
+        }
+    };
+
+    private Runnable copyThread = new Runnable()
+    {
+        @Override
+        public void run() {
+            while(copyRunning >0)
+            {
+                if(copyRunning==1) {
+                    copyRunning++;
+                    rtSendKey(Ruffy.Key.COPY,true);
+                }
+                else
+                {
+                    rtSendKey(Ruffy.Key.COPY,false);
                 }
                 try{sleep(200);}catch(Exception e){}
             }
@@ -410,6 +431,27 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                     case MotionEvent.ACTION_UP:
                         downRunning=0;
+                        break;
+                }
+
+                return false;
+            }
+        });
+        Button copy= (Button) displayLayout.findViewById(R.id.pumpCopy);
+        copy.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        if(copyRunning==0) {
+                            copyRunning = 1;
+                            scheduler.execute(copyThread);
+                        }
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        copyRunning=0;
                         break;
                 }
 

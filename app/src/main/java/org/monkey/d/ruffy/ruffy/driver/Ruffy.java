@@ -29,6 +29,7 @@ public class Ruffy extends Service  {
         public static byte UP					=(byte)0x30;
         public static byte DOWN					=(byte)0xC0;
         public static byte BACK                 =(byte)0x33;
+        public static byte COPY                 =(byte)0xF0;
     }
 
     private IRTHandler rtHandler = null;
