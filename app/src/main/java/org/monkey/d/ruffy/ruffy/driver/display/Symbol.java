@@ -57,5 +57,6 @@ public enum Symbol {
     LARGE_MY_DATA,
     LARGE_ALARM_SETTINGS,
     LARGE_CHECK,
+    LARGE_ERROR,
 
 }

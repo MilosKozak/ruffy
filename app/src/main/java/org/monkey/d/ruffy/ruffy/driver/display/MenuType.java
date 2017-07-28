@@ -25,7 +25,7 @@ public enum MenuType {
     ALARM_MENU,
     MENU_SETTINGS_MENU,
     BLUETOOTH_MENU,
-    THERAPIE_MENU,
+    THERAPY_MENU,
     PUMP_MENU,
     QUICK_INFO,
     BOLUS_DATA,
@@ -38,4 +38,5 @@ public enum MenuType {
     START_MENU,
     BASAL_TOTAL,
     BASAL_SET,
+    WARNING_OR_ERROR,
 }

@@ -32,7 +32,7 @@ public class BTConnection {
     private InputStream currentInput;
     private OutputStream currentOutput;
     private PairingRequest pairingReciever;
-    private ConnectReciever connectReciever;
+    private ConnectReceiver connectReceiver;
 
     private PumpData pumpData;
 
@@ -70,8 +70,8 @@ public class BTConnection {
         listen = new ListenThread(srvSock);
 
         filter = new IntentFilter("android.bluetooth.device.action.ACL_CONNECTED");
-        connectReciever = new ConnectReciever(handler);
-        activity.registerReceiver(connectReciever, filter);
+        connectReceiver = new ConnectReceiver(handler);
+        activity.registerReceiver(connectReceiver, filter);
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 1 );
         scheduler.execute(listen);
@@ -150,21 +150,37 @@ public class BTConnection {
             @Override
             public void run() {
                 try {
-                    currentConnection.connect();
+                    currentConnection.connect();//This method will block until a connection is made or the connection fails. If this method returns without an exception then this socket is now connected.
                     currentInput = currentConnection.getInputStream();
                     currentOutput = currentConnection.getOutputStream();
                 } catch (IOException e) {
                     //e.printStackTrace();
                     handler.fail("no connection possible");
+
+
+                    //??????????
+                    //state=1;
+                    //return;
                 }
                 try {
-                    pumpData.getActivity().unregisterReceiver(connectReciever);
+                    pumpData.getActivity().unregisterReceiver(connectReceiver);
                 }catch(Exception e){/*ignore*/}
                 try {
                     pumpData.getActivity().unregisterReceiver(pairingReciever);
                 }catch(Exception e){/*ignore*/}
                 state=0;
-                handler.deviceConnected();
+
+                //here check if really connected!
+                //this will start thread to write
+                handler.deviceConnected();//in ruffy.java
+
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 byte[] buffer = new byte[512];
                 while (true) {
                     try {
@@ -231,6 +247,9 @@ public class BTConnection {
     }
 
     public void write(byte[] ro){
+
+        handler.log("!!!write!!!");
+
         if(this.currentConnection==null)
         {
             handler.fail("unable to write: no socket");
@@ -266,10 +285,18 @@ public class BTConnection {
         this.currentConnection=null;
         this.pumpData = null;
 
-        handler.log("closed current Connection");
+        handler.log("disconnect() closed current Connection");
     }
 
     public PumpData getPumpData() {
         return pumpData;
+    }
+
+    public boolean isConnected() {
+        if (this.currentConnection == null) {
+            return false;
+        } else {
+            return this.currentConnection.isConnected();
+        }
     }
 }

@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver.display.parser;
 
-import android.util.Log;
-
 import org.monkey.d.ruffy.ruffy.driver.display.Symbol;
 import org.monkey.d.ruffy.ruffy.driver.display.Token;
 
@@ -193,6 +191,23 @@ public class LargeTextParser {
     private static Map<Character, String[]> letters = new HashMap<Character, String[]>();
 
     static {
+        letters.put('E', new String[]{
+                "████████",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "███████ ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "██      ",
+                "████████"
+        });
         letters.put('W', new String[]{
                 "██      ██",
                 "██      ██",
@@ -609,6 +624,24 @@ public class LargeTextParser {
                 "   █████       ",
                 "    ███        ",
                 "     █         "
+
+        });
+        symbols.put(Symbol.LARGE_ERROR, new String[]{
+                "     █████     ",
+                "   █████████   ",
+                "  ███████████  ",
+                " ███ █████ ███ ",
+                " ██   ███   ██ ",
+                "████   █   ████",
+                "█████     █████",
+                "██████   ██████",
+                "█████     █████",
+                "████   █   ████",
+                " ██   ███   ██ ",
+                " ███ █████ ███ ",
+                "  ███████████  ",
+                "   █████████   ",
+                "     █████     "
 
         });
     }

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
@@ -29,6 +28,8 @@ public class Ruffy extends Service  {
         public static byte CHECK				=(byte)0x0C;
         public static byte UP					=(byte)0x30;
         public static byte DOWN					=(byte)0xC0;
+        public static byte BACK                 =(byte)0x33;
+        public static byte COPY                 =(byte)0xF0;
     }
 
     private IRTHandler rtHandler = null;
@@ -44,7 +45,7 @@ public class Ruffy extends Service  {
     private int modeErrorCount = 0;
     private int step = 0;
 
-    private boolean synRun= true;
+    private boolean synRun=false;//With set to false, write process is started at first time
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 3 );
 
     private Display display;
@@ -84,7 +85,6 @@ public class Ruffy extends Service  {
 
         public void rtSendKey(byte keyCode, boolean changed)
         {
-            //FIXME
             lastRtMessageSent = System.currentTimeMillis();
             synchronized (rtSequenceSemaphore) {
                 rtSequence = Application.rtSendKey(keyCode, changed, rtSequence, btConn);
@@ -98,8 +98,21 @@ public class Ruffy extends Service  {
             synRun=false;
             rtModeRunning =false;
         }
-    };
 
+        public boolean isConnected()
+        {
+            if (btConn!=null) {
+                return btConn.isConnected();
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean isBoundToPump() throws RemoteException {
+            return PumpData.isPumpBound(Ruffy.this);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -132,6 +145,7 @@ public class Ruffy extends Service  {
             log("connected to pump");
             if(synRun==false) {
                 synRun = true;
+                log("start synThread");
                 scheduler.execute(synThread);
             }
         }
@@ -154,7 +168,6 @@ public class Ruffy extends Service  {
                 btConn.connect(pumpData,4);
             else
                 Ruffy.this.fail(s);
-
         }
 
         @Override
@@ -270,7 +283,7 @@ public class Ruffy extends Service  {
         public void run() {
             while(synRun)
             {
-                Protokoll.sendSyn(btConn);
+                Protocol.sendSyn(btConn);
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -355,7 +368,7 @@ public class Ruffy extends Service  {
     private PacketHandler rtPacketHandler = new PacketHandler(){
         @Override
         public void sendImidiateAcknowledge(byte sequenceNumber) {
-            Protokoll.sendAck(sequenceNumber,btConn);
+            Protocol.sendAck(sequenceNumber,btConn);
         }
 
         @Override
@@ -368,7 +381,7 @@ public class Ruffy extends Service  {
             switch (response)
             {
                 case ID:
-                    Protokoll.sendSyn(btConn);
+                    Protocol.sendSyn(btConn);
                     break;
                 case SYNC:
                     btConn.seqNo = 0x00;

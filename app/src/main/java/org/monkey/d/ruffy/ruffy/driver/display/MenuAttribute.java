@@ -29,5 +29,6 @@ public enum MenuAttribute {
     BASAL_START, //time MenuTime the basalrate starts
     BASAL_END, // time MenuTime the basalrate ends
     DEBUG_TIMING, //double with timing infos
-    WARANTY, //boolean true if out of waranty
+    WARANTY,  //boolean true if out of waranty
+    ERROR_OR_WARNING, // set if menu in blink during error/warning
 }

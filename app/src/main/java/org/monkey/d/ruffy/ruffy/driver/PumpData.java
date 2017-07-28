@@ -13,7 +13,6 @@ import java.security.InvalidKeyException;
 
 public class PumpData {
     private String pumpMac;
-    private BTConnection btConn;
     private Object pump_tf;
     private Object driver_tf;
     private byte address;
@@ -23,6 +22,13 @@ public class PumpData {
     public PumpData(Context activity) {
         this.activity = activity;
         this.nonceTx = new byte[13];
+    }
+
+    public static boolean isPumpBound(Context activity ) {
+        SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
+        if(prefs==null)
+            return false;
+        return prefs.getString("device",null) != null;
     }
 
     public static PumpData loadPump(Context activity, IRTHandler handler) {

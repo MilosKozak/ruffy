@@ -22,7 +22,7 @@ import org.monkey.d.ruffy.ruffy.driver.BTConnection;
 import org.monkey.d.ruffy.ruffy.driver.BTHandler;
 import org.monkey.d.ruffy.ruffy.driver.Frame;
 import org.monkey.d.ruffy.ruffy.driver.Packet;
-import org.monkey.d.ruffy.ruffy.driver.Protokoll;
+import org.monkey.d.ruffy.ruffy.driver.Protocol;
 import org.monkey.d.ruffy.ruffy.driver.Twofish_Algorithm;
 import org.monkey.d.ruffy.ruffy.driver.Utils;
 
@@ -128,18 +128,19 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private void appendLog(final String message) {
         Log.v("RUFFY_LOG", message);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connectLog.append("\n" + message);
-                final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
-                if (scrollAmount > 0)
-                    connectLog.scrollTo(0, scrollAmount);
-                else
-                    connectLog.scrollTo(0, 0);
-            }
-        });
-
+        if(getActivity()!=null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    connectLog.append("\n" + message);
+                    final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
+                    if (scrollAmount > 0)
+                        connectLog.scrollTo(0, scrollAmount);
+                    else
+                        connectLog.scrollTo(0, 0);
+                }
+            });
+        }
     }
 
     public void handleRX(byte[] inBuf, int length, boolean rel) {
@@ -202,7 +203,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     btConn.getPumpData().setAndSaveToDeviceKey(key_pd,tf);
                     btConn.getPumpData().setAndSaveToPumpKey(key_dp,tf);
                     btConn.getPumpData().setAndSavePumpMac(pairingDevice.getAddress());
-                    Protokoll.sendIDReq(btConn);
+                    Protocol.sendIDReq(btConn);
                 } catch (Exception e) {
                     e.printStackTrace();
                     appendLog("failed inRX: " + e.getMessage());
@@ -221,7 +222,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                     appendLog("Server ID: " + String.format("%X", serverId) + " Device ID: " + deviceId);
 
                     try {
-                        Protokoll.sendSyn(btConn);
+                        Protocol.sendSyn(btConn);
                         appendLog("send Syn!");
                     }catch(Exception e) {
                         e.printStackTrace();
@@ -290,7 +291,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 break;
             case (short) 0xA095:
                 step+=100;
-                Protokoll.sendSyn(btConn);
+                Protocol.sendSyn(btConn);
                 break;
         }
     }
@@ -304,32 +305,34 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
                 btConn.writeCommand(key);
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final EditText pinIn = new EditText(getContext());
-                        pinIn.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        pinIn.setHint("XXX XXX XXXX");
-                        new AlertDialog.Builder(getContext())
-                                .setTitle("Enter Pin")
-                                .setMessage("Read the Pin-Code from pump and enter it")
-                                .setView(pinIn)
-                                .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String pin = pinIn.getText().toString();
-                                        appendLog("got the pin: " + pin);
-                                        SetupFragment.this.pin = Utils.generateKey(pin);
-                                        step = 2;
-                                        //sending key available:
-                                        appendLog(" doing A_KEY_AVA");
-                                        byte[] key = {16, 15, 2, 0, -16};
-                                        btConn.writeCommand(key);
+                if(getActivity()!=null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            final EditText pinIn = new EditText(getContext());
+                            pinIn.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            pinIn.setHint("XXX XXX XXXX");
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Enter Pin")
+                                    .setMessage("Read the Pin-Code from pump and enter it")
+                                    .setView(pinIn)
+                                    .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            String pin = pinIn.getText().toString();
+                                            appendLog("got the pin: " + pin);
+                                            SetupFragment.this.pin = Utils.generateKey(pin);
+                                            step = 2;
+                                            //sending key available:
+                                            appendLog(" doing A_KEY_AVA");
+                                            byte[] key = {16, 15, 2, 0, -16};
+                                            btConn.writeCommand(key);
 
-                                    }
-                                })
-                                .show();
-                    }
-                });
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
+                }
 
             }
             break;

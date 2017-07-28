@@ -119,6 +119,13 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('a', new String[]{
+                " ███ ",
+                "    █",
+                " ████",
+                "█   █",
+                " ████"
+        });
         letters.put('Ä', new String[]{
                 "█   █",
                 " ███ ",
@@ -128,6 +135,53 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('ă', new String[]{
+                " █ █ ",
+                "  █  ",
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█████",
+                "█   █"
+        });
+        letters.put('Á', new String[]{
+                "   █ ",
+                "  █  ",
+                " ███ ",
+                "█   █",
+                "█████",
+                "█   █",
+                "█   █"
+        });
+        letters.put('á', new String[]{
+                "   █ ",
+                "  █  ",
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█████",
+                "█   █"
+        });
+        letters.put('ã', new String[]{
+                " █  █",
+                "█ ██ ",
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█████",
+                "█   █"
+        });
+
+        letters.put('æ', new String[]{
+                " ████",
+                "█ █  ",
+                "█ █  ",
+                "████ ",
+                "█ █  ",
+                "█ █  ",
+                "█ ███"
+        });
+
         letters.put('B', new String[]{
                 "████ ",
                 "█   █",
@@ -146,6 +200,34 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('ć', new String[]{
+                "   █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                "█    ",
+                "█    ",
+                " ████"
+        });
+        letters.put('č', new String[]{
+                " █ █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                "█    ",
+                "█    ",
+                " ████"
+        });
+        letters.put('Ç', new String[]{
+                " ████",
+                "█    ",
+                "█    ",
+                "█    ",
+                " ████",
+                "  █  ",
+                " ██  "
+        });
+
         letters.put('D', new String[]{
                 "███  ",
                 "█  █ ",
@@ -163,6 +245,33 @@ public class SmallTextParser {
                 "█    ",
                 "█    ",
                 "█████"
+        });
+        letters.put('É', new String[]{
+                "   █ ",
+                "  █  ",
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████"
+        });
+        letters.put('Ê', new String[]{
+                "  █  ",
+                " █ █ ",
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████"
+        });
+        letters.put('ę', new String[]{
+                "█████",
+                "█    ",
+                "████ ",
+                "█    ",
+                "█████",
+                "  █  ",
+                "  ██ "
         });
         letters.put('F', new String[]{
                 "█████",
@@ -200,6 +309,43 @@ public class SmallTextParser {
                 "  █  ",
                 " ███ "
         });
+        letters.put('i', new String[]{
+                " █ ",
+                "   ",
+                "██ ",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
+        letters.put('í', new String[]{
+                "  █",
+                " █ ",
+                "███",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
+        letters.put('İ', new String[]{
+                " █ ",
+                "   ",
+                "███",
+                " █ ",
+                " █ ",
+                " █ ",
+                "███"
+        });
+
+        letters.put('J', new String[]{
+                "  ███",
+                "   █ ",
+                "   █ ",
+                "   █ ",
+                "   █ ",
+                "█  █ ",
+                " ██  "
+        });
         letters.put('K', new String[]{
                 "█   █",
                 "█  █ ",
@@ -217,6 +363,15 @@ public class SmallTextParser {
                 "█    ",
                 "█    ",
                 "█████"
+        });
+        letters.put('ł', new String[]{
+                " █   ",
+                " █   ",
+                " █ █ ",
+                " ██  ",
+                "██   ",
+                " █   ",
+                " ████"
         });
         letters.put('M', new String[]{
                 "█   █",
@@ -236,6 +391,25 @@ public class SmallTextParser {
                 "█   █",
                 "█   █"
         });
+        letters.put('Ñ', new String[]{
+                " █  █",
+                "█ ██ ",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█  ██",
+                "█   █"
+        });
+        letters.put('ň', new String[]{
+                " █ █ ",
+                "  █  ",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█  ██",
+                "█   █"
+        });
+
         letters.put('O', new String[]{
                 " ███ ",
                 "█   █",
@@ -254,6 +428,34 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('ó', new String[]{
+                "   █ ",
+                "  █  ",
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('ø', new String[]{
+                "     █",
+                "  ███ ",
+                " █ █ █",
+                " █ █ █",
+                " █ █ █",
+                "  ███ ",
+                " █    "
+        });
+        letters.put('ő', new String[]{
+                " █  █",
+                "█  █ ",
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+
         letters.put('P', new String[]{
                 "████ ",
                 "█   █",
@@ -290,6 +492,25 @@ public class SmallTextParser {
                 "    █",
                 "████ "
         });
+        letters.put('ś', new String[]{
+                "   █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                " ███ ",
+                "    █",
+                "████ "
+        });
+        letters.put('š', new String[]{
+                " █ █ ",
+                "  █  ",
+                " ████",
+                "█    ",
+                " ███ ",
+                "    █",
+                "████ "
+        });
+
         letters.put('T', new String[]{
                 "█████",
                 "  █  ",
@@ -308,10 +529,35 @@ public class SmallTextParser {
                 "█   █",
                 " ███ "
         });
+        letters.put('u', new String[]{
+                "█   █",
+                "█   █",
+                "█   █",
+                "█  ██",
+                " ██ █"
+        });
         letters.put('Ü', new String[]{
                 "█   █",
                 "     ",
                 "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('ú', new String[]{
+                "   █ ",
+                "  █  ",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+        letters.put('ů', new String[]{
+                "  █  ",
+                " █ █ ",
+                "█ █ █",
                 "█   █",
                 "█   █",
                 "█   █",
@@ -353,6 +599,15 @@ public class SmallTextParser {
                 "  █  ",
                 "  █  "
         });
+        letters.put('ý', new String[]{
+                "   █ ",
+                "█ █ █",
+                "█   █",
+                " █ █ ",
+                "  █  ",
+                "  █  ",
+                "  █  "
+        });
         letters.put('Z', new String[]{
                 "█████",
                 "    █",
@@ -362,7 +617,248 @@ public class SmallTextParser {
                 "█    ",
                 "█████"
         });
+        letters.put('ź', new String[]{
+                "  █  ",
+                "█████",
+                "    █",
+                "  ██ ",
+                " █   ",
+                "█    ",
+                "█████"
+        });
+        letters.put('ž', new String[]{
+                " █ █ ",
+                "  █  ",
+                "█████",
+                "   █ ",
+                "  █  ",
+                " █   ",
+                "█████"
+        });
+
+        /// russian letters (not in alphabetical order):
+        letters.put('б', new String[]{
+                "█████",
+                "█    ",
+                "█    ",
+                "████ ",
+                "█   █",
+                "█   █",
+                "████ "
+        });
+        letters.put('ъ', new String[]{
+                "██  ",
+                " █  ",
+                " █  ",
+                " ██ ",
+                " █ █",
+                " █ █",
+                " ██ "
+        });
+        letters.put('м', new String[]{
+                "█   █",
+                "██ ██",
+                "█ █ █",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █"
+        });
+        letters.put('л', new String[]{
+                " ████",
+                " █  █",
+                " █  █",
+                " █  █",
+                " █  █",
+                " █  █",
+                "██  █"
+        });
+        letters.put('ю', new String[]{
+                "█  █ ",
+                "█ █ █",
+                "█ █ █",
+                "███ █",
+                "█ █ █",
+                "█ █ █",
+                "█  █ "
+        });
+        letters.put('а', new String[]{
+                "  █  ",
+                " █ █ ",
+                "█   █",
+                "█   █",
+                "█████",
+                "█   █",
+                "█   █"
+        });
+        letters.put('п', new String[]{
+                "█████",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █"
+        });
+        letters.put('я', new String[]{
+                " ████",
+                "█   █",
+                "█   █",
+                " ████",
+                "  █ █",
+                " █  █",
+                "█   █"
+        });
+        letters.put('й', new String[]{
+                " █ █ ",
+                "  █  ",
+                "█   █",
+                "█  ██",
+                "█ █ █",
+                "██  █",
+                "█   █"
+        });
+        letters.put('д', new String[]{
+                "  ██ ",
+                " █ █ ",
+                " █ █ ",
+                "█  █ ",
+                "█  █ ",
+                "█████",
+                "█   █"
+        });
+        letters.put('ж', new String[]{
+                "█ █ █",
+                "█ █ █",
+                " ███ ",
+                " ███ ",
+                "█ █ █",
+                "█ █ █",
+                "█ █ █"
+        });
+        letters.put('ы', new String[]{
+                "█   █",
+                "█   █",
+                "█   █",
+                "██  █",
+                "█ █ █",
+                "█ █ █",
+                "██  █"
+        });
+        letters.put('у', new String[]{
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ ",
+                "  █  ",
+                " █   ",
+                "█    "
+        });
+        letters.put('ч', new String[]{
+                " █   █",
+                " █   █",
+                " █   █",
+                " █  ██",
+                "  ██ █",
+                "     █",
+                "     █"
+        });
+        letters.put('з', new String[]{
+                "  ███ ",
+                " █   █",
+                "     █",
+                "   ██ ",
+                "     █",
+                " █   █",
+                "  ███ "
+        });
+        letters.put('ц', new String[]{
+                "█  █ ",
+                "█  █ ",
+                "█  █ ",
+                "█  █ ",
+                "█  █ ",
+                "█████",
+                "    █"
+        });
+        letters.put('и', new String[]{
+                "█   █",
+                "█  ██",
+                "█ █ █",
+                "█ █ █",
+                "█ █ █",
+                "██  █",
+                "█   █"
+        });
+
+        /// GREEK LETTERS (out of order)
+        letters.put('Σ', new String[]{
+                "█████",
+                "█    ",
+                " █   ",
+                "  █  ",
+                " █   ",
+                "█    ",
+                "█████"
+        });
+        letters.put('Δ', new String[]{
+                "  █  ",
+                "  █  ",
+                " █ █ ",
+                " █ █ ",
+                "█   █",
+                "█   █",
+                "█████"
+        });
+        letters.put('Φ', new String[]{
+                "  █  ",
+                " ███ ",
+                "█ █ █",
+                "█ █ █",
+                "█ █ █",
+                " ███ ",
+                "  █  "
+        });
+        letters.put('Λ', new String[]{
+                "  █  ",
+                " █ █ ",
+                " █ █ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █"
+        });
+        letters.put('Ω', new String[]{
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█   █",
+                "█   █",
+                " █ █ ",
+                "██ ██"
+        });
+        letters.put('υ', new String[]{
+                "█   █",
+                "█   █",
+                "█   █",
+                " ███ ",
+                "  █  ",
+                "  █  ",
+                "  █  "
+        });
+        letters.put('Θ', new String[]{
+                " ███ ",
+                "█   █",
+                "█   █",
+                "█ █ █",
+                "█   █",
+                "█   █",
+                " ███ "
+        });
+
+
     }
+
 
     private static Map<Symbol, String[]> symbols = new HashMap<Symbol, String[]>();
 
