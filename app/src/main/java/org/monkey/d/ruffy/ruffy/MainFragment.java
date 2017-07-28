@@ -208,6 +208,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private void setButtons(final boolean enabled)
+    {
+        if(getActivity()!=null) {
+            getActivity().runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    check.setEnabled(enabled);
+                    menu.setEnabled(enabled);
+                    up.setEnabled(enabled);
+                    down.setEnabled(enabled);
+                    back.setEnabled(enabled);
+                    copy.setEnabled(enabled);
+                }
+            });
+        }
+    }
     private Stub handler = new Stub() {
         @Override
         public void log(String message) throws RemoteException {
@@ -234,6 +250,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         public void rtStarted()
         {
+            setButtons(true);
             if(getActivity()!=null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -319,6 +336,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         public void rtStopped()
         {
+            setButtons(false);
             if(getActivity()!=null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -329,6 +347,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
     };
+
+    private Button check;
+    private Button menu;
+    private Button up;
+    private Button down;
+    private Button back;
+    private Button copy;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -366,7 +391,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         displayView = (PumpDisplayView) displayLayout.findViewById(R.id.pumpView);
 
         frameCounter = (TextView) v.findViewById(R.id.frameCounter);
-        Button menu = (Button) displayLayout.findViewById(R.id.pumpMenu);
+        menu = (Button) displayLayout.findViewById(R.id.pumpMenu);
         menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -375,7 +400,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 rtSendKey(Ruffy.Key.NO_KEY,true);
             }
         });
-        Button check = (Button) displayLayout.findViewById(R.id.pumpCheck);
+        check = (Button) displayLayout.findViewById(R.id.pumpCheck);
         check.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -384,7 +409,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 rtSendKey(Ruffy.Key.NO_KEY,true);
             }
         });
-        Button up = (Button) displayLayout.findViewById(R.id.pumpUp);
+        up = (Button) displayLayout.findViewById(R.id.pumpUp);
         up.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -405,7 +430,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 return false;
             }
         });
-        Button back = (Button) displayLayout.findViewById(R.id.pumpBack);
+        back = (Button) displayLayout.findViewById(R.id.pumpBack);
         back.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -426,7 +451,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 return false;
             }
         });
-        Button down= (Button) displayLayout.findViewById(R.id.pumpDown);
+        down= (Button) displayLayout.findViewById(R.id.pumpDown);
         down.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -447,7 +472,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 return false;
             }
         });
-        Button copy= (Button) displayLayout.findViewById(R.id.pumpCopy);
+        copy= (Button) displayLayout.findViewById(R.id.pumpCopy);
         copy.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -468,6 +493,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 return false;
             }
         });
+        setButtons(false);
+
         Intent intent = new Intent(getActivity(), Ruffy.class);
         ComponentName name = getActivity().startService(intent);
         if(name != null)
@@ -475,6 +502,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
             {
                 Log.v("Start","bound it");
+                try {
+                    reset.setEnabled(mBoundService.isBoundToPump());
+                }catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
         return v;
