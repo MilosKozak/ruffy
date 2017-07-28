@@ -128,18 +128,19 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private void appendLog(final String message) {
         Log.v("RUFFY_LOG", message);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connectLog.append("\n" + message);
-                final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
-                if (scrollAmount > 0)
-                    connectLog.scrollTo(0, scrollAmount);
-                else
-                    connectLog.scrollTo(0, 0);
-            }
-        });
-
+        if(getActivity()!=null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    connectLog.append("\n" + message);
+                    final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
+                    if (scrollAmount > 0)
+                        connectLog.scrollTo(0, scrollAmount);
+                    else
+                        connectLog.scrollTo(0, 0);
+                }
+            });
+        }
     }
 
     public void handleRX(byte[] inBuf, int length, boolean rel) {
@@ -304,32 +305,34 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
                 btConn.writeCommand(key);
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final EditText pinIn = new EditText(getContext());
-                        pinIn.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        pinIn.setHint("XXX XXX XXXX");
-                        new AlertDialog.Builder(getContext())
-                                .setTitle("Enter Pin")
-                                .setMessage("Read the Pin-Code from pump and enter it")
-                                .setView(pinIn)
-                                .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        String pin = pinIn.getText().toString();
-                                        appendLog("got the pin: " + pin);
-                                        SetupFragment.this.pin = Utils.generateKey(pin);
-                                        step = 2;
-                                        //sending key available:
-                                        appendLog(" doing A_KEY_AVA");
-                                        byte[] key = {16, 15, 2, 0, -16};
-                                        btConn.writeCommand(key);
+                if(getActivity()!=null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            final EditText pinIn = new EditText(getContext());
+                            pinIn.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            pinIn.setHint("XXX XXX XXXX");
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Enter Pin")
+                                    .setMessage("Read the Pin-Code from pump and enter it")
+                                    .setView(pinIn)
+                                    .setPositiveButton("ENTER", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            String pin = pinIn.getText().toString();
+                                            appendLog("got the pin: " + pin);
+                                            SetupFragment.this.pin = Utils.generateKey(pin);
+                                            step = 2;
+                                            //sending key available:
+                                            appendLog(" doing A_KEY_AVA");
+                                            byte[] key = {16, 15, 2, 0, -16};
+                                            btConn.writeCommand(key);
 
-                                    }
-                                })
-                                .show();
-                    }
-                });
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
+                }
 
             }
             break;

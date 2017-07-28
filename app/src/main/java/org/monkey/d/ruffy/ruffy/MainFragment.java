@@ -234,21 +234,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         public void rtStarted()
         {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (mBoundService.isConnected()) {
-                            connect.setText("Disconnect");
-                        } else {
-                            connect.setText("Connect");
+            if(getActivity()!=null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (mBoundService.isConnected()) {
+                                connect.setText("Disconnect");
+                            } else {
+                                connect.setText("Connect");
+                            }
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
+                        connect.setEnabled(true);
                     }
-                    connect.setEnabled(true);
-                }
-            });
+                });
+            }
         }
 
         @Override
@@ -264,12 +266,14 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
             //TODO just for debug marker display[which] = quarter;
             if (connectLog.getVisibility() != View.GONE)
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectLog.setVisibility(View.GONE);
-                    }
-                });
+                if(getActivity()!=null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            connectLog.setVisibility(View.GONE);
+                        }
+                    });
+                }
         }
 
         @Override
@@ -290,10 +294,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void rtDisplayHandleNoMenu() throws RemoteException {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    frameCounter.setText("no display found");
+            if(getActivity()!=null) {
+                if(getActivity()!=null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            frameCounter.setText("no display found");
 /*                    DisplayParser.findMenu(display, new DisplayParserHandler() {
                         @Override
                         public void menuFound(Menu menu) {
@@ -305,18 +311,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                         }
                     });*///TODO just for debug marker
+                        }
+                    });
                 }
-            });
+            }
         }
 
         public void rtStopped()
         {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connectLog.setVisibility(View.VISIBLE);
-                }
-            });
+            if(getActivity()!=null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectLog.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
         }
     };
 
@@ -503,21 +513,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Log.v("RUFFY_LOG", message);
 
         if(connectLog.getVisibility()!=View.GONE) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (connectLog.getLineCount() < 1000) {
-                        connectLog.append("\n" + message_time);
-                    } else {
-                        connectLog.setText("");
+            if(getActivity()!=null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (connectLog.getLineCount() < 1000) {
+                            connectLog.append("\n" + message_time);
+                        } else {
+                            connectLog.setText("");
+                        }
+                        final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
+                        if (scrollAmount > 0)
+                            connectLog.scrollTo(0, scrollAmount);
+                        else
+                            connectLog.scrollTo(0, 0);
                     }
-                    final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
-                    if (scrollAmount > 0)
-                        connectLog.scrollTo(0, scrollAmount);
-                    else
-                        connectLog.scrollTo(0, 0);
-                }
-            });
+                });
+            }
         }
     }
 }
