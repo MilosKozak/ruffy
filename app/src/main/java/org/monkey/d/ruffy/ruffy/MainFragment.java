@@ -62,6 +62,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mServiceBound = false;
+            mBoundService = null;
+            connect.setText("Reconnect");
         }
 
         @Override
@@ -70,9 +72,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mServiceBound = true;
 
             try {
-                mBoundService.setHandler(handler);
+                reset.setEnabled(mBoundService.isBoundToPump());
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            try {
+                mBoundService.addHandler(handler);
             } catch (RemoteException e) {
                 e.printStackTrace();
+            }
+            connect.setEnabled(true);
+            if(conOnBind)
+            {
+                conOnBind=false;
+                try {
+                    mBoundService.doRTConnect();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -80,6 +98,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        try{
+            mBoundService.removeHandler(handler);
+        }catch(RemoteException e)
+        {
+            e.printStackTrace();
+        }
         if (mServiceBound) {
 
             try {
@@ -354,6 +378,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private Button down;
     private Button back;
     private Button copy;
+    private Button reset;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -368,8 +393,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         
         connect = (Button) v.findViewById(R.id.main_connect);
         connect.setOnClickListener(this);
+        connect.setEnabled(false);
 
-        Button reset = (Button) v.findViewById(R.id.main_reset);
+        reset = (Button) v.findViewById(R.id.main_reset);
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -382,6 +408,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }).setNegativeButton("NO",null).show();
             }
         });
+        reset.setEnabled(false);
 
         connectLog = (TextView) v.findViewById(R.id.main_log);
         connectLog.setMovementMethod(new ScrollingMovementMethod());
@@ -502,17 +529,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
             {
                 Log.v("Start","bound it");
-                try {
-                    reset.setEnabled(mBoundService.isBoundToPump());
-                }catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
             }
         }
         return v;
     }
 
+    private boolean conOnBind = true;
     @Override
     public void onClick(final View view) {
         view.setEnabled(false);
@@ -524,6 +546,20 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
             connect.setText("Connect!");
+            return;
+        }
+        else if(connect.getText().toString().toLowerCase().startsWith("recon"))
+        {
+            Intent intent = new Intent(getActivity(), Ruffy.class);
+            ComponentName name = getActivity().startService(intent);
+            if(name != null)
+            {
+                if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
+                {
+                    conOnBind = true;
+                    Log.v("Start","bound it");
+                }
+            }
             return;
         }
         try {

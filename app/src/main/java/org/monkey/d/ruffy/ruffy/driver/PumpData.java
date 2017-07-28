@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.RemoteException;
 
 import java.security.InvalidKeyException;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * Created by fishermen21 on 20.05.17.
@@ -31,7 +33,7 @@ public class PumpData {
         return prefs.getString("device",null) != null;
     }
 
-    public static PumpData loadPump(Context activity, IRTHandler handler) {
+    public static PumpData loadPump(Context activity, Set<IRTHandler> handlers) {
         PumpData data = new PumpData(activity);
         
         SharedPreferences prefs = activity.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
@@ -39,10 +41,15 @@ public class PumpData {
         String pd = prefs.getString("pd",null);
         data.pumpMac = prefs.getString("device",null);
 
-        try {
-            handler.log("Loading data of Pump "+data.pumpMac);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        for(IRTHandler handler : new LinkedList<>(handlers))
+        {
+            try
+            {
+                handler.log("Loading data of Pump "+data.pumpMac);
+            }catch(RemoteException e)
+            {
+                handlers.remove(handler);
+            }
         }
 
         if(data.pumpMac != null)
@@ -57,10 +64,15 @@ public class PumpData {
             } catch(Exception e)
             {
                 e.printStackTrace();
-                try {
-                    handler.fail("unable to load keys!");
-                } catch (RemoteException e1) {
-                    e1.printStackTrace();
+                for(IRTHandler handler : new LinkedList<>(handlers))
+                {
+                    try
+                    {
+                        handler.fail("unable to load keys!");
+                    }catch(RemoteException e1)
+                    {
+                        handlers.remove(handler);
+                    }
                 }
                 return null;
             }

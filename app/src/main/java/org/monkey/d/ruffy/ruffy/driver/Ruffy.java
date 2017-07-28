@@ -7,12 +7,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
 
 import java.nio.ByteBuffer;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -32,7 +36,7 @@ public class Ruffy extends Service  {
         public static byte COPY                 =(byte)0xF0;
     }
 
-    private IRTHandler rtHandler = null;
+    private Set<IRTHandler> rtHandlers = new HashSet<>();
     private BTConnection btConn;
     private PumpData pumpData;
 
@@ -53,20 +57,25 @@ public class Ruffy extends Service  {
     private final IRuffyService.Stub serviceBinder = new IRuffyService.Stub(){
 
         @Override
-        public void setHandler(IRTHandler handler) throws RemoteException {
-            Ruffy.this.rtHandler = handler;
+        public void addHandler(IRTHandler handler) throws RemoteException {
+            Ruffy.this.rtHandlers.add(handler);
+        }
+
+        @Override
+        public void removeHandler(IRTHandler handler) throws RemoteException {
+            Ruffy.this.rtHandlers.remove(handler);
         }
 
         @Override
         public int doRTConnect() throws RemoteException {
             step= 0;
-            if(Ruffy.this.rtHandler==null)
+            if(Ruffy.this.rtHandlers.size()==0)
             {
                 return -2;//FIXME make errors
             }
             if(pumpData==null)
             {
-                pumpData = PumpData.loadPump(Ruffy.this,rtHandler);
+                pumpData = PumpData.loadPump(Ruffy.this,rtHandlers);
             }
             if(pumpData != null) {
                 btConn = new BTConnection(rtBTHandler);
@@ -131,6 +140,9 @@ public class Ruffy extends Service  {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.v("Ruffy","++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        Log.v("Ruffy","got ounbind");
+        Log.v("Ruffy","++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         return true;
     }
 
@@ -185,10 +197,15 @@ public class Ruffy extends Service  {
 
         @Override
         public void requestBlueTooth() {
-            try {
-                rtHandler.requestBluetooth();
-            } catch (RemoteException e) {
-                e.printStackTrace();
+            for(IRTHandler handler : new LinkedList<>(rtHandlers))
+            {
+                try
+                {
+                    handler.requestBluetooth();
+                }catch(RemoteException e1)
+                {
+                    rtHandlers.remove(handler);
+                }
             }
         }
     };
@@ -208,23 +225,32 @@ public class Ruffy extends Service  {
                 rtSequence = 0;
                 lastRtMessageSent = System.currentTimeMillis();
                 rtModeRunning = true;
-                try {
                     display = new Display(new DisplayUpdater() {
                         @Override
                         public void clear() {
-                            try {
-                                rtHandler.rtClearDisplay();
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
+                            for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                            {
+                                try
+                                {
+                                    handler.rtClearDisplay();
+                                }catch(RemoteException e1)
+                                {
+                                    rtHandlers.remove(handler);
+                                }
                             }
                         }
 
                         @Override
                         public void update(byte[] quarter, int which) {
-                            try {
-                                rtHandler.rtUpdateDisplay(quarter,which);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
+                            for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                            {
+                                try
+                                {
+                                    handler.rtUpdateDisplay(quarter,which);
+                                }catch(RemoteException e1)
+                                {
+                                    rtHandlers.remove(handler);
+                                }
                             }
                         }
                     });
@@ -234,29 +260,45 @@ public class Ruffy extends Service  {
                             DisplayParser.findMenu(pixels, new DisplayParserHandler() {
                                 @Override
                                 public void menuFound(Menu menu) {
-                                    try {
-                                        rtHandler.rtDisplayHandleMenu(menu);
-                                    } catch (RemoteException e) {
-                                        e.printStackTrace();
+                                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                                    {
+                                        try
+                                        {
+                                            handler.rtDisplayHandleMenu(menu);
+                                        }catch(RemoteException e1)
+                                        {
+                                            rtHandlers.remove(handler);
+                                        }
                                     }
                                 }
 
                                 @Override
                                 public void noMenuFound() {
-                                    try {
-                                        rtHandler.rtDisplayHandleNoMenu();
-                                    } catch (RemoteException e) {
-                                        e.printStackTrace();
+                                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                                    {
+                                        try
+                                        {
+                                            handler.rtDisplayHandleNoMenu();
+                                        }catch(RemoteException e1)
+                                        {
+                                            rtHandlers.remove(handler);
+                                        }
                                     }
                                 }
                             });
 
                         }
                     });
-                    rtHandler.rtStarted();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                    {
+                        try
+                        {
+                            handler.rtStarted();
+                        }catch(RemoteException e1)
+                        {
+                            rtHandlers.remove(handler);
+                        }
+                    }
                 while(rtModeRunning)
                 {
                     if(System.currentTimeMillis() > lastRtMessageSent +1000L) {
@@ -268,10 +310,15 @@ public class Ruffy extends Service  {
                     }
                     try{Thread.sleep(500);}catch(Exception e){/*ignore*/}
                 }
-                try {
-                    rtHandler.rtStopped();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+                for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                {
+                    try
+                    {
+                        handler.rtStopped();
+                    }catch(RemoteException e1)
+                    {
+                        rtHandlers.remove(handler);
+                    }
                 }
 
             }
@@ -354,15 +401,29 @@ public class Ruffy extends Service  {
     };
 
     public void log(String s) {
-        try{
-            rtHandler.log(s);
-        }catch(Exception e){e.printStackTrace();}
+        for(IRTHandler handler : new LinkedList<>(rtHandlers))
+        {
+            try
+            {
+                handler.log(s);
+            }catch(RemoteException e1)
+            {
+                rtHandlers.remove(handler);
+            }
+        }
     }
 
     public void fail(String s) {
-        try{
-            rtHandler.fail(s);
-        }catch(Exception e){e.printStackTrace();}
+        for(IRTHandler handler : new LinkedList<>(rtHandlers))
+        {
+            try
+            {
+                handler.fail(s);
+            }catch(RemoteException e1)
+            {
+                rtHandlers.remove(handler);
+            }
+        }
     }
 
     private PacketHandler rtPacketHandler = new PacketHandler(){
