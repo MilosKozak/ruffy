@@ -6,7 +6,8 @@ import org.monkey.d.ruffy.ruffy.driver.IRTHandler;
 
 interface IRuffyService {
 
-    void setHandler(IRTHandler handler);
+    void addHandler(IRTHandler handler);
+    void removeHandler(IRTHandler handler);
 
     /** Connect to the pump
     *
