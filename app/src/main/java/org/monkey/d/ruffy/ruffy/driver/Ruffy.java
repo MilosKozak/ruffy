@@ -71,6 +71,8 @@ public class Ruffy extends Service  {
         @Override
         public int doRTConnect() throws RemoteException {
             Log.d("Ruffy","doRTConnect");
+            if(isConnected())
+                return 0;
             step= 0;
             if(Ruffy.this.rtHandlers.size()==0)
             {
