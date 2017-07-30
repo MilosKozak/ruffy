@@ -58,16 +58,19 @@ public class Ruffy extends Service  {
 
         @Override
         public void addHandler(IRTHandler handler) throws RemoteException {
+            Log.d("Ruffy","add Handler "+handler);
             Ruffy.this.rtHandlers.add(handler);
         }
 
         @Override
         public void removeHandler(IRTHandler handler) throws RemoteException {
+            Log.d("Ruffy","remove Handler "+handler);
             Ruffy.this.rtHandlers.remove(handler);
         }
 
         @Override
         public int doRTConnect() throws RemoteException {
+            Log.d("Ruffy","doRTConnect");
             step= 0;
             if(Ruffy.this.rtHandlers.size()==0)
             {
@@ -87,6 +90,7 @@ public class Ruffy extends Service  {
 
         public void doRTDisconnect()
         {
+            Log.d("Ruffy","doRTDisconnect");
             step = 200;
             stopRT();
             btConn.disconnect();
@@ -94,6 +98,7 @@ public class Ruffy extends Service  {
 
         public void rtSendKey(byte keyCode, boolean changed)
         {
+            Log.d("Ruffy","rtSendKey");
             lastRtMessageSent = System.currentTimeMillis();
             synchronized (rtSequenceSemaphore) {
                 rtSequence = Application.rtSendKey(keyCode, changed, rtSequence, btConn);
@@ -102,6 +107,7 @@ public class Ruffy extends Service  {
 
         public void resetPairing()
         {
+            Log.d("Ruffy","resetPairing");
             SharedPreferences prefs = Ruffy.this.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
             prefs.edit().putBoolean("paired",false).apply();
             synRun=false;
@@ -110,6 +116,7 @@ public class Ruffy extends Service  {
 
         public boolean isConnected()
         {
+            Log.d("Ruffy","isConnected");
             if (btConn!=null) {
                 return btConn.isConnected();
             } else {
@@ -119,35 +126,39 @@ public class Ruffy extends Service  {
 
         @Override
         public boolean isBoundToPump() throws RemoteException {
+            Log.d("Ruffy","isBoundToPump");
             return PumpData.isPumpBound(Ruffy.this);
         }
     };
 
     @Override
     public void onCreate() {
+        Log.d("Ruffy","onCreate");
         super.onCreate();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d("Ruffy","onBind");
         return serviceBinder;
     }
 
     @Override
     public void onRebind(Intent intent) {
+        Log.d("Ruffy","onRebind");
         super.onRebind(intent);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.v("Ruffy","++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        Log.v("Ruffy","got ounbind");
-        Log.v("Ruffy","++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        Log.v("Ruffy","onUnbind");
         return true;
     }
 
     @Override
     public void onDestroy() {
+
+        Log.d("Ruffy","onDestroy");
         super.onDestroy();
     }
 
@@ -401,6 +412,7 @@ public class Ruffy extends Service  {
     };
 
     public void log(String s) {
+        Log.d("Ruffy-log",s);
         for(IRTHandler handler : new LinkedList<>(rtHandlers))
         {
             try
@@ -414,6 +426,7 @@ public class Ruffy extends Service  {
     }
 
     public void fail(String s) {
+        Log.e("Ruffy-fail",s);
         for(IRTHandler handler : new LinkedList<>(rtHandlers))
         {
             try
