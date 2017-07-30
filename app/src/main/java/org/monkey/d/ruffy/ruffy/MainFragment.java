@@ -594,7 +594,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         final String message_time = currentDateTime + " - " + message;
         Log.v("RUFFY_LOG", message);
 
-        if(connectLog.getVisibility()!=View.GONE) {
+        if(connectLog != null && connectLog.getVisibility()!=View.GONE) {
             if(getActivity()!=null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
