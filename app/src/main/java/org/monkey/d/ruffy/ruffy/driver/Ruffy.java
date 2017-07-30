@@ -72,7 +72,19 @@ public class Ruffy extends Service  {
         public int doRTConnect() throws RemoteException {
             Log.d("Ruffy","doRTConnect");
             if(isConnected())
+            {
+                for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                {
+                    try
+                    {
+                        handler.rtStarted();
+                    }catch(Exception e1)
+                    {
+                        rtHandlers.remove(handler);
+                    }
+                }
                 return 0;
+            }
             step= 0;
             if(Ruffy.this.rtHandlers.size()==0)
             {
