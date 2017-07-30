@@ -106,8 +106,10 @@ public class Ruffy extends Service  {
         {
             Log.d("Ruffy","doRTDisconnect");
             step = 200;
-            stopRT();
-            btConn.disconnect();
+            if(btConn!=null) {
+                stopRT();
+                btConn.disconnect();
+            }
         }
 
         public void rtSendKey(byte keyCode, boolean changed)
