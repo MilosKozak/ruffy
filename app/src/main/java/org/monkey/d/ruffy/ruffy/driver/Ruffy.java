@@ -227,7 +227,7 @@ public class Ruffy extends Service  {
                 try
                 {
                     handler.requestBluetooth();
-                }catch(RemoteException e1)
+                }catch(Exception e1)
                 {
                     rtHandlers.remove(handler);
                 }
@@ -258,7 +258,7 @@ public class Ruffy extends Service  {
                                 try
                                 {
                                     handler.rtClearDisplay();
-                                }catch(RemoteException e1)
+                                }catch(Exception e1)
                                 {
                                     rtHandlers.remove(handler);
                                 }
@@ -272,7 +272,7 @@ public class Ruffy extends Service  {
                                 try
                                 {
                                     handler.rtUpdateDisplay(quarter,which);
-                                }catch(RemoteException e1)
+                                }catch(Exception e1)
                                 {
                                     rtHandlers.remove(handler);
                                 }
@@ -290,7 +290,7 @@ public class Ruffy extends Service  {
                                         try
                                         {
                                             handler.rtDisplayHandleMenu(menu);
-                                        }catch(RemoteException e1)
+                                        }catch(Exception e1)
                                         {
                                             rtHandlers.remove(handler);
                                         }
@@ -304,7 +304,7 @@ public class Ruffy extends Service  {
                                         try
                                         {
                                             handler.rtDisplayHandleNoMenu();
-                                        }catch(RemoteException e1)
+                                        }catch(Exception e1)
                                         {
                                             rtHandlers.remove(handler);
                                         }
@@ -319,7 +319,7 @@ public class Ruffy extends Service  {
                         try
                         {
                             handler.rtStarted();
-                        }catch(RemoteException e1)
+                        }catch(Exception e1)
                         {
                             rtHandlers.remove(handler);
                         }
@@ -340,7 +340,7 @@ public class Ruffy extends Service  {
                     try
                     {
                         handler.rtStopped();
-                    }catch(RemoteException e1)
+                    }catch(Exception e1)
                     {
                         rtHandlers.remove(handler);
                     }
@@ -432,7 +432,7 @@ public class Ruffy extends Service  {
             try
             {
                 handler.log(s);
-            }catch(RemoteException e1)
+            }catch(Exception e1)
             {
                 rtHandlers.remove(handler);
             }
@@ -446,7 +446,7 @@ public class Ruffy extends Service  {
             try
             {
                 handler.fail(s);
-            }catch(RemoteException e1)
+            }catch(Exception e1)
             {
                 rtHandlers.remove(handler);
             }
