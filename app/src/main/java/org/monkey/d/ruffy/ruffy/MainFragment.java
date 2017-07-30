@@ -83,15 +83,28 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 e.printStackTrace();
             }
             connect.setEnabled(true);
-            if(conOnBind)
-            {
-                conOnBind=false;
-                try {
-                    mBoundService.doRTConnect();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
+
+            try {
+                if (!mBoundService.isBoundToPump()) {
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
                 }
+                else if(mBoundService.isConnected())
+                {
+                    handler.rtStarted();
+                }
+                else if(conOnBind)
+                {
+                    conOnBind=false;
+                    mBoundService.doRTConnect();
+                }
+            }catch(RemoteException e){
+                e.printStackTrace();
             }
+            finally
+            {
+                conOnBind = false;
+            }
+
         }
     };
 
@@ -534,7 +547,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         return v;
     }
 
-    private boolean conOnBind = true;
+    private boolean conOnBind = false;
     @Override
     public void onClick(final View view) {
         view.setEnabled(false);
