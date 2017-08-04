@@ -102,6 +102,7 @@ public class BTConnection {
 
     private void connect(String deviceAddress, int retry) {
 
+        this.disconnect = false;
         if(state!=0)
         {
             handler.log("in connect!");
@@ -154,8 +155,9 @@ public class BTConnection {
                     currentInput = currentConnection.getInputStream();
                     currentOutput = currentConnection.getOutputStream();
                 } catch (IOException e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                     handler.fail("no connection possible");
+                    //return;
 
 
                     //??????????
@@ -198,7 +200,15 @@ public class BTConnection {
         }.start();
     }
 
+    private boolean disconnect = false;
+    public void disableWrite()
+    {
+        this.disconnect=true;
+
+    }
     public void writeCommand(byte[] key) {
+        if(disconnect)
+            return;
         List<Byte> out = new LinkedList<Byte>();
         for(Byte b : key)
             out.add(b);

@@ -21,4 +21,6 @@ public interface AppHandler {
     void sequenceError();
 
     void error(short error, String desc);
+
+    void keySent(ByteBuffer b);
 }

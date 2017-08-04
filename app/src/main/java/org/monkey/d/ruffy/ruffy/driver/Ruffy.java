@@ -12,6 +12,7 @@ import android.util.Log;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
+import org.monkey.d.ruffy.ruffy.driver.display.MenuAttribute;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -58,31 +59,24 @@ public class Ruffy extends Service  {
 
         @Override
         public void addHandler(IRTHandler handler) throws RemoteException {
-            Log.d("Ruffy","add Handler "+handler);
-            Ruffy.this.rtHandlers.add(handler);
+            rtHandlers.add(handler);
+            if(rtModeRunning)
+                handler.rtStarted();
         }
 
         @Override
         public void removeHandler(IRTHandler handler) throws RemoteException {
-            Log.d("Ruffy","remove Handler "+handler);
-            Ruffy.this.rtHandlers.remove(handler);
+            rtHandlers.remove(handler);
+            if(rtHandlers.size()==0 && rtModeRunning)
+                doRTDisconnect(null);
         }
 
         @Override
-        public int doRTConnect() throws RemoteException {
+        public int doRTConnect(IRTHandler startingHandler) throws RemoteException {
             Log.d("Ruffy","doRTConnect");
-            if(isConnected())
+            if(isConnected() && rtModeRunning)
             {
-                for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                {
-                    try
-                    {
-                        handler.rtStarted();
-                    }catch(Exception e1)
-                    {
-                        rtHandlers.remove(handler);
-                    }
-                }
+                startingHandler.rtStarted();
                 return 0;
             }
             step= 0;
@@ -96,19 +90,49 @@ public class Ruffy extends Service  {
             }
             if(pumpData != null) {
                 btConn = new BTConnection(rtBTHandler);
+                step=0;
+                rtModeRunning = true;
                 btConn.connect(pumpData, 10);
                 return 0;
             }
             return -1;
         }
 
-        public void doRTDisconnect()
+        public void doRTDisconnect(IRTHandler handler)
         {
-            Log.d("Ruffy","doRTDisconnect");
-            step = 200;
-            if(btConn!=null) {
+            if(!rtModeRunning)
+                try{handler.rtStopped();}catch(Exception e){}
+            boolean doDisco = true;
+
+            String discoIdent = null;
+            try{discoIdent = handler.getServiceIdentifier();}catch(Exception e){}
+            for(IRTHandler h : new LinkedList<>(rtHandlers))
+            {
+                String ident = null;
+                try {ident= h.getServiceIdentifier();}catch(Exception e){rtHandlers.remove(h);}
+
+                if(ident!=null && !ident.equals(discoIdent)) {
+                    try {
+                        doDisco = h.canDisconnect();
+                    } catch (Exception e) {
+                        rtHandlers.remove(h);
+                    }
+                    if (!doDisco) {
+                        Log.d("Ruffy", "doRTDisconnect interupted by: " + ident);
+
+                        break;
+                    }
+                }
+            }
+            if(doDisco) {
+                Log.d("Ruffy", "doRTDisconnect");
+                step = 300;
+
                 stopRT();
-                btConn.disconnect();
+            }
+            else if(handler!=null)
+            {
+                try{handler.rtStopped();}catch(Exception e){};
             }
         }
 
@@ -118,6 +142,7 @@ public class Ruffy extends Service  {
             lastRtMessageSent = System.currentTimeMillis();
             synchronized (rtSequenceSemaphore) {
                 rtSequence = Application.rtSendKey(keyCode, changed, rtSequence, btConn);
+                Log.v("RUFFY_KEY","send a key with sequence: "+(rtSequence-1)+" and value "+String.format("%02X",keyCode));
             }
         }
 
@@ -218,7 +243,7 @@ public class Ruffy extends Service  {
         public void handleRawData(byte[] buffer, int bytes) {
             log("got data from pump");
             synRun=false;
-            step=0;
+            //step=0;
             Packet.handleRawData(buffer,bytes, rtPacketHandler);
         }
 
@@ -240,7 +265,6 @@ public class Ruffy extends Service  {
     private void stopRT()
     {
         rtModeRunning = false;
-        rtSequence =0;
     }
 
     private void startRT() {
@@ -248,84 +272,92 @@ public class Ruffy extends Service  {
         new Thread(){
             @Override
             public void run() {
-                rtModeRunning = true;
                 rtSequence = 0;
                 lastRtMessageSent = System.currentTimeMillis();
                 rtModeRunning = true;
-                    display = new Display(new DisplayUpdater() {
-                        @Override
-                        public void clear() {
-                            for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                            {
-                                try
-                                {
-                                    handler.rtClearDisplay();
-                                }catch(Exception e1)
-                                {
-                                    rtHandlers.remove(handler);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void update(byte[] quarter, int which) {
-                            for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                            {
-                                try
-                                {
-                                    handler.rtUpdateDisplay(quarter,which);
-                                }catch(Exception e1)
-                                {
-                                    rtHandlers.remove(handler);
-                                }
-                            }
-                        }
-                    });
-                    display.setCompletDisplayHandler(new CompleteDisplayHandler() {
-                        @Override
-                        public void handleCompleteFrame(byte[][] pixels) {
-                            DisplayParser.findMenu(pixels, new DisplayParserHandler() {
-                                @Override
-                                public void menuFound(Menu menu) {
-                                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                                    {
-                                        try
-                                        {
-                                            handler.rtDisplayHandleMenu(menu);
-                                        }catch(Exception e1)
-                                        {
-                                            rtHandlers.remove(handler);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void noMenuFound() {
-                                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                                    {
-                                        try
-                                        {
-                                            handler.rtDisplayHandleNoMenu();
-                                        }catch(Exception e1)
-                                        {
-                                            rtHandlers.remove(handler);
-                                        }
-                                    }
-                                }
-                            });
-
-                        }
-                    });
-                    for(IRTHandler handler : new LinkedList<>(rtHandlers))
-                    {
-                        try
+                display = new Display(new DisplayUpdater() {
+                    @Override
+                    public void clear() {
+                        for(IRTHandler handler : new LinkedList<>(rtHandlers))
                         {
-                            handler.rtStarted();
-                        }catch(Exception e1)
-                        {
-                            rtHandlers.remove(handler);
+                            try
+                            {
+                                handler.rtClearDisplay();
+                            }catch(Exception e1)
+                            {
+                                rtHandlers.remove(handler);
+                            }
                         }
                     }
+
+                    @Override
+                    public void update(byte[] quarter, int which) {
+                        for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                        {
+                            try
+                            {
+                                handler.rtUpdateDisplay(quarter,which);
+                            }catch(Exception e1)
+                            {
+                                rtHandlers.remove(handler);
+                            }
+                        }
+                    }
+                });
+                display.setCompletDisplayHandler(new CompleteDisplayHandler() {
+                    @Override
+                    public void handleCompleteFrame(byte[][] pixels, final short seq) {
+                        DisplayParser.findMenu(pixels, new DisplayParserHandler() {
+                            @Override
+                            public void menuFound(Menu menu) {
+                                Log.v("RUFFY_KEY", "found menu: " + menu.getType());
+                                if (menu.getAttribute(MenuAttribute.BASAL_RATE)!=null)
+                                {
+                                    Log.v("RUFFY_KEY", "TBR: " + menu.getAttribute(MenuAttribute.BASAL_RATE));
+                                }
+                                if (menu.getAttribute(MenuAttribute.RUNTIME)!=null)
+                                {
+                                    Log.v("RUFFY_KEY", "RUNTIME: " + menu.getAttribute(MenuAttribute.RUNTIME));
+                                }
+                                for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                                {
+                                    try
+                                    {
+                                        handler.rtDisplayHandleMenu(menu,seq);
+                                    }catch(Exception e1)
+                                    {
+                                        rtHandlers.remove(handler);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void noMenuFound() {
+                                for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                                {
+                                    try
+                                    {
+                                        handler.rtDisplayHandleNoMenu(seq);
+                                    }catch(Exception e1)
+                                    {
+                                        rtHandlers.remove(handler);
+                                    }
+                                }
+                            }
+                        });
+
+                    }
+                });
+                for(IRTHandler handler : new LinkedList<>(rtHandlers))
+                {
+                    try
+                    {
+                        handler.rtStarted();
+                    }catch(Exception e1)
+                    {
+                        rtHandlers.remove(handler);
+                    }
+                }
                 while(rtModeRunning)
                 {
                     if(System.currentTimeMillis() > lastRtMessageSent +1000L) {
@@ -337,16 +369,24 @@ public class Ruffy extends Service  {
                     }
                     try{Thread.sleep(500);}catch(Exception e){/*ignore*/}
                 }
+
+                synRun=false;
+                Application.sendAppDisconnect(btConn);
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                btConn.disconnect();
+
                 for(IRTHandler handler : new LinkedList<>(rtHandlers))
                 {
                     try
                     {
                         handler.rtStopped();
-                    }catch(Exception e1)
-                    {
-                        rtHandlers.remove(handler);
-                    }
+                    }catch(Exception e1) {rtHandlers.remove(handler);}
                 }
+                rtSequence =0;
 
             }
         }.start();
@@ -355,7 +395,7 @@ public class Ruffy extends Service  {
     private Runnable synThread = new Runnable(){
         @Override
         public void run() {
-            while(synRun)
+            while(synRun && rtModeRunning)
             {
                 Protocol.sendSyn(btConn);
                 try {
@@ -391,7 +431,10 @@ public class Ruffy extends Service  {
 
         @Override
         public void addDisplayFrame(ByteBuffer b) {
-            display.addDisplayFrame(b);
+            //FIXME this short has to be removed in Display:47 if this line is removed
+            short seq = b.getShort();
+            Log.v("RUFFY_KEY","display with sequence: "+(seq));
+            display.addDisplayFrame(b,seq);
         }
 
         @Override
@@ -423,6 +466,16 @@ public class Ruffy extends Service  {
                     break;
                 default:
                     log(desc);
+            }
+        }
+
+        @Override
+        public void keySent(ByteBuffer b) {
+            short seq = b.getShort();
+            Log.v("RUFFY_KEY","key ack with sequence: "+(seq));
+            for(IRTHandler h : new LinkedList<>(rtHandlers))
+            {
+                try {h.keySent(seq);}catch(Exception e){rtHandlers.remove(h);}
             }
         }
     };
@@ -476,12 +529,12 @@ public class Ruffy extends Service  {
                 case SYNC:
                     btConn.seqNo = 0x00;
 
-                    if(step<100)
+                    if(step<201)
                         Application.sendAppConnect(btConn);
                     else
                     {
                         Application.sendAppDisconnect(btConn);
-                        step = 200;
+                        step = 300;
                     }
                     break;
                 case UNRELIABLE_DATA:

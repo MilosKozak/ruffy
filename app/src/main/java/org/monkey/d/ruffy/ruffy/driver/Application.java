@@ -13,6 +13,7 @@ public class Application {
      */
     public static int MODE_ERROR_TRESHHOLD = 3;
 
+
     public static enum Command
     {
         COMMANDS_SERVICES_VERSION,
@@ -259,6 +260,12 @@ public class Application {
             case (byte)0xC0:
                 k="DOWN";
                 break;
+            case (byte)0xF0:
+                k="COPY";
+                break;
+            case (byte)0x33:
+                k="BACK";
+                break;
         }
         btConn.log("send key "+k+" with seq: "+rtSeq);
         btConn.log("/////////////////////////////////////////////////////////////////////");
@@ -319,6 +326,7 @@ public class Application {
                     handler.addDisplayFrame(b);
                     break;
                 case (short) 0x0556://key answer
+                    handler.keySent(b);
                     break;
                 case (short) 0x0566://alive answer, often missed
                     break;

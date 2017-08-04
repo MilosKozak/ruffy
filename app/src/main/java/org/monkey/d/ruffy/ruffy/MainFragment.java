@@ -19,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -47,12 +48,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private PumpDisplayView displayView;
     private LinearLayout displayLayout;
     private TextView versionNameView;
-
+    private CheckBox canDisconnect;
 
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool( 3 );
 
     public boolean mServiceBound = false;
     public IRuffyService mBoundService;
+    private View pumpPanel;
 
     public MainFragment() {
     }
@@ -63,7 +65,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         public void onServiceDisconnected(ComponentName name) {
             mServiceBound = false;
             mBoundService = null;
-            connect.setText("Reconnect");
+            getActivity().runOnUiThread(new Thread(){
+                @Override
+                public void run() {
+                    connect.setEnabled(false);
+                }
+            });
+
+            Intent intent = new Intent(getActivity(), Ruffy.class);
+            name = getActivity().startService(intent);
+            if(name != null)
+            {
+                if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
+                {
+                    Log.v("Start","bound it");
+                }
+            }
         }
 
         @Override
@@ -71,40 +88,30 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mBoundService = IRuffyService.Stub.asInterface(service);
             mServiceBound = true;
 
+            try {mBoundService.addHandler(handler);}catch(Exception e){
+                Log.e("Main","add Handler: ",e);
+            }
             try {
                 reset.setEnabled(mBoundService.isBoundToPump());
             }catch(Exception e)
             {
-                e.printStackTrace();
+                Log.e("Main","isBound: ",e);
             }
-            try {
-                mBoundService.addHandler(handler);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-            connect.setEnabled(true);
+            getActivity().runOnUiThread(new Thread(){
+                @Override
+                public void run() {
+                    connect.setEnabled(true);
+                }
+            });
 
             try {
                 if (!mBoundService.isBoundToPump()) {
                     getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container,new SetupFragment()).addToBackStack("Start").commit();
                 }
-                else if(mBoundService.isConnected())
-                {
-                    handler.rtStarted();
-                }
-                else if(conOnBind)
-                {
-                    conOnBind=false;
-                    mBoundService.doRTConnect();
-                }
             }catch(RemoteException e){
                 e.printStackTrace();
+                Log.e("Main","add Handler: ",e);
             }
-            finally
-            {
-                conOnBind = false;
-            }
-
         }
     };
 
@@ -112,20 +119,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
         super.onDestroy();
         try{
-            mBoundService.removeHandler(handler);
+            if(mBoundService!=null && mBoundService.isConnected())
+            {
+                appendLog("Try to disconnect before exit");
+                mBoundService.doRTDisconnect(handler);
+            }
         }catch(RemoteException e)
         {
             e.printStackTrace();
         }
         if (mServiceBound) {
-
-            try {
-                appendLog("Try to disconnect before exit");
-                mBoundService.doRTDisconnect();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-
             getActivity().unbindService(mServiceConnection);
             mServiceBound = false;
         }
@@ -270,13 +273,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Override
         public void fail(String message) throws RemoteException {
             appendLog("fail: "+message);
-        /*getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connect.setText("Try Connect again!");
-                connect.setEnabled(true);
-            }
-        });*/
+            if(!mBoundService.isConnected() && getActivity()!=null)
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connect.setText("Connect!");
+                        connect.setEnabled(true);
+                    }
+                });
+
         }
 
         @Override
@@ -285,22 +290,28 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             getActivity().startActivityForResult(enableBtIntent, 1);
         }
 
+        @Override
+        public boolean canDisconnect() throws RemoteException {
+            if(getActivity()!=null)
+                return !canDisconnect.isChecked();
+            return true;
+        }
+
         public void rtStarted()
         {
+            if(getActivity()!=null)
+                getActivity().runOnUiThread(new Thread(){
+                    @Override
+                    public void run() {
+                        pumpPanel.setVisibility(View.VISIBLE);
+                    }
+                });
             setButtons(true);
             if(getActivity()!=null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            if (mBoundService.isConnected()) {
-                                connect.setText("Disconnect");
-                            } else {
-                                connect.setText("Connect");
-                            }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
+                        connect.setText("Disconnect");
                         connect.setEnabled(true);
                     }
                 });
@@ -331,23 +342,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         @Override
-        public void rtDisplayHandleMenu(final Menu menu) throws RemoteException {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String s = "";
-                    for(MenuAttribute ma : menu.attributes())
-                    {
-                        s+="\n"+ma+": "+menu.getAttribute(ma);
-                    }
-
-                    frameCounter.setText("display found: "+menu.getType()+s);
-                }
-            });
-        }
-
-        @Override
-        public void rtDisplayHandleNoMenu() throws RemoteException {
+        public void rtDisplayHandleNoMenu(int sequence) throws RemoteException {
             if(getActivity()!=null) {
                 if(getActivity()!=null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -371,6 +366,32 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
         }
 
+        @Override
+        public void keySent(int sequence) throws RemoteException {
+            //ignore here
+        }
+
+        @Override
+        public String getServiceIdentifier() throws RemoteException {
+            return this.toString();
+        }
+
+        @Override
+        public void rtDisplayHandleMenu(final Menu menu,int seq) throws RemoteException {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String s = "";
+                    for(MenuAttribute ma : menu.attributes())
+                    {
+                        s+="\n"+ma+": "+menu.getAttribute(ma);
+                    }
+
+                    frameCounter.setText("display found: "+menu.getType()+s);
+                }
+            });
+        }
+
         public void rtStopped()
         {
             setButtons(false);
@@ -382,6 +403,20 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     }
                 });
             }
+            getActivity().runOnUiThread(new Thread(){
+                @Override
+                public void run() {
+                    connect.setEnabled(true);
+                    connect.setText("Connect!");
+                }
+            });
+            if(getActivity()!=null)
+                getActivity().runOnUiThread(new Thread(){
+                    @Override
+                    public void run() {
+                        pumpPanel.setVisibility(View.GONE);
+                    }
+                });
         }
     };
 
@@ -535,6 +570,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         });
         setButtons(false);
 
+        canDisconnect = (CheckBox) v.findViewById(R.id.canDisconnectCheck);
         Intent intent = new Intent(getActivity(), Ruffy.class);
         ComponentName name = getActivity().startService(intent);
         if(name != null)
@@ -544,39 +580,26 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 Log.v("Start","bound it");
             }
         }
+        pumpPanel = v.findViewById(R.id.pumpPanel);
+        pumpPanel.setVisibility(View.GONE);
         return v;
     }
 
-    private boolean conOnBind = false;
+    //private boolean conOnBind = false;
     @Override
     public void onClick(final View view) {
         view.setEnabled(false);
         if(connect.getText().toString().startsWith("Disco"))
         {
             try {
-                mBoundService.doRTDisconnect();//FIXME
+                mBoundService.doRTDisconnect(handler);//FIXME
             } catch (RemoteException e) {
                 e.printStackTrace();
-            }
-            connect.setText("Connect!");
-            return;
-        }
-        else if(connect.getText().toString().toLowerCase().startsWith("recon"))
-        {
-            Intent intent = new Intent(getActivity(), Ruffy.class);
-            ComponentName name = getActivity().startService(intent);
-            if(name != null)
-            {
-                if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
-                {
-                    conOnBind = true;
-                    Log.v("Start","bound it");
-                }
             }
             return;
         }
         try {
-            mBoundService.doRTConnect();
+            mBoundService.doRTConnect(handler);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -599,10 +622,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (connectLog.getLineCount() < 1000) {
+                        if (connectLog.getLineCount() < 50) {
                             connectLog.append("\n" + message_time);
                         } else {
-                            connectLog.setText("");
+                            connectLog.setText(""+message_time);
                         }
                         final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
                         if (scrollAmount > 0)

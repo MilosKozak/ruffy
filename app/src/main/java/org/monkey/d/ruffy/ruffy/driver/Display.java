@@ -17,7 +17,7 @@ public class Display {
 
     public void setCompletDisplayHandler(CompleteDisplayHandler completeHandler) {this.completeHandler = completeHandler;}
 
-    private void update(byte[] rowBytes, boolean quarter[][], int which, int index)
+    private void update(byte[] rowBytes, boolean quarter[][], int which, int index, short seq)
     {
         updater.update(rowBytes,which);
         if(this.index==index)
@@ -26,7 +26,7 @@ public class Display {
 
             this.displayBytes[which] = rowBytes;
             if(this.completeHandler != null && complete[0] && complete[1] && complete[2] && complete[3])
-                completeHandler.handleCompleteFrame(this.displayBytes);
+                completeHandler.handleCompleteFrame(this.displayBytes,seq);
 
         }
         else
@@ -40,10 +40,10 @@ public class Display {
         }
     }
 
-    public void addDisplayFrame(ByteBuffer b)
+    public void addDisplayFrame(ByteBuffer b, short seq)
     {
         //discard first 3
-        b.getShort();
+        //b.getShort();//this is sequence, removed at RuffySevrice for now
         b.get();
         int index = (int)(b.get() & 0xFF);
         byte row = b.get();
@@ -71,16 +71,16 @@ public class Display {
         switch(row)
         {
             case 0x47:
-                update(displayBytes,quarter,0,index);
+                update(displayBytes,quarter,0,index,seq);
                 break;
             case 0x48:
-                update(displayBytes,quarter,1,index);
+                update(displayBytes,quarter,1,index,seq);
                 break;
             case (byte)0xB7:
-                update(displayBytes,quarter,2,index);
+                update(displayBytes,quarter,2,index,seq);
                 break;
             case (byte)0xB8:
-                update(displayBytes,quarter,3,index);
+                update(displayBytes,quarter,3,index,seq);
                 break;
         }
     }

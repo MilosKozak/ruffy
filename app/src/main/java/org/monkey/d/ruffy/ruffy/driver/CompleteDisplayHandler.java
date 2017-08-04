@@ -5,5 +5,5 @@ package org.monkey.d.ruffy.ruffy.driver;
  */
 
 public interface CompleteDisplayHandler {
-    void handleCompleteFrame(byte[][] pixels);
+    void handleCompleteFrame(byte[][] pixels, short seq);
 }

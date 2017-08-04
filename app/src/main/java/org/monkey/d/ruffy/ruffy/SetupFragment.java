@@ -154,7 +154,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
         Byte command, addresses;
         buffer.get();
-        command = buffer.get();
+        command = (byte)(buffer.get() & 0x1F);
 
         short payloadlength = buffer.getShort();
 
@@ -256,7 +256,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
 
-            case 5://ack response
+            case 0x05://ack response
                 break;
 
             default:

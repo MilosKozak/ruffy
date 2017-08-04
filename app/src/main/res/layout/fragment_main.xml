@@ -19,7 +19,7 @@
             android:id="@+id/main_log"
             style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@color/colorPrimaryDark"
             android:clickable="true"
@@ -31,7 +31,7 @@
             android:scrollbars="vertical"
             android:text="Log"
             android:textIsSelectable="true"
-            android:textSize="10sp" />
+            android:textSize="10sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -66,6 +66,14 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:minHeight="32dp" />
+
+            <CheckBox
+                android:id="@+id/canDisconnectCheck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Keep connection on other Disconect"
+                android:checked="false"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
