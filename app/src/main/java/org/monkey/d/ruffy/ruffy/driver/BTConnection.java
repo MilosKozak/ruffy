@@ -258,8 +258,6 @@ public class BTConnection {
 
     public void write(byte[] ro){
 
-        handler.log("!!!write!!!");
-
         if(this.currentConnection==null)
         {
             handler.fail("unable to write: no socket");
