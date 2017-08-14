@@ -187,7 +187,7 @@ public class BTConnection {
                 while (true) {
                     try {
                         int bytes = currentInput.read(buffer);
-                        handler.log("read "+bytes+": "+Utils.byteArrayToHexString(buffer,bytes));
+                        //handler.log("read "+bytes+": "+Utils.byteArrayToHexString(buffer,bytes));
                         handler.handleRawData(buffer,bytes);
                     } catch (Exception e) {
                         //e.printStackTrace();
@@ -227,7 +227,7 @@ public class BTConnection {
         for (i = 0; i < key.length; i++) {
             sb.append(String.format("%02X ", key[i]));
         }
-        handler.log("writing command: "+sb.toString());
+        //handler.log("writing command: "+sb.toString());
         write(ro);
     }
 
@@ -265,7 +265,7 @@ public class BTConnection {
         }
         try {
             currentOutput.write(ro);
-            handler.log("wrote "+ro.length+" bytes: "+Utils.byteArrayToHexString(ro,ro.length));
+            //handler.log("wrote "+ro.length+" bytes: "+Utils.byteArrayToHexString(ro,ro.length));
         }catch(Exception e)
         {
             //e.printStackTrace();

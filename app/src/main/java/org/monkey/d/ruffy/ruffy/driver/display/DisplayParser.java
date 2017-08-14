@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver.display;
 
-import android.util.Log;
-
 import org.monkey.d.ruffy.ruffy.driver.display.parser.LargeTextParser;
 import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuFactory;
 import org.monkey.d.ruffy.ruffy.driver.display.parser.SmallTextParser;
@@ -18,7 +16,6 @@ public class DisplayParser {
     public static void findMenu(final byte[][] pixels, final DisplayParserHandler handler) {
         if(busy)
         {
-            Log.v("Tokens","skipping frame, busy…");
             return;
         }
         busy = true;
@@ -70,13 +67,13 @@ public class DisplayParser {
             }
             if(s!=0)
             {
-                print(display,"not empty");
+                //print(display,"not empty");
             }
 
             Menu menu = MenuFactory.get(tokens);
 
             if(menu != null) {
-                Log.v("tokens", " needed " + ((((double) (System.currentTimeMillis() - t1)) / 1000d)) + " for parsing " + (menu != null ? menu.getType() : "no menu"));
+                //Log.v("tokens", " needed " + ((((double) (System.currentTimeMillis() - t1)) / 1000d)) + " for parsing " + (menu != null ? menu.getType() : "no menu"));
                 menu.setAttribute(MenuAttribute.DEBUG_TIMING, (((double) (System.currentTimeMillis() - t1)) / 1000d));
                 handler.menuFound(menu);
             }
@@ -85,9 +82,11 @@ public class DisplayParser {
 
             int nct = 0;
             for(int i=0;i<4;i++)nct+=tokens[i].size();
-            if(nct>0 && menu!= null)
-                Log.v("tokens",nct+" toks not consumed in "+menu.getType());
-        }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
+            if(nct>0 && menu!= null){
+                //Log.v("tokens",nct+" toks not consumed in "+menu.getType());
+            }
+
+        }catch(Throwable e){e.printStackTrace();/*Log.e("Tokens","error...",e);*/}
         finally {
             busy=false;
         }
@@ -107,7 +106,7 @@ public class DisplayParser {
         return display;
     }
 
-  public static void print(byte[][] display, String text) {
+  /*public static void print(byte[][] display, String text) {
         Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
         Log.d("DisplayParser",text);
 
@@ -124,6 +123,6 @@ public class DisplayParser {
             }
         }
         Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
-    }
+    }*/
 }
 

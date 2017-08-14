@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -78,7 +77,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             {
                 if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
                 {
-                    Log.v("Start","bound it");
+                    //Log.v("Start","bound it");
                 }
             }
         }
@@ -89,13 +88,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mServiceBound = true;
 
             try {mBoundService.addHandler(handler);}catch(Exception e){
-                Log.e("Main","add Handler: ",e);
+              //  Log.e("Main","add Handler: ",e);
             }
             try {
                 reset.setEnabled(mBoundService.isBoundToPump());
             }catch(Exception e)
             {
-                Log.e("Main","isBound: ",e);
+               // Log.e("Main","isBound: ",e);
             }
             getActivity().runOnUiThread(new Thread(){
                 @Override
@@ -110,7 +109,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 }
             }catch(RemoteException e){
                 e.printStackTrace();
-                Log.e("Main","add Handler: ",e);
+                //Log.e("Main","add Handler: ",e);
             }
         }
     };
@@ -577,7 +576,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         {
             if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
             {
-                Log.v("Start","bound it");
+                //Log.v("Start","bound it");
             }
         }
         pumpPanel = v.findViewById(R.id.pumpPanel);
@@ -615,9 +614,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         final String message_time = currentDateTime + " - " + message;
-        Log.v("RUFFY_LOG", message);
 
-        if(connectLog != null && connectLog.getVisibility()!=View.GONE) {
+        if(getActivity()!= null && connectLog != null && connectLog.getVisibility()!=View.GONE) {
             if(getActivity()!=null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

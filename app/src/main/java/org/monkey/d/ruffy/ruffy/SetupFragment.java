@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,7 +126,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     }
 
     private void appendLog(final String message) {
-        Log.v("RUFFY_LOG", message);
+        //Log.v("RUFFY_LOG", message);
         if(getActivity()!=null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override

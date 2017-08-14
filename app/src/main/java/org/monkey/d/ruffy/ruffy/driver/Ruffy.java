@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
@@ -73,7 +72,6 @@ public class Ruffy extends Service  {
 
         @Override
         public int doRTConnect(IRTHandler startingHandler) throws RemoteException {
-            Log.d("Ruffy","doRTConnect");
             if(isConnected() && rtModeRunning)
             {
                 startingHandler.rtStarted();
@@ -118,14 +116,14 @@ public class Ruffy extends Service  {
                         rtHandlers.remove(h);
                     }
                     if (!doDisco) {
-                        Log.d("Ruffy", "doRTDisconnect interupted by: " + ident);
+                        //Log.d("Ruffy", "doRTDisconnect interupted by: " + ident);
 
                         break;
                     }
                 }
             }
             if(doDisco) {
-                Log.d("Ruffy", "doRTDisconnect");
+                //Log.d("Ruffy", "doRTDisconnect");
                 step = 300;
 
                 stopRT();
@@ -138,17 +136,17 @@ public class Ruffy extends Service  {
 
         public void rtSendKey(byte keyCode, boolean changed)
         {
-            Log.d("Ruffy","rtSendKey");
+           // Log.d("Ruffy","rtSendKey");
             lastRtMessageSent = System.currentTimeMillis();
             synchronized (rtSequenceSemaphore) {
                 rtSequence = Application.rtSendKey(keyCode, changed, rtSequence, btConn);
-                Log.v("RUFFY_KEY","send a key with sequence: "+(rtSequence-1)+" and value "+String.format("%02X",keyCode));
+                //Log.v("RUFFY_KEY","send a key with sequence: "+(rtSequence-1)+" and value "+String.format("%02X",keyCode));
             }
         }
 
         public void resetPairing()
         {
-            Log.d("Ruffy","resetPairing");
+            //Log.d("Ruffy","resetPairing");
             SharedPreferences prefs = Ruffy.this.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
             prefs.edit().putBoolean("paired",false).apply();
             synRun=false;
@@ -157,7 +155,7 @@ public class Ruffy extends Service  {
 
         public boolean isConnected()
         {
-            Log.d("Ruffy","isConnected");
+          //  Log.d("Ruffy","isConnected");
             if (btConn!=null) {
                 return btConn.isConnected();
             } else {
@@ -167,39 +165,38 @@ public class Ruffy extends Service  {
 
         @Override
         public boolean isBoundToPump() throws RemoteException {
-            Log.d("Ruffy","isBoundToPump");
+           // Log.d("Ruffy","isBoundToPump");
             return PumpData.isPumpBound(Ruffy.this);
         }
     };
 
     @Override
     public void onCreate() {
-        Log.d("Ruffy","onCreate");
+        //Log.d("Ruffy","onCreate");
         super.onCreate();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("Ruffy","onBind");
+        //Log.d("Ruffy","onBind");
         return serviceBinder;
     }
 
     @Override
     public void onRebind(Intent intent) {
-        Log.d("Ruffy","onRebind");
+        //Log.d("Ruffy","onRebind");
         super.onRebind(intent);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.v("Ruffy","onUnbind");
+        //Log.v("Ruffy","onUnbind");
         return true;
     }
 
     @Override
     public void onDestroy() {
-
-        Log.d("Ruffy","onDestroy");
+        //Log.d("Ruffy","onDestroy");
         super.onDestroy();
     }
 
@@ -226,7 +223,7 @@ public class Ruffy extends Service  {
 
         @Override
         public void fail(String s) {
-            log("failed: "+s);
+            //log("failed: "+s);
             synRun=false;
             if(step < 200)
                 btConn.connect(pumpData,4);
@@ -236,12 +233,12 @@ public class Ruffy extends Service  {
 
         @Override
         public void deviceFound(BluetoothDevice bd) {
-            log("not be here!?!");
+            //log("not be here!?!");
         }
 
         @Override
         public void handleRawData(byte[] buffer, int bytes) {
-            log("got data from pump");
+            //log("got data from pump");
             synRun=false;
             //step=0;
             Packet.handleRawData(buffer,bytes, rtPacketHandler);
@@ -310,14 +307,14 @@ public class Ruffy extends Service  {
                         DisplayParser.findMenu(pixels, new DisplayParserHandler() {
                             @Override
                             public void menuFound(Menu menu) {
-                                Log.v("RUFFY_KEY", "found menu: " + menu.getType());
+                                //Log.v("RUFFY_KEY", "found menu: " + menu.getType());
                                 if (menu.getAttribute(MenuAttribute.BASAL_RATE)!=null)
                                 {
-                                    Log.v("RUFFY_KEY", "TBR: " + menu.getAttribute(MenuAttribute.BASAL_RATE));
+                                    //Log.v("RUFFY_KEY", "TBR: " + menu.getAttribute(MenuAttribute.BASAL_RATE));
                                 }
                                 if (menu.getAttribute(MenuAttribute.RUNTIME)!=null)
                                 {
-                                    Log.v("RUFFY_KEY", "RUNTIME: " + menu.getAttribute(MenuAttribute.RUNTIME));
+                                    //Log.v("RUFFY_KEY", "RUNTIME: " + menu.getAttribute(MenuAttribute.RUNTIME));
                                 }
                                 for(IRTHandler handler : new LinkedList<>(rtHandlers))
                                 {
@@ -361,7 +358,7 @@ public class Ruffy extends Service  {
                 while(rtModeRunning)
                 {
                     if(System.currentTimeMillis() > lastRtMessageSent +1000L) {
-                        log("sending keep alive");
+                        //log("sending keep alive");
                         synchronized (rtSequenceSemaphore) {
                             rtSequence = Application.sendRTKeepAlive(rtSequence, btConn);
                             lastRtMessageSent = System.currentTimeMillis();
@@ -433,7 +430,7 @@ public class Ruffy extends Service  {
         public void addDisplayFrame(ByteBuffer b) {
             //FIXME this short has to be removed in Display:47 if this line is removed
             short seq = b.getShort();
-            Log.v("RUFFY_KEY","display with sequence: "+(seq));
+            //Log.v("RUFFY_KEY","display with sequence: "+(seq));
             display.addDisplayFrame(b,seq);
         }
 
@@ -472,7 +469,7 @@ public class Ruffy extends Service  {
         @Override
         public void keySent(ByteBuffer b) {
             short seq = b.getShort();
-            Log.v("RUFFY_KEY","key ack with sequence: "+(seq));
+            //Log.v("RUFFY_KEY","key ack with sequence: "+(seq));
             for(IRTHandler h : new LinkedList<>(rtHandlers))
             {
                 try {h.keySent(seq);}catch(Exception e){rtHandlers.remove(h);}
@@ -481,7 +478,7 @@ public class Ruffy extends Service  {
     };
 
     public void log(String s) {
-        Log.d("Ruffy-log",s);
+        //Log.d("Ruffy-log",s);
         for(IRTHandler handler : new LinkedList<>(rtHandlers))
         {
             try
@@ -495,7 +492,7 @@ public class Ruffy extends Service  {
     }
 
     public void fail(String s) {
-        Log.e("Ruffy-fail",s);
+        //Log.e("Ruffy-fail",s);
         for(IRTHandler handler : new LinkedList<>(rtHandlers))
         {
             try

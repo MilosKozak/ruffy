@@ -2,7 +2,6 @@ package org.monkey.d.ruffy.ruffy.driver.display;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.menu.BolusType;
 import org.monkey.d.ruffy.ruffy.driver.display.menu.MenuBlink;
@@ -55,23 +54,23 @@ public class Menu implements Parcelable{
                     } else if (String.class.toString().equals(clas)) {
                         o = new String(value);
                     } else {
-                        Log.e("MENU","unknown class: "+clas);
+                        //Log.e("MENU","unknown class: "+clas);
                     }
 
 
                     if (o != null) {
                         attributes.put(a, o);
                     } else {
-                        Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
+                       // Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
                     }
                 }
                 else
                 {
-                    Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
+                    //Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
                 }
             }catch(Exception e)
             {
-                Log.e("MenuIn","Exception in read",e);
+                //Log.e("MenuIn","Exception in read",e);
             }
 
         }
@@ -120,11 +119,11 @@ public class Menu implements Parcelable{
                 }
                 else
                 {
-                    Log.e("Menu","null in write :/");
+                    //Log.e("Menu","null in write :/");
                 }
             }catch(Exception e)
             {
-                Log.v("MenuOut","error in write",e);
+                //Log.v("MenuOut","error in write",e);
             }
         }
     }
