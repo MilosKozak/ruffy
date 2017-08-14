@@ -17,6 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -58,6 +59,18 @@ public class Ruffy extends Service  {
 
         @Override
         public void addHandler(IRTHandler handler) throws RemoteException {
+            String n = handler.getServiceIdentifier();
+            for(IRTHandler h : rtHandlers)
+            {
+                String i = null;
+                i = h.getServiceIdentifier();
+                if(i.equals(n))
+                {
+                    if(rtModeRunning)
+                        handler.rtStarted();
+                    return;
+                }
+            }
             rtHandlers.add(handler);
             if(rtModeRunning)
                 handler.rtStarted();
