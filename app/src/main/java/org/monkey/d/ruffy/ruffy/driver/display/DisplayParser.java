@@ -18,7 +18,7 @@ public class DisplayParser {
     public static void findMenu(final byte[][] pixels, final DisplayParserHandler handler) {
         if(busy)
         {
-            Log.v("Tokens","skipping frame, busy…");
+//            Log.v("Tokens","skipping frame, busy…");
             return;
         }
         busy = true;
@@ -76,7 +76,7 @@ public class DisplayParser {
             Menu menu = MenuFactory.get(tokens);
 
             if(menu != null) {
-                Log.v("tokens", " needed " + ((((double) (System.currentTimeMillis() - t1)) / 1000d)) + " for parsing " + (menu != null ? menu.getType() : "no menu"));
+//                Log.v("tokens", " needed " + ((((double) (System.currentTimeMillis() - t1)) / 1000d)) + " for parsing " + (menu != null ? menu.getType() : "no menu"));
                 menu.setAttribute(MenuAttribute.DEBUG_TIMING, (((double) (System.currentTimeMillis() - t1)) / 1000d));
                 handler.menuFound(menu);
             }
@@ -85,9 +85,11 @@ public class DisplayParser {
 
             int nct = 0;
             for(int i=0;i<4;i++)nct+=tokens[i].size();
-            if(nct>0 && menu!= null)
-                Log.v("tokens",nct+" toks not consumed in "+menu.getType());
-        }catch(Throwable e){e.printStackTrace();Log.e("Tokens","error...",e);}
+//            if(nct>0 && menu!= null)
+//                Log.v("tokens",nct+" toks not consumed in "+menu.getType());
+        }catch(Throwable e){e.printStackTrace();
+//            Log.e("Tokens","error...",e);
+ }
         finally {
             busy=false;
         }
@@ -108,8 +110,8 @@ public class DisplayParser {
     }
 
   public static void print(byte[][] display, String text) {
-        Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
-        Log.d("DisplayParser",text);
+//        Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
+//        Log.d("DisplayParser",text);
 
         for (int i = 0; i < 4; i++) {
             String[] lines = new String[]{"","","","","","","",""};
@@ -119,11 +121,11 @@ public class DisplayParser {
                     lines[r] += (display[i][c] & ((1 << r) & 0xFF)) != 0 ? "█" : " ";
                 }
             }
-            for(int r = 0; r < 8; r++) {
-                Log.d("DisplayParser", lines[r]);
-            }
+//            for(int r = 0; r < 8; r++) {
+//                Log.d("DisplayParser", lines[r]);
+//            }
         }
-        Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
+//        Log.d("DisplayParser","////////////////////////////////////////////////////////////////////////////////////////////////");
     }
 }
 

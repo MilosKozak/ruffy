@@ -58,11 +58,11 @@ public class Menu implements Parcelable{
                 if (o != null) {
                     attributes.put(a, o);
                 } else {
-                    Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
+//                    Log.e("MenuIn", "failed to parse: " + attr + " / " + clas + " / " + value);
                 }
             }catch(Exception e)
             {
-                Log.e("MenuIn","Exception in read",e);
+//                Log.e("MenuIn","Exception in read",e);
             }
 
         }
@@ -106,7 +106,7 @@ public class Menu implements Parcelable{
                 dest.writeString(o.toString());
             }catch(Exception e)
             {
-                Log.v("MenuOut","error in write",e);
+//                Log.v("MenuOut","error in write",e);
             }
         }
     }

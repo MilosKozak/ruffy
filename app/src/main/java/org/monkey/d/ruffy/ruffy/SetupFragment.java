@@ -127,7 +127,7 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
     }
 
     private void appendLog(final String message) {
-        Log.v("RUFFY_LOG", message);
+//        Log.v("RUFFY_LOG", message);
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

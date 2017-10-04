@@ -380,7 +380,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         {
             if(getActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE))
             {
-                Log.v("Start","bound it");
+//                Log.v("Start","bound it");
             }
         }
         return v;
@@ -416,7 +416,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         final String message_time = currentDateTime + " - " + message;
-        Log.v("RUFFY_LOG", message);
+//        Log.v("RUFFY_LOG", message);
 
         if(connectLog.getVisibility()!=View.GONE) {
             getActivity().runOnUiThread(new Runnable() {
