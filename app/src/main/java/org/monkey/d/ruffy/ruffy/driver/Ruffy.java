@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * Created by fishermen21 on 25.05.17.
  */
 
-public class Ruffy extends Service  {
+public class Ruffy extends Service {
 
     public static class Key {
         public static byte NO_KEY				=(byte)0x00;
@@ -83,9 +83,10 @@ public class Ruffy extends Service  {
         public void doRTDisconnect()
         {
             step = 200;
-            stopRT();
-            if (btConn!=null)
+            if(btConn!=null) {
+                stopRT();
                 btConn.disconnect();
+            }
         }
 
         public void rtSendKey(byte keyCode, boolean changed)
@@ -101,7 +102,6 @@ public class Ruffy extends Service  {
         {
             SharedPreferences prefs = Ruffy.this.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
             prefs.edit().putBoolean("paired",false).apply();
-/*
 
             String bondedDeviceId = prefs.getString("device", null);
             if (bondedDeviceId != null) {
@@ -277,14 +277,23 @@ public class Ruffy extends Service  {
                 }
                 while(rtModeRunning)
                 {
-                    if(System.currentTimeMillis() > lastRtMessageSent +1000L) {
-                        log("sending keep alive");
-                        synchronized (rtSequenceSemaphore) {
-                            rtSequence = Application.sendRTKeepAlive(rtSequence, btConn);
-                            lastRtMessageSent = System.currentTimeMillis();
+                    try {
+                        if (System.currentTimeMillis() > lastRtMessageSent + 1000L) {
+                            log("sending keep alive");
+                            synchronized (rtSequenceSemaphore) {
+                                rtSequence = Application.sendRTKeepAlive(rtSequence, btConn);
+                                lastRtMessageSent = System.currentTimeMillis();
+                            }
+                        }
+                    } catch (Exception e) {
+                        if (rtModeRunning) {
+                            fail("Error sending keep alive while rtModeRunning is still true");
+                        } else {
+                            fail("Error sending keep alive. rtModeRunning is false, so this is most likely a race condition during disconnect");
                         }
                     }
-                    try{Thread.sleep(500);}catch(Exception e){/*ignore*/}
+                    try{
+                        Thread.sleep(500);}catch(Exception e){/*ignore*/}
                 }
                 try {
                     rtHandler.rtStopped();
@@ -395,7 +404,7 @@ public class Ruffy extends Service  {
         }
 
         @Override
-        public void handleResponse(Packet.Response response,boolean reliableFlagged, byte[] payload) {
+        public void handleResponse(Packet.Response response, boolean reliableFlagged, byte[] payload) {
             switch (response)
             {
                 case ID:
