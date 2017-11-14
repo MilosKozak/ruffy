@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,7 +121,7 @@ public class BTConnection {
 
             tmp = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
         } catch (IOException e) {
-            handler.log("socket create() failed: "+e.getMessage());
+            handler.fail("socket create() failed: "+e.getMessage());
         }
         if(tmp != null) {
             stopDiscoverable();
@@ -128,7 +129,7 @@ public class BTConnection {
         }
         else
         {
-            handler.log("failed the pump connection( retries left: "+retry+")");
+            handler.fail("failed the pump connection( retries left: "+retry+")");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -155,7 +156,7 @@ public class BTConnection {
                     currentOutput = currentConnection.getOutputStream();
                 } catch (IOException e) {
                     //e.printStackTrace();
-                    handler.fail("no connection possible");
+                    handler.fail("no connection possible: " + e.getMessage());
 
 
                     //??????????
@@ -185,7 +186,7 @@ public class BTConnection {
                 while (true) {
                     try {
                         int bytes = currentInput.read(buffer);
-                        handler.log("read "+bytes+": "+Utils.byteArrayToHexString(buffer,bytes));
+                        handler.log("read "+bytes+": "+ Utils.byteArrayToHexString(buffer,bytes));
                         handler.handleRawData(buffer,bytes);
                     } catch (Exception e) {
                         //e.printStackTrace();
@@ -236,9 +237,9 @@ public class BTConnection {
             this.currentInput=null;
             this.currentOutput=null;
             this.currentConnection=null;
-            handler.log("closed current Connection");
+            handler.fail("closed current Connection");
         }
-        handler.log("got new Connection: "+newConnection);
+        handler.fail("got new Connection: "+newConnection);
         this.currentConnection = newConnection;
         if(newConnection!=null)
         {
@@ -257,7 +258,7 @@ public class BTConnection {
         }
         try {
             currentOutput.write(ro);
-            handler.log("wrote "+ro.length+" bytes: "+Utils.byteArrayToHexString(ro,ro.length));
+            handler.log("wrote "+ro.length+" bytes: "+ Utils.byteArrayToHexString(ro,ro.length));
         }catch(Exception e)
         {
             //e.printStackTrace();
