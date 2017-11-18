@@ -259,12 +259,6 @@ public class Application {
             case (byte)0xC0:
                 k="DOWN";
                 break;
-            case (byte)0xF0:
-                k="COPY";
-                break;
-            case (byte)0x33:
-                k="BACK";
-                break;
         }
         btConn.log("send key "+k+" with seq: "+rtSeq);
         btConn.log("/////////////////////////////////////////////////////////////////////");

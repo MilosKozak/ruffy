@@ -60,10 +60,6 @@ public class Ruffy extends Service {
         @Override
         public int doRTConnect() throws RemoteException {
             step= 0;
-            if(isConnected()) {
-                rtHandler.rtStarted();
-                return 0;
-            }
             if(Ruffy.this.rtHandler==null)
             {
                 return -2;//FIXME make errors
@@ -114,19 +110,14 @@ public class Ruffy extends Service {
                     // it's not going better here either
                 }
             }
+*/
 
             synRun=false;
             rtModeRunning =false;
         }
 
-        public boolean isConnected()
-        {
-            if (btConn!=null) {
-                return btConn.isConnected();
-            } else {
-                return false;
-            }
-
+        public boolean isConnected() {
+            return btConn != null && btConn.isConnected();
         }
     };
 
