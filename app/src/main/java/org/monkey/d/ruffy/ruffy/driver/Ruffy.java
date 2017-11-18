@@ -59,10 +59,12 @@ public class Ruffy extends Service {
 
         @Override
         public int doRTConnect() throws RemoteException {
-            step= 0;
+//            step= 0;
             if(Ruffy.this.rtHandler==null)
             {
-                return -2;//FIXME make errors
+                throw new IllegalStateException("XXX");
+
+//                return -2;//FIXME make errors
             }
             if(pumpData==null)
             {
@@ -70,6 +72,8 @@ public class Ruffy extends Service {
             }
             if(pumpData != null) {
                 btConn = new BTConnection(rtBTHandler);
+                step = 0;
+                rtModeRunning=true;
                 btConn.connect(pumpData, 10);
                 return 0;
             }
@@ -79,8 +83,8 @@ public class Ruffy extends Service {
         public void doRTDisconnect()
         {
             step = 200;
+            stopRT();
             if(btConn!=null) {
-                stopRT();
                 btConn.disconnect();
             }
         }
@@ -99,6 +103,7 @@ public class Ruffy extends Service {
             SharedPreferences prefs = Ruffy.this.getSharedPreferences("pumpdata", Activity.MODE_PRIVATE);
             prefs.edit().putBoolean("paired",false).apply();
 
+            /*
             String bondedDeviceId = prefs.getString("device", null);
             if (bondedDeviceId != null) {
                 BluetoothDevice boundedPump = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(bondedDeviceId);
@@ -299,7 +304,7 @@ public class Ruffy extends Service {
     private Runnable synThread = new Runnable(){
         @Override
         public void run() {
-            while(synRun)
+            while(synRun && rtModeRunning)
             {
                 Protocol.sendSyn(btConn);
                 try {

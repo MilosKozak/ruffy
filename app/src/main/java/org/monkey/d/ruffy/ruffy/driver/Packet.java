@@ -158,6 +158,9 @@ public class Packet {
                     handler.handleResponse(Response.UNRELIABLE_DATA,reliableFlagged,payload);
                 }
                 break;
+            case 0x05:
+                //ignore ack response
+                break;
 
             case 0x06:
                 if(Utils.ccmVerify(packetNoUmac, handler.getToDeviceKey(), umac, nonce))
