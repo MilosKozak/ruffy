@@ -1055,8 +1055,18 @@ public class MenuFactory {
                 case 2:
                     if(p instanceof NumberPattern)
                     {
-                        code = ((NumberPattern) p).getNumber();
-                        stage++;
+                        if (code == 0 && tokens[1].size() == 6) {
+                            // first number of a 2 digit code, don't advance stage
+                            code = ((NumberPattern) p).getNumber();
+                        } else if (code != 0 && tokens[1].size() == 5) {
+                            // second number of a 2 digit code
+                            code = code * 10 + ((NumberPattern) p).getNumber();
+                            stage++;
+                        } else {
+                            // single digit code
+                            code = ((NumberPattern) p).getNumber();
+                            stage++;
+                        }
                     }
                     else
                         return null;
