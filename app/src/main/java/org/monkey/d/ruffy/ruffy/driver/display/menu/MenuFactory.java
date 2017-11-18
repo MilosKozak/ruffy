@@ -1569,7 +1569,7 @@ public class MenuFactory {
             Pattern p = t.getPattern();
             switch (stage) {
                 case 0:
-                    if (isSymbol(p, Symbol.LARGE_AMPULE_FULL)) {
+                    if (isSymbol(p, Symbol.LARGE_AMPULE_FULL) || isSymbol(p, Symbol.LARGE_AMPULE_LOW)) {
                         stage++;
                     } else
                         return null;
