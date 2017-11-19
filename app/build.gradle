@@ -35,7 +35,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "org.monkey.d.ruffy.ruffy"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 25
         versionCode 1
         versionName generateVersionName()
