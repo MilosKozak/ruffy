@@ -59,7 +59,12 @@ public class Ruffy extends Service {
 
         @Override
         public int doRTConnect() throws RemoteException {
-//            step= 0;
+            if(isConnected() && rtModeRunning)
+            {
+                rtHandler.rtStarted();
+                return 0;
+            }
+            step= 0;
             if(Ruffy.this.rtHandler==null)
             {
                 throw new IllegalStateException("XXX");
@@ -72,7 +77,6 @@ public class Ruffy extends Service {
             }
             if(pumpData != null) {
                 btConn = new BTConnection(rtBTHandler);
-                step = 0;
                 rtModeRunning=true;
                 btConn.connect(pumpData, 10);
                 return 0;
