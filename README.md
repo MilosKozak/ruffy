@@ -33,10 +33,12 @@ What are the requirements:
 
 * Android below 4.2
 * Lineage 7+ with latest nightly
+* Android 8.1+
 
 What must I change to use another Android version?
 
 * nothing, you just can not use another version!
+* but maybe you can upgrade to Android 8.1 or use some Distribution for your mobile that is based on LineageOS 
 
 Why?
 
@@ -66,6 +68,9 @@ How do I know that my bluetooth Stack is wrong?
 
 * start the pairing, lay the pump next to the phone in pairing mode
 * if the pump does not find your phone (shows it as selectable device in the screen) then it wont work!
+
+Is there really no other alternative?
+* Get root rigths on any android and use this method: https://github.com/gregorybel/combo-pairing/
 
 Why the name?
 
