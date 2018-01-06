@@ -166,6 +166,14 @@ public class Application {
                 payload.put((byte) (0x9AAA & 0xFF));
                 payload.put((byte) ((0x9AAA>>8) & 0xFF));
                 reliable = false;
+            case DEACTIVATE_ALL:
+                Log.d("ApplicatioN","Send deactivate");
+                payload = ByteBuffer.allocate(4);
+                payload.put((byte)16);
+                payload.put((byte)0);
+                payload.put((byte)(0x6A));
+                payload.put((byte)(0x90));
+                reliable = true;
                 break;
 
             default:
@@ -295,16 +303,24 @@ public class Application {
                 case (short) 0xA095://bind
                     handler.log("not should happen here!");
                     break;
-                case (short) 0xA066://activate rt:
-                    handler.rtModeActivated();
-                    break;
+                case (short) 0xA066: {//activate service:
+                    byte service = b.get();
+                    if (service == -73)
+                        handler.cmdModeActivated();
+                    else
+                        handler.rtModeActivated();
+                } break;
                 case (short) 0x005A://AL_DISCONNECT_RES:
                     descrip = "AL_DISCONNECT_RES";
                     break;
-                case (short) 0xA069://service deactivated
+                case (short) 0xA069: {//service deactivated
+                    byte service = b.get();
                     descrip = "AL_DEACTIVATE_RES";
-                    handler.modeDeactivated();
-                    break;
+                    if (service == -73)
+                        handler.cmdModeDeactivated();
+                    else
+                        handler.rtModeDeactivated();
+                } break;
                 case (short) 0xA06A://service all deactivate
                     descrip = "AL_DEACTIVATE_ALL_RES";
                     handler.modeDeactivated();
