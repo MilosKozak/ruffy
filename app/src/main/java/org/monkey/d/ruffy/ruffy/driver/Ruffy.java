@@ -71,15 +71,21 @@ public class Ruffy extends Service {
 
 //                return -2;//FIXME make errors
             }
-            if(pumpData==null)
-            {
-                pumpData = PumpData.loadPump(Ruffy.this,rtHandler);
-            }
-            if(pumpData != null) {
-                btConn = new BTConnection(rtBTHandler);
-                rtModeRunning=true;
-                btConn.connect(pumpData, 10);
-                return 0;
+            if(!isConnected()) {
+                if (pumpData == null) {
+                    pumpData = PumpData.loadPump(Ruffy.this, rtHandler);
+                }
+                if (pumpData != null) {
+                    inShutDown=false;
+                    btConn = new BTConnection(rtBTHandler);
+                    rtModeRunning = true;
+                    btConn.connect(pumpData, 10);
+                    return 0;
+                }
+            } else {
+                inShutDown=false;
+                rtModeRunning = true;
+                Application.sendAppCommand(Application.Command.COMMAND_DEACTIVATE,btConn);
             }
             return -1;
         }
@@ -88,9 +94,6 @@ public class Ruffy extends Service {
         {
             step = 200;
             stopRT();
-            if(btConn!=null) {
-                btConn.disconnect();
-            }
         }
 
         public void rtSendKey(byte keyCode, boolean changed)
@@ -159,8 +162,9 @@ public class Ruffy extends Service {
     private BTHandler rtBTHandler = new BTHandler() {
         @Override
         public void deviceConnected() {
+            inShutDown=false;
             log("connected to pump");
-            if(synRun==false) {
+            if(synRun==false && !inShutDown) {
                 synRun = true;
                 log("start synThread");
                 scheduler.execute(synThread);
@@ -170,11 +174,12 @@ public class Ruffy extends Service {
         @Override
         public void log(String s) {
             Ruffy.this.log(s);
-            if(s.equals("got error in read") && step < 200)
+            if(s.equals("got error in read") && step < 200 && !inShutDown)
             {
                 synRun=false;
                 btConn.connect(pumpData,4);
             }
+            Log.v("RuffyService",s);
         }
 
         @Override
@@ -213,8 +218,9 @@ public class Ruffy extends Service {
 
     private void stopRT()
     {
+        step=200;
         rtModeRunning = false;
-        rtSequence =0;
+        Application.sendAppCommand(Application.Command.DEACTIVATE_ALL,btConn);
     }
 
     private void startRT() {
@@ -337,9 +343,33 @@ public class Ruffy extends Service {
         }
 
         @Override
+        public void rtModeDeactivated() {
+            rtSequence =0;
+
+            if(rtHandler!=null)
+                try {rtHandler.rtStopped();} catch (RemoteException e){};
+                if(!inShutDown) {
+                    inShutDown = true;
+                    Application.sendAppDisconnect(btConn);
+                    btConn.disconnect();
+                }
+        }
+
+        @Override
+        public void cmdModeDeactivated() {
+        }
+
+        @Override
         public void modeDeactivated() {
             rtModeRunning = false;
-            Application.sendAppCommand(Application.Command.RT_MODE, btConn);
+            rtSequence =0;
+            if(rtHandler!=null)
+                try {rtHandler.rtStopped();} catch (RemoteException e){};
+            if(!inShutDown) {
+                inShutDown = true;
+                Application.sendAppDisconnect(btConn);
+                btConn.disconnect();
+            }
         }
 
         @Override
@@ -362,7 +392,7 @@ public class Ruffy extends Service {
 
         @Override
         public void sequenceError() {
-            Application.sendAppCommand(Application.Command.RT_DEACTIVATE, btConn);
+            Application.sendAppCommand(Application.Command.APP_DISCONNECT, btConn);
         }
 
         @Override
@@ -392,10 +422,12 @@ public class Ruffy extends Service {
         }catch(Exception e){e.printStackTrace();}
     }
 
+    private boolean inShutDown = false;
     private PacketHandler rtPacketHandler = new PacketHandler(){
         @Override
         public void sendImidiateAcknowledge(byte sequenceNumber) {
-            Protocol.sendAck(sequenceNumber,btConn);
+            if(!inShutDown)
+                Protocol.sendAck(sequenceNumber,btConn);
         }
 
         @Override

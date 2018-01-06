@@ -12,6 +12,12 @@ public interface AppHandler {
 
     void rtModeActivated();
 
+    void cmdModeActivated();
+
+    void rtModeDeactivated();
+
+    void cmdModeDeactivated();
+
     void modeDeactivated();
 
     void addDisplayFrame(ByteBuffer b);
