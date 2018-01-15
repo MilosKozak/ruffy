@@ -1,7 +1,5 @@
 package org.monkey.d.ruffy.ruffy.driver;
 
-import android.util.Log;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;

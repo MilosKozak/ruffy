@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
@@ -341,11 +340,6 @@ public class Ruffy extends Service {
         @Override
         public void rtModeActivated() {
             startRT();
-        }
-
-        @Override
-        public void cmdModeActivated() {
-            // not there yet
         }
 
         @Override
