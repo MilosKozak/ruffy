@@ -47,7 +47,6 @@ public class Application {
         List<Byte> packet  = Packet.buildPacket(sendR, payload, true,btConn);					//Add the payload, set the address if valid
 
         if(reliable) {
-            int seq = btConn.seqNo;
             packet.set(1, setSeqRel(packet.get(1), true,btConn));                        //Set the sequence and reliable bits
         }
         Packet.adjustLength(packet, payload.capacity());							//Set the payload length
@@ -161,11 +160,12 @@ public class Application {
                 break;
 
             case CMD_PING:
+                payload = ByteBuffer.allocate(4);
                 payload.put((byte)16);
                 payload.put((byte)0xB7);
                 payload.put((byte) (0x9AAA & 0xFF));
                 payload.put((byte) ((0x9AAA>>8) & 0xFF));
-                reliable = false;
+                reliable = true;
                 break;
 
             default:
