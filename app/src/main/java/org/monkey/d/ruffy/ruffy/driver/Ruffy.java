@@ -8,7 +8,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.Log;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParser;
 import org.monkey.d.ruffy.ruffy.driver.display.DisplayParserHandler;
 import org.monkey.d.ruffy.ruffy.driver.display.Menu;
@@ -36,7 +39,7 @@ public class Ruffy extends Service {
     private BTConnection btConn;
     private PumpData pumpData;
 
-    private boolean rtModeRunning = false;
+    private volatile boolean rtModeRunning = false;
     private long lastRtMessageSent = 0;
 
     private final Object rtSequenceSemaphore = new Object();
@@ -214,7 +217,8 @@ public class Ruffy extends Service {
     private void stopRT()
     {
         rtModeRunning = false;
-        rtSequence =0;
+        SystemClock.sleep(500 + 250);
+        rtSequence = 0;
     }
 
     private void startRT() {
@@ -287,9 +291,9 @@ public class Ruffy extends Service {
                         }
                     } catch (Exception e) {
                         if (rtModeRunning) {
-                            fail("Error sending keep alive while rtModeRunning is still true");
+                            fail("Error sending keep alive while rtModeRunning is still true: " + ExceptionUtils.getStackTrace(e));
                         } else {
-                            fail("Error sending keep alive. rtModeRunning is false, so this is most likely a race condition during disconnect");
+                            fail("Error sending keep alive. rtModeRunning is false, so this is most likely a race condition during disconnect: " + ExceptionUtils.getStackTrace(e));
                         }
                     }
                     try{
