@@ -10,6 +10,9 @@ I AM NOT RESPONSIBLE FOR ANY DAMAGES ON YOUR PHONE, PUMP, HEALTH OR WHAT EVER GE
 DON'T USE IT WHILE PUMP IS ATTACHED TO YOUR BODY!
 USE IT AT YOUR OWN RISK!
 
+This project was initiated by Sandra Kessler at https://github.com/monkey-r/ruffy.
+The version found here has been been updated where needed to work well with AndroidAPS.
+
 Neither this project or me or anybody who has worked on this project is affiliated, or endorsed, by ROCHE or any of its national or international subsidiaries!
 
 This work is presented as it is, no one should ever:
