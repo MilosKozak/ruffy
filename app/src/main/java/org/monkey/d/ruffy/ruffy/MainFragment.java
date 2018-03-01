@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -193,24 +192,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         public void rtStarted()
         {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (mBoundService.isConnected()) {
-                                connect.setText("Disconnect");
-                            } else {
-                                connect.setText("Connect");
-                            }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (mBoundService.isConnected()) {
+                            connect.setText("Disconnect");
+                        } else {
+                            connect.setText("Connect");
                         }
-                        connect.setEnabled(true);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
-                });
-            }
+                    connect.setEnabled(true);
+                }
+            });
         }
 
         @Override
@@ -225,45 +221,37 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             displayView.update(quarter,which);
 
             //TODO just for debug marker display[which] = quarter;
-            if (connectLog.getVisibility() != View.GONE) {
-                FragmentActivity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            connectLog.setVisibility(View.GONE);
-                        }
-                    });
-                }
-            }
+            if (connectLog.getVisibility() != View.GONE)
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectLog.setVisibility(View.GONE);
+                    }
+                });
         }
 
         @Override
         public void rtDisplayHandleMenu(final Menu menu) throws RemoteException {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String s = "";
-                        for (MenuAttribute ma : menu.attributes()) {
-                            s += "\n" + ma + ": " + menu.getAttribute(ma);
-                        }
-
-                        frameCounter.setText("display found: " + menu.getType() + s);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String s = "";
+                    for(MenuAttribute ma : menu.attributes())
+                    {
+                        s+="\n"+ma+": "+menu.getAttribute(ma);
                     }
-                });
-            }
+
+                    frameCounter.setText("display found: "+menu.getType()+s);
+                }
+            });
         }
 
         @Override
         public void rtDisplayHandleNoMenu() throws RemoteException {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        frameCounter.setText("no display found");
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    frameCounter.setText("no display found");
 /*                    DisplayParser.findMenu(display, new DisplayParserHandler() {
                         @Override
                         public void menuFound(Menu menu) {
@@ -275,21 +263,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                         }
                     });*///TODO just for debug marker
-                    }
-                });
-            }
+                }
+            });
         }
 
-        public void rtStopped() {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectLog.setVisibility(View.VISIBLE);
-                    }
-                });
-            }
+        public void rtStopped()
+        {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    connectLog.setVisibility(View.VISIBLE);
+                }
+            });
         }
     };
 
@@ -434,28 +419,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 //        Log.v("RUFFY_LOG", message);
 
         if(connectLog.getVisibility()!=View.GONE) {
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (connectLog.getLineCount() < 1000) {
-                            connectLog.append("\n" + message_time);
-                        } else {
-                            connectLog.setText("");
-                        }
-                        // TODO not sure how or why, but I kept getting NPEs with the getLayout call
-                        // here when doing the initial pairing
-                        if (connectLog.getLayout() != null) {
-                            final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
-                            if (scrollAmount > 0)
-                                connectLog.scrollTo(0, scrollAmount);
-                            else
-                                connectLog.scrollTo(0, 0);
-                        }
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (connectLog.getLineCount() < 1000) {
+                        connectLog.append("\n" + message_time);
+                    } else {
+                        connectLog.setText("");
                     }
-                });
-            }
+                    // TODO not sure how or why, but I kept getting NPEs with the getLayout call
+                    // here when doing the initial pairing
+                    if (connectLog.getLayout() != null) {
+                        final int scrollAmount = connectLog.getLayout().getLineTop(connectLog.getLineCount()) - connectLog.getHeight();
+                        if (scrollAmount > 0)
+                            connectLog.scrollTo(0, scrollAmount);
+                        else
+                            connectLog.scrollTo(0, 0);
+                    }
+                }
+            });
         }
     }
 }

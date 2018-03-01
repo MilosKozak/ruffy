@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.method.ScrollingMovementMethod;
@@ -127,9 +126,8 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
     private void appendLog(final String message) {
 //        Log.v("RUFFY_LOG", message);
-        FragmentActivity activity = getActivity();
-        if(activity != null) {
-            activity.runOnUiThread(new Runnable() {
+        if(getActivity()!=null) {
+            getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     connectLog.append("\n" + message);
@@ -305,9 +303,8 @@ public class SetupFragment extends Fragment implements View.OnClickListener {
 
                 btConn.writeCommand(key);
 
-                FragmentActivity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
+                if(getActivity()!=null) {
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             final EditText pinIn = new EditText(getContext());
