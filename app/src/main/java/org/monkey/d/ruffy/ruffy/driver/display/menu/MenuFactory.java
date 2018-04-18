@@ -1468,7 +1468,7 @@ public class MenuFactory {
                     CharacterPattern p1 = (CharacterPattern) clock.removeFirst();
                     if(p0.getCharacter()=='A' && p1.getCharacter()=='M' && hour10==1 && hour1 == 2)
                         timeadd-=12;
-                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M')
+                    else if(p0.getCharacter()=='P' && p1.getCharacter()=='M' && !(hour10==1 && hour1 == 2))
                         timeadd+=12;
                 }
                 m.setAttribute(MenuAttribute.RUNTIME,new MenuTime((hour10*10)+hour1+timeadd,(minute10*10)+minute1));
