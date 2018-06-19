@@ -452,6 +452,9 @@ class TitleResolver {
         if(title.equalsIgnoreCase("ΔIаPKEIа п.B.P.")) //TBR 2
             return Title.TBR_DURATION;
 
+        // some pumps came preconfigured with a different quick info name
+        if (title.equalsIgnoreCase("accu chek spirit"))
+            return Title.QUICK_INFO;
 
         //FIXME add Translations
         return null;

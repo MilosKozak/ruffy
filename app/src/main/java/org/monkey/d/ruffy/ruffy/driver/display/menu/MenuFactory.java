@@ -1370,8 +1370,13 @@ public class MenuFactory {
                         bolus.add(p);
                     else if(p instanceof CharacterPattern && ((CharacterPattern)p).getCharacter()=='U')
                         stage++;
-                    else
-                        return null;
+                    else {
+                        // virgin pump w/o any history yet
+                        m.setAttribute(MenuAttribute.CURRENT_RECORD, 0);
+                        m.setAttribute(MenuAttribute.TOTAL_RECORD, 0);
+                        m.setAttribute(MenuAttribute.BOLUS_TYPE, BolusType.NORMAL);
+                        return m;
+                    }
                     break;
                 case 2:
                     if(p instanceof NumberPattern)
