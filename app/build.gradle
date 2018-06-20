@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 def generateVersionName = { ->
 
-    StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder stringBuilder = new StringBuilder()
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -17,22 +17,21 @@ def generateVersionName = { ->
             standardOutput = stdout
         }
         String branch = stdout.toString().trim()
-        if (!branch.equals("master")) {
+        if (branch != "master") {
             stringBuilder.append('-')
             stringBuilder.append(branch)
         }
 
     } catch (ignored) {
-        return "NoGitSystemAvailable";
+        return "NoGitSystemAvailable"
     }
     stringBuilder.append('-')
-    stringBuilder.append((new Date()).format('yyyy.MM.dd'))
+    stringBuilder.append((new Date()).format('yyyy.MM.dd-HH:mm'))
     return stringBuilder.toString()
 }
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "org.monkey.d.ruffy.ruffy"
         minSdkVersion 19
@@ -50,12 +49,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.android.support:design:25.+'
-    compile 'org.apache.commons:commons-lang3:3.7'
-    testCompile 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation 'com.android.support:design:25.4.0'
+    implementation 'org.apache.commons:commons-lang3:3.7'
 }
