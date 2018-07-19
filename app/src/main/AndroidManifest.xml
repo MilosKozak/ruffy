@@ -37,5 +37,18 @@
             android:exported="true" >
 
         </service>
+
+        <receiver
+            android:name="org.monkey.d.ruffy.Watchdog"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.monkey.d.ruffy.ruffy.WATCHDOG" />
+            </intent-filter>
+        </receiver>
+
+
+
+
     </application>
 </manifest>
