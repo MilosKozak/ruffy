@@ -131,6 +131,10 @@ public class Ruffy extends Service {
         public boolean isConnected() {
             return btConn != null && btConn.isConnected();
         }
+
+        public String getMacAddress() {
+            return pumpData != null ? pumpData.getPumpMac() : null;
+        }
     };
 
 

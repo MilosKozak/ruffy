@@ -21,4 +21,5 @@ interface IRuffyService {
     void rtSendKey(byte keyCode, boolean changed);
     void resetPairing();
     boolean isConnected();
+    String getMacAddress();
 }
