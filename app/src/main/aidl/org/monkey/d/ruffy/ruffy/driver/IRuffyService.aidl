@@ -17,8 +17,8 @@ interface IRuffyService {
     /** Disconnect from the pump */
     void doRTDisconnect();
 
-    // TODO what's the meaning of 'changed'?
     void rtSendKey(byte keyCode, boolean changed);
     void resetPairing();
     boolean isConnected();
+    String getMacAddress();
 }
