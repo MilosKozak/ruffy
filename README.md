@@ -53,7 +53,7 @@ But Why?
 
 How do I build it?
 
-* Download a 2.3 Version of Android-Studio
+* Use the same version of Android Studio you use for AndroidAPS
 * Set it up with the wizard
 * clone this project from github
 * open it with android studio
