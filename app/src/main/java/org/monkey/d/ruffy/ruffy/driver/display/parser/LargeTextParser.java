@@ -363,6 +363,18 @@ public class LargeTextParser {
                 "█               ████    ",
                 "████████████████████    "
         });
+        symbols.put(Symbol.LARGE_AMPULE_EMPTY, new String[]{
+                "████████████████████    ",
+                "█      █  █  █  █  █    ",
+                "█      █  █  █  █  █ ███",
+                "█                  ███ █",
+                "█                    █ █",
+                "█                    █ █",
+                "█                  ███ █",
+                "█                  █ ███",
+                "█                  █    ",
+                "████████████████████    "
+        });
         symbols.put(Symbol.LARGE_ARROW, new String[]{
                 "        ██      ",
                 "        ███     ",
