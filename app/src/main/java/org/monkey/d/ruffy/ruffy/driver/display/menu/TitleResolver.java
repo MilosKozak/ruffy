@@ -363,8 +363,9 @@ class TitleResolver {
         if(title.equalsIgnoreCase("trvanie dbd")) //TBR 2
             return Title.TBR_DURATION;
 
-        /**portugues titles**/
-        if(title.equalsIgnoreCase("volume do bolus")) //multiwave 1
+        /**portugues titles (on some newer pumps translations have changed, so a menu can have multiple names) **/
+        if (title.equalsIgnoreCase("volume do bolus")
+                || title.equalsIgnoreCase("dose do bolus")) //multiwave 1
             return Title.BOLUS_AMOUNT;
         if(title.equalsIgnoreCase("bolus imediato")) //multiwave 2
             return Title.IMMEDIATE_BOLUS;
@@ -374,7 +375,8 @@ class TitleResolver {
             return Title.QUICK_INFO;
         if(title.equalsIgnoreCase("dados de bolus")) //check2, mydata 1
             return Title.BOLUS_DATA;
-        if(title.equalsIgnoreCase("dados de erros")) //mydata 2
+        if (title.equalsIgnoreCase("dados de erros")
+                || title.equalsIgnoreCase("dados de alarmes")) //mydata 2
             return Title.ERROR_DATA;
         if(title.equalsIgnoreCase("totais diários")) //mydata 3
             return Title.DAILY_TOTALS;
