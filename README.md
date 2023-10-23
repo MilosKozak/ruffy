@@ -1,8 +1,10 @@
 # ruffy
-Gum Gum to the pump!
-[![Join the chat at https://gitter.im/monkey-r/Lobby](https://badges.gitter.im/monkey-r/Lobby.svg)](https://gitter.im/monkey-r/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-<img src="https://cdn.rawgit.com/monkey-r/ruffy/master/ruffy-logo.svg" align="right" width="200" alt="ruffy logo">
+> [!IMPORTANT]
+> ruffy is no longer maintained. Please use [AndroidAPS 3.2.0](https://github.com/nightscout/AndroidAPS/releases/tag/3.2.0.0) or later, which contains the ComboV2 plugin which doesn't need ruffy and fixes a lot of issues that ruffy has.
+
+Gum Gum to the pump!
+
 This is not even alpha Software!
 
 USE IT AT YOUR OWN RISK!
